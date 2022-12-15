@@ -1,5 +1,7 @@
 html, body{
     height: 100%;
+    width: 100%;
+    overflow: hidden;
 }
 body{
     margin: 0;  
@@ -8,22 +10,28 @@ body{
     align-items: stretch;
 }
 * {
-    box-sizing: border-box;
+    /* box-sizing: border-box; */
 }
 
 header {
     flex-shrink: 0;
+    width: 100%;
 }
 main {
     height: auto;
     display: flex;
     align-items: stretch;
+    align-content: stretch;
     flex-grow: 1;
-    flex-shrink: 0;
+    overflow-x: scroll;
+    overscroll-behavior-x: none;
 }
 main > section {
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: none;
     flex-grow: 1;
     flex-shrink: 0;
+    overflow: scroll;
 }
 
 

@@ -8,8 +8,10 @@ pub struct Props {
 #[function_component]
 pub fn Header() -> Html {
     html! {
-        <header data-tauri-drag-region="true">
-            <p>{"Testttt"}</p>
-        </header>
+        <>
+            <header data-tauri-drag-region="true">
+                <p data-tauri-drag-region="true" class="select-none">{"Test"}</p>
+            </header>
+        </>
     }
 }
