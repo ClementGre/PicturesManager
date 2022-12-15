@@ -9,7 +9,7 @@ pub struct Props {
 pub fn MainPane() -> Html {
     html! {
         <section class="mainpane">
-            <h2>{"MainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMain"}</h2>
+            <h2>{"MainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMain"}<br/>{"Main"}<br/>{"Main"}<br/>{"Main"}<br/>{"Main"}<br/>{"Main"}<br/>{"Main"}<br/>{"Main"}<br/>{"Main"}<br/>{"Main"}<br/>{"Main"}</h2>
         </section>
     }
 }

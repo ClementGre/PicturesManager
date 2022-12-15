@@ -24,7 +24,7 @@ main {
     align-content: stretch;
     flex-grow: 1;
     width: 100%;
-    overflow-x: scroll;
+    overflow-x: auto;
     overscroll-behavior-x: none;
 }
 main > section {
@@ -32,7 +32,7 @@ main > section {
     overscroll-behavior-y: none;
     flex-grow: 1;
     flex-shrink: 0;
-    overflow: scroll;
+    overflow: auto;
 }
 main > section.mainpane {
     flex-shrink: 1;
