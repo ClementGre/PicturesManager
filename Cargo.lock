@@ -1889,6 +1889,7 @@ dependencies = [
 name = "pictures_manager"
 version = "0.0.0"
 dependencies = [
+ "cocoa",
  "serde",
  "serde_json",
  "tauri",

@@ -3,8 +3,9 @@
     windows_subsystem = "windows"
 )]
 
-mod menubar;
-use menubar::setup_menubar;
+mod header;
+use header::{menubar::setup_menubar, macos::WindowExt};
+use tauri::{Runtime, Window, Manager};
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -13,8 +14,12 @@ fn greet(name: &str) -> String {
 }
 
 fn main() {
-
     tauri::Builder::default()
+        .setup(|app| {
+            let win = app.get_window("main").unwrap();
+            win.set_transparent_titlebar(header::macos::ToolbarThickness::Thick);
+            Ok(())
+        })
         .menu(setup_menubar(
             String::from("Pictures Manager"),
             String::from("0.0.1"),
@@ -23,9 +28,7 @@ fn main() {
             // Only custom menus
             println!("MenuEvent: {}", event.menu_item_id());
             match event.menu_item_id() {
-                "close" => {
-                    
-                }
+                "close" => {}
                 _ => {}
             }
         })
