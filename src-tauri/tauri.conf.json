@@ -64,11 +64,13 @@
     },
     "windows": [
       {
-        "fullscreen": false,
         "height": 600,
+        "width": 800,
+        "minWidth": 500,
+        "minHeight": 300,
+        "fullscreen": false,
         "resizable": true,
         "title": "PicturesManager",
-        "width": 800,
         "titleBarStyle": "Overlay",
         "hiddenTitle": true
       }
