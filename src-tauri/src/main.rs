@@ -9,8 +9,6 @@ use header::macos::WindowExt;
 #[cfg(target_os = "macos")]
 use header::menubar::setup_menubar;
 use tauri::Manager;
-#[cfg(target_os = "macos")]
-use tauri::{Runtime, Window};
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -19,7 +17,7 @@ fn greet(name: &str) -> String {
 }
 
 fn main() {
-    let builder = tauri::Builder::default().setup(|app| {
+    let mut builder = tauri::Builder::default().setup(|app| {
         let win = app.get_window("main").unwrap();
         #[cfg(target_os = "macos")]
         win.set_transparent_titlebar(header::macos::ToolbarThickness::Thick);

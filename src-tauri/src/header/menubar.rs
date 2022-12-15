@@ -1,9 +1,7 @@
 #[cfg(target_os = "macos")]
 use tauri::AboutMetadata;
 #[cfg(target_os = "macos")]
-use tauri::{Menu, MenuItem, Submenu, CustomMenuItem};
-
-
+use tauri::{CustomMenuItem, Menu, MenuItem, Submenu};
 
 #[cfg(target_os = "macos")]
 pub fn setup_menubar(app_name: String) -> Menu {
@@ -11,46 +9,52 @@ pub fn setup_menubar(app_name: String) -> Menu {
 
     ////////// PLATFORM MENUS //////////
 
-    {
-        menu = menu.add_submenu(Submenu::new(
-            app_name.clone(),
-            Menu::new()
-                .add_native_item(MenuItem::About(app_name, AboutMetadata::default()))
-                .add_native_item(MenuItem::Separator)
-                .add_native_item(MenuItem::Services)
-                .add_native_item(MenuItem::Separator)
-                .add_native_item(MenuItem::Hide)
-                .add_native_item(MenuItem::HideOthers)
-                .add_native_item(MenuItem::ShowAll)
-                .add_native_item(MenuItem::Separator)
-                .add_native_item(MenuItem::Quit),
-        ));
-    }
+    menu = menu.add_submenu(Submenu::new(
+        app_name.clone(),
+        Menu::new()
+            .add_native_item(MenuItem::About(app_name, AboutMetadata::default()))
+            .add_native_item(MenuItem::Separator)
+            .add_native_item(MenuItem::Services)
+            .add_native_item(MenuItem::Separator)
+            .add_native_item(MenuItem::Hide)
+            .add_native_item(MenuItem::HideOthers)
+            .add_native_item(MenuItem::ShowAll)
+            .add_native_item(MenuItem::Separator)
+            .add_native_item(MenuItem::Quit),
+    ));
 
     let mut file_menu = Menu::new();
     file_menu = file_menu.add_native_item(MenuItem::CloseWindow);
-    
-    file_menu = file_menu.add_native_item(MenuItem::Quit);
-    
+
     menu = menu.add_submenu(Submenu::new("File", file_menu));
 
-    
+    let mut edit_menu = Menu::new();
+
+    edit_menu = edit_menu.add_native_item(MenuItem::Undo);
+    edit_menu = edit_menu.add_native_item(MenuItem::Redo);
+    edit_menu = edit_menu.add_native_item(MenuItem::Separator);
+
+    edit_menu = edit_menu.add_native_item(MenuItem::Cut);
+    edit_menu = edit_menu.add_native_item(MenuItem::Copy);
+    edit_menu = edit_menu.add_native_item(MenuItem::Paste);
+
     edit_menu = edit_menu.add_native_item(MenuItem::SelectAll);
 
+    menu = menu.add_submenu(Submenu::new("Edit", edit_menu));
     menu = menu.add_submenu(Submenu::new(
         "View",
         Menu::new().add_native_item(MenuItem::EnterFullScreen),
     ));
-    
 
     let mut window_menu = Menu::new();
     window_menu = window_menu.add_native_item(MenuItem::Minimize);
-
     window_menu = window_menu.add_native_item(MenuItem::Zoom);
     window_menu = window_menu.add_native_item(MenuItem::Separator);
-    
+
     window_menu = window_menu.add_native_item(MenuItem::CloseWindow);
     menu = menu.add_submenu(Submenu::new("Window", window_menu));
+
+    ////////// OTHERS MENUS //////////
 
     let quit = CustomMenuItem::new("quit".to_string(), "Quit");
     let close = CustomMenuItem::new("close".to_string(), "Close");
