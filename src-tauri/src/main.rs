@@ -4,15 +4,21 @@
 )]
 
 mod header;
+use log::trace;
+use std::env;
+mod logger;
+use logger::{get_logger_plugin, log_from_front};
+
 #[cfg(target_os = "macos")]
 use header::macos::WindowExt;
 #[cfg(target_os = "macos")]
 use header::menubar::setup_menubar;
+
 use tauri::Manager;
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn greet(name: &str) -> String {
+    trace!("FROM TRACE !!! {:?}", env::var("CARGO_CFG_TARGET_OS"));
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
@@ -34,9 +40,7 @@ fn main() {
 
     #[cfg(target_os = "macos")]
     {
-        builder = builder.menu(setup_menubar(
-            String::from("Pictures Manager"),
-        ));
+        builder = builder.menu(setup_menubar(String::from("Pictures Manager")));
     }
 
     builder
@@ -48,7 +52,8 @@ fn main() {
                 _ => {}
             }
         })
-        .invoke_handler(tauri::generate_handler![greet])
+        .plugin(get_logger_plugin())
+        .invoke_handler(tauri::generate_handler![greet, log_from_front])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

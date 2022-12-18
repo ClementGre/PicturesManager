@@ -7,10 +7,45 @@ pub struct Props {
 
 #[function_component]
 pub fn Header() -> Html {
+
+    let macos = true;
+    
+
     html! {
         <>
             <header data-tauri-drag-region="true">
-                <p data-tauri-drag-region="true" class="select-none">{"Test"}</p>
+                
+                {
+                    if macos {
+                        html! {
+                            <div class="macos-spacer">
+                            </div>
+                        }
+                    } else {
+                        html! {
+                            <>
+                                <div class="windows-icon">
+
+                                </div>
+                                <div class="windows-menu">
+
+                                </div>
+                            </>
+                        }
+                    }
+                }
+                <div class="buttons">
+
+                </div>
+                {
+                     if cfg!(not(target_os = "macos")) {
+                        html! {
+                            <div class="windows-buttons">
+
+                            </div>
+                        }
+                    }else{ html!() }
+                }
             </header>
         </>
     }
