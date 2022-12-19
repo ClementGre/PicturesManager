@@ -8,6 +8,8 @@ use log::trace;
 use std::env;
 mod logger;
 use logger::{get_logger_plugin, log_from_front};
+mod os;
+use os::get_os;
 
 #[cfg(target_os = "macos")]
 use header::macos::WindowExt;
@@ -53,7 +55,7 @@ fn main() {
             }
         })
         .plugin(get_logger_plugin())
-        .invoke_handler(tauri::generate_handler![greet, log_from_front])
+        .invoke_handler(tauri::generate_handler![greet, log_from_front, get_os])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

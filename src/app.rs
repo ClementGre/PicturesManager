@@ -1,11 +1,14 @@
+use std::cell::RefCell;
+use std::future::Future;
 use std::rc::Rc;
-use log::info;
-use serde::{Serialize, Deserialize};
+
+use crate::utils::logger::*;
+use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
-use crate::utils::logger::*;
+use yew::suspense::{Suspension, SuspensionResult, use_future};
 
 use crate::header::header::Header;
 use crate::leftbar::leftbar::LeftBar;
@@ -22,8 +25,8 @@ extern "C" {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-struct Context {
-    macos: bool,
+pub struct Context {
+    pub macos: bool,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -31,11 +34,13 @@ struct GreetArgs<'a> {
     name: &'a str,
 }
 
-#[function_component(App)]
-pub fn app() -> Html {
-
+#[function_component]
+pub fn App() -> HtmlResult {
     wasm_logger::init(wasm_logger::Config::default());
 
+    let os = *use_future(|| async { invoke("get_os", JsValue::default()).await.as_f64().unwrap() as u16 })?;
+
+    let context = use_state(|| Context { macos: os == 1 });
 
     /*let greet_input_ref = use_node_ref();
 
@@ -100,31 +105,25 @@ pub fn app() -> Html {
 
                 <p><b>{ &*greet_msg }</b></p>*/
 
-    let context = use_memo(|_| Context {
-        macos: false
-    }, ());
-
     let event = Callback::from(move |_| {
-
         spawn_local(async move {
-            info!("Some info");
             let new_msg = invoke("greet", to_value(&GreetArgs { name: &*"test" }).unwrap()).await;
             info(new_msg.as_string().unwrap().as_str());
         });
     });
 
-    html! {
-                <>
-                    <ContextProvider<Rc<Context>> context={context}>
-                        <Header/>
-                        <button type="button" onclick={event}>{"Greet"}</button>
-                        <main>
-                            <LeftBar/>
-                            <MainPane/>
-                            <RightBar/>
-                        </main>
+    Ok(html! {
+        <>
+            <ContextProvider<Context> context={(*context).clone()}>
+                <Header/>
+                <button type="button" onclick={event}>{"Greet"}</button>
+                <main>
+                    <LeftBar/>
+                    <MainPane/>
+                    <RightBar/>
+                </main>
 
-                    </ContextProvider<Rc<Context>>>
-                </>
-            }
+            </ContextProvider<Context>>
+        </>
+    })
 }

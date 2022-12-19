@@ -1,4 +1,5 @@
 use yew::prelude::*;
+use crate::app::{Context};
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -8,8 +9,7 @@ pub struct Props {
 #[function_component]
 pub fn Header() -> Html {
 
-    let macos = true;
-    
+    let macos = use_context::<Context>().unwrap().macos;
 
     html! {
         <>
@@ -19,13 +19,14 @@ pub fn Header() -> Html {
                     if macos {
                         html! {
                             <div class="macos-spacer">
+                                {{"Macos"}}
                             </div>
                         }
                     } else {
                         html! {
                             <>
                                 <div class="windows-icon">
-
+                                    {{"Windows"}}
                                 </div>
                                 <div class="windows-menu">
 
@@ -38,7 +39,7 @@ pub fn Header() -> Html {
 
                 </div>
                 {
-                     if cfg!(not(target_os = "macos")) {
+                     if !macos {
                         html! {
                             <div class="windows-buttons">
 
