@@ -1,14 +1,10 @@
-use std::cell::RefCell;
-use std::future::Future;
-use std::rc::Rc;
-
 use crate::utils::logger::*;
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
 use yew::prelude::*;
-use yew::suspense::{Suspension, SuspensionResult, use_future};
+use yew::suspense::{use_future};
 
 use crate::header::header::Header;
 use crate::leftbar::leftbar::LeftBar;
@@ -17,11 +13,9 @@ use crate::rightbar::rightbar::RightBar;
 
 #[wasm_bindgen]
 extern "C" {
+    // For async commands
     #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
-    async fn invoke(cmd: &str, args: JsValue) -> JsValue;
-
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
+    pub async fn invoke(cmd: &str, args: JsValue) -> JsValue;
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -111,6 +105,7 @@ pub fn App() -> HtmlResult {
             info(new_msg.as_string().unwrap().as_str());
         });
     });
+
 
     Ok(html! {
         <>

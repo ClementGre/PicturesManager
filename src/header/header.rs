@@ -1,5 +1,6 @@
-use yew::prelude::*;
-use crate::app::{Context};
+use crate::{app::{Context}, invoke};
+use wasm_bindgen::JsValue;
+use yew::{prelude::*};
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -8,46 +9,66 @@ pub struct Props {
 
 #[function_component]
 pub fn Header() -> Html {
-
     let macos = use_context::<Context>().unwrap().macos;
 
-    html! {
-        <>
-            <header data-tauri-drag-region="true">
-                
-                {
-                    if macos {
-                        html! {
-                            <div class="macos-spacer">
-                                {{"Macos"}}
-                            </div>
-                        }
-                    } else {
-                        html! {
-                            <>
-                                <div class="windows-icon">
-                                    {{"Windows"}}
-                                </div>
-                                <div class="windows-menu">
+    let on_minimize = Callback::from(move |_: MouseEvent| {
+        invoke("window_minimize", JsValue::default());
+    });
 
+    let on_maximize = Callback::from(move |_: MouseEvent| {
+        invoke("window_maximize", JsValue::default());
+    });
+
+    let on_close = Callback::from(move |_: MouseEvent| {
+        invoke("window_close", JsValue::default());
+    });
+
+    html! {
+            <>
+                <header data-tauri-drag-region="true">
+
+                    {
+                        if macos {
+                            html! {
+                                <div class="macos-spacer" data-tauri-drag-region="true">
+                                    {{"Macos"}}
                                 </div>
-                            </>
+                            }
+                        } else {
+                            html! {
+                                <>
+                                    <div class="windows-icon" data-tauri-drag-region="true">
+                                        {{"Windows"}}
+                                    </div>
+                                    <div class="windows-menu" data-tauri-drag-region="true">
+
+                                    </div>
+                                </>
+                            }
                         }
                     }
-                }
-                <div class="buttons">
+                    <div class="buttons">
 
-                </div>
-                {
-                     if !macos {
-                        html! {
-                            <div class="windows-buttons">
-
-                            </div>
-                        }
-                    }else{ html!() }
-                }
-            </header>
-        </>
-    }
+                    </div>
+                    {
+                         if !macos {
+                            html! {
+                                <div class="windows-buttons" data-tauri-drag-region="true">
+                                    <div class="minimize" onclick={on_minimize}>
+                                        <div></div>
+                                    </div>
+                                    <div class="maximize" onclick={on_maximize}>
+                                        <div></div>
+                                    </div>
+                                    <div class="close" onclick={on_close}>
+                                        <div class="first"></div>
+                                        <div class="second"></div>
+                                    </div>
+                                </div>
+                            }
+                        }else{ html!() }
+                    }
+                </header>
+            </>
+        }
 }

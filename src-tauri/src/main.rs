@@ -6,6 +6,7 @@
 mod header;
 use log::trace;
 use std::env;
+use header::window::{window_minimize, window_maximize, window_close};
 mod logger;
 use logger::{get_logger_plugin, log_from_front};
 mod os;
@@ -55,7 +56,7 @@ fn main() {
             }
         })
         .plugin(get_logger_plugin())
-        .invoke_handler(tauri::generate_handler![greet, log_from_front, get_os])
+        .invoke_handler(tauri::generate_handler![greet, log_from_front, get_os, window_minimize, window_maximize, window_close])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

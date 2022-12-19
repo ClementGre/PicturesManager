@@ -1,15 +1,77 @@
-header{
-    height: 40px;
-    color: white;
-    background-color: rgb(55, 56, 58);
-    overflow: hidden;
-}
-header, header *{
+header,
+header * {
     user-select: none;
     cursor: default;
     user-select: none;
     -webkit-user-select: none;
 }
+
+header {
+    height: 40px;
+    color: white;
+    background-color: rgb(55, 56, 58);
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+/* WINDOWS BUTTONS */
+
+header .windows-buttons {
+    display: flex;
+    flex-direction: row;
+}
+
+header .windows-buttons>div {
+    position: relative;
+    width: 46px;
+    height: 100%;
+    transition: all 0.2s ease-in-out;
+}
+
+header .windows-buttons>div:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+header .windows-buttons>div.close:hover {
+    background-color: rgba(180, 25, 23);
+}
+
+header .windows-buttons>div>div {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    background-color: white;
+    border-radius: 1px;
+    width: 10px;
+    height: 10px;
+}
+
+header .windows-buttons>div.minimize>div {
+    height: 1px;
+}
+
+header .windows-buttons>div.maximize>div {
+    background-color: transparent;
+    border: 1px solid white;
+}
+
+header .windows-buttons>div.close>div.first {
+    /* sqrt(2*10^2) */
+    width: 14px;
+    height: 1px;
+    transform: translateX(-50%) translateY(-50%) rotate(45deg);
+}
+
+header .windows-buttons>div.close>div.second {
+    /* sqrt(2*10^2) */
+    width: 14px;
+    height: 1px;
+    transform: translateX(-50%) translateY(-50%) rotate(-45deg);
+}
+
 header p {
     margin: 0;
 }

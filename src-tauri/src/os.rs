@@ -1,5 +1,7 @@
+
 #[tauri::command]
 pub fn get_os() -> u16 {
+    
     if cfg!(target_os = "windows") {
         return 0;
     }else if cfg!(target_os = "macos") {
@@ -7,4 +9,5 @@ pub fn get_os() -> u16 {
     }else{
         return 2;
     }
+
 }
