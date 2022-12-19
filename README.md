@@ -15,10 +15,10 @@ Developed with [Tauri](https://tauri.app) (web app) with a Rust backend and a Ru
 - Exif tools: fix exif data, add exif to images that do not have exif data.
 - This app is not only a utility app. It also aims to have 
 
-# build
+# Build
 
-## Dev
+### Dev
 ``cargo tauri dev``
 
-## Release
+### Release
 ``cargo tauri build``

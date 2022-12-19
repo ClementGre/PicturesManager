@@ -24,6 +24,9 @@
       },
       "dialog": {
         "all": true
+      },
+      "http": {
+        "all": true
       }
     },
     "bundle": {

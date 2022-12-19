@@ -16,7 +16,7 @@ tauri-build = {version = "1.2", features = [] }
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = {version = "1.2", features = ["dialog-all", "shell-open", "window-maximize", "window-start-dragging", "window-unmaximize"] }
+tauri = {version = "1.2", features = ["dialog-all", "http-all", "shell-open", "window-maximize", "window-start-dragging", "window-unmaximize"] }
 log = "^0.4"
 tauri-plugin-log = { git = "https://github.com/tauri-apps/tauri-plugin-log", features = ["colored"] }
 time = "0.3.17"

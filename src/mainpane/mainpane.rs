@@ -10,6 +10,7 @@ pub fn MainPane() -> Html {
     html! {
         <section class="mainpane">
             <h2>{"MainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMainMain"}<br/>{"Main"}<br/>{"Main"}<br/>{"Main"}<br/>{"Main"}<br/>{"Main"}<br/>{"Main"}<br/>{"Main"}<br/>{"Main"}<br/>{"Main"}<br/>{"Main"}</h2>
+            <img src="reqimg://reqimg/?path=/Users/clement/Pictures/Icones/banner.png&test=te" alt=""/>
         </section>
     }
 }
