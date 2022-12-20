@@ -6,10 +6,10 @@
 use tauri::http::ResponseBuilder;
 use tauri::Manager;
 mod header;
-use header::window::{window_close, window_maximize, window_minimize};
-use log::{trace, info};
+use header::window::{setup_app_window, window_close, window_maximize, window_minimize};
+use log::{info, trace};
 use std::env;
-use std::fs::{read};
+use std::fs::read;
 mod logger;
 use logger::{get_logger_plugin, log_from_front};
 
@@ -26,16 +26,14 @@ fn greet(name: &str) -> String {
 
 fn main() {
     let mut builder = tauri::Builder::default().setup(|app| {
-        let win = app.get_window("main").unwrap();
-        #[cfg(target_os = "macos")]
-        win.set_transparent_titlebar(header::macos::ToolbarThickness::Thick);
-        #[cfg(not(target_os = "macos"))]
-        {
-            win.set_decorations(false)
-                .expect("Unsupported platform! (Removing decorations)");
-            use window_shadows::set_shadow;
-            set_shadow(&win, true).expect("Unsupported platform! (Applying window decorations)");
-        }
+        setup_app_window(app.get_window("main").unwrap());
+
+        let local_window =
+            tauri::WindowBuilder::new(app, "local", tauri::WindowUrl::App("index.html".into()))
+                .hidden_title(true)
+                .title_bar_style(tauri::TitleBarStyle::Overlay)
+                .build();
+        setup_app_window(local_window.unwrap());
 
         Ok(())
     });

@@ -77,8 +77,8 @@
         "fullscreen": false,
         "resizable": true,
         "title": "PicturesManager",
-        "titleBarStyle": "Overlay",
-        "hiddenTitle": true
+        "hiddenTitle": true,
+        "titleBarStyle": "Overlay"
       }
     ]
   }

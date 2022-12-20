@@ -22,7 +22,6 @@ impl<R: Runtime> WindowExt for Window<R> {
             id.setTitlebarAppearsTransparent_(cocoa::base::YES);
             match thickness {
                 ToolbarThickness::Thick => {
-                    self.set_title("").expect("Title wasn't set to ''");
                     make_toolbar(id);
                 }
                 ToolbarThickness::Medium => {
