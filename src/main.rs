@@ -1,14 +1,16 @@
-use wasm_bindgen::JsValue;
+use utils::logger::{info};
 use wasm_bindgen::prelude::wasm_bindgen;
-use yew::{Html, function_component, html};
+use wasm_bindgen::JsValue;
 use yew::suspense::Suspense;
+use yew::{function_component, html, Html};
+
 use crate::app::App;
 
 mod app;
 mod header;
 mod leftbar;
-mod rightbar;
 mod mainpane;
+mod rightbar;
 mod utils;
 
 #[wasm_bindgen]
@@ -16,13 +18,26 @@ extern "C" {
     #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
     pub fn invoke(cmd: &str, args: JsValue) -> JsValue;
 
+    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"], js_name = invoke)]
+    pub async fn invoke_async(cmd: &str, args: JsValue) -> JsValue;
+
     #[wasm_bindgen(js_namespace = console)]
     pub fn log(s: &str);
 }
 
 fn main() {
+    // let bundle = load_locale();
+
+    // let mut errors = vec![];
+    // let msg = bundle
+    //     .format_value_sync("test", None, &mut errors)
+    //     .expect("Message doesn't exist.");
+
+    wasm_logger::init(wasm_logger::Config::default());
     yew::Renderer::<AppLoader>::new().render();
 }
+
+
 
 #[function_component]
 pub fn AppLoader() -> Html {

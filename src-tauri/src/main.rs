@@ -9,11 +9,9 @@ mod header;
 use header::window::{window_close, window_maximize, window_minimize};
 use log::{trace, info};
 use std::env;
-use std::fs::{self, read};
+use std::fs::{read};
 mod logger;
 use logger::{get_logger_plugin, log_from_front};
-mod os;
-use os::get_os;
 
 #[cfg(target_os = "macos")]
 use header::macos::WindowExt;
@@ -56,7 +54,7 @@ fn main() {
                 _ => {}
             }
         })
-        .register_uri_scheme_protocol("reqimg", move |app, request| {
+        .register_uri_scheme_protocol("reqimg", move |_, request| {
             info!("🚩Request: {:?}", request);
 
             let res_not_img = ResponseBuilder::new().status(404).body(Vec::new());
@@ -88,7 +86,6 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             greet,
             log_from_front,
-            get_os,
             window_minimize,
             window_maximize,
             window_close
@@ -97,7 +94,7 @@ fn main() {
         .expect("error while running tauri application");
 }
 
-fn is_img_extension(extension: &str) -> bool {
-  let ex: [&str; 6] = ["png", "jpg", "jpeg", "gif", "bmp", "webp"];
-  ex.iter().any(|e| *e == extension.to_lowercase())
-}
+// fn is_img_extension(extension: &str) -> bool {
+//   let ex: [&str; 6] = ["png", "jpg", "jpeg", "gif", "bmp", "webp"];
+//   ex.iter().any(|e| *e == extension.to_lowercase())
+// }

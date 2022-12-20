@@ -9,7 +9,7 @@ pub struct Props {
 
 #[function_component]
 pub fn Header() -> Html {
-    let macos = use_context::<Context>().unwrap().macos;
+    let macos = !use_context::<Context>().unwrap().macos;
 
     let on_minimize = Callback::from(move |_: MouseEvent| {
         invoke("window_minimize", JsValue::default());

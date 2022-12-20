@@ -20,6 +20,10 @@ tauri = {version = "1.2", features = ["dialog-all", "http-all", "shell-open", "w
 log = "^0.4"
 tauri-plugin-log = { git = "https://github.com/tauri-apps/tauri-plugin-log", features = ["colored"] }
 time = "0.3.17"
+fluent = "0.16.0"
+fluent-fallback = "0.7.0"
+fluent-resmgr = "0.0.6"
+unic-langid = { version="0.9.1", features = ["macros"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 cocoa = "0.24.1"

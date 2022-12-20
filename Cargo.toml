@@ -11,9 +11,14 @@ serde = { version = "1.0.140", features = ["derive"] }
 wasm-bindgen = { version = "0.2.82", features = ["serde-serialize"] }
 wasm-bindgen-futures = "0.4.32"
 wasm-logger = "0.2.0"
-web-sys = "0.3.59"
+web-sys = { version = "0.3.59", features = ["Window", "Navigator"]}
 yew = { version="0.20.0", features = ["csr"] }
 log = "^0.4"
+fluent = "0.16.0"
+fluent-fallback = "0.7.0"
+fluent-resmgr = "0.0.6"
+fluent-langneg = "0.13.0"
+unic-langid = { version="0.9.1", features = ["macros"]}
 
 [workspace]
 members = ["src-tauri"]
