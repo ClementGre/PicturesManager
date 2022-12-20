@@ -1,8 +1,11 @@
+use crate::{invoke_async};
 use crate::utils::logger::*;
+use js_sys::Array;
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::spawn_local;
+use web_sys::window;
 use yew::prelude::*;
 use yew::suspense::{use_future};
 
@@ -11,16 +14,11 @@ use crate::leftbar::leftbar::LeftBar;
 use crate::mainpane::mainpane::MainPane;
 use crate::rightbar::rightbar::RightBar;
 
-#[wasm_bindgen]
-extern "C" {
-    // For async commands
-    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
-    pub async fn invoke(cmd: &str, args: JsValue) -> JsValue;
-}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Context {
     pub macos: bool,
+    pub windows: bool,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -30,11 +28,14 @@ struct GreetArgs<'a> {
 
 #[function_component]
 pub fn App() -> HtmlResult {
-    wasm_logger::init(wasm_logger::Config::default());
 
-    let os = *use_future(|| async { invoke("get_os", JsValue::default()).await.as_f64().unwrap() as u16 })?;
+    let lang = window().unwrap().navigator().languages().to_vec().iter().map(|val| val.as_string().unwrap()).collect::<Vec<String>>();
+    info(lang.join(",").as_str());
 
-    let context = use_state(|| Context { macos: os == 1 });
+    //let os = *use_future(|| async { invoke_async("get_os", JsValue::default()).await.as_f64().unwrap() as u16 })?;
+
+    let os = window().unwrap().navigator().app_version().unwrap();
+    let context = use_state(|| Context { macos: os.contains("Mac"), windows: os.contains("Win") });
 
     /*let greet_input_ref = use_node_ref();
 
@@ -101,7 +102,7 @@ pub fn App() -> HtmlResult {
 
     let event = Callback::from(move |_| {
         spawn_local(async move {
-            let new_msg = invoke("greet", to_value(&GreetArgs { name: &*"test" }).unwrap()).await;
+            let new_msg = invoke_async("greet", to_value(&GreetArgs { name: &*"test" }).unwrap()).await;
             info(new_msg.as_string().unwrap().as_str());
         });
     });
