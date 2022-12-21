@@ -3,38 +3,59 @@
     windows_subsystem = "windows"
 )]
 
-use tauri::http::ResponseBuilder;
-use tauri::Manager;
+use app_data::{AppData, AppDataState};
+use sys_locale::get_locale;
+use tauri::{http::ResponseBuilder, Manager, Window};
 mod header;
-use header::window::{setup_app_window, window_close, window_maximize, window_minimize};
+use header::window::{new_window, window_close, window_maximize, window_minimize, GalleryData};
 use log::{info, trace};
-use std::env;
 use std::fs::read;
+use std::{env};
 mod logger;
 use logger::{get_logger_plugin, log_from_front};
+mod app_data;
 
-#[cfg(target_os = "macos")]
-use header::macos::WindowExt;
 #[cfg(target_os = "macos")]
 use header::menubar::setup_menubar;
 
 #[tauri::command]
-fn greet(name: &str) -> String {
+fn greet(
+    window: Window,
+    app_handle: tauri::AppHandle,
+    state: tauri::State<GalleryData>,
+    name: &str,
+) -> String {
     trace!("FROM TRACE !!! {:?}", env::var("CARGO_CFG_TARGET_OS"));
-    format!("Hello, {}! You've been greeted from Rust!", name)
+
+    format!(
+        "Hello, {}!  window = {}  gallery = {} app = {}",
+        name,
+        window.label(),
+        state.gallery_path,
+        app_handle.package_info().name
+    )
 }
 
 fn main() {
     let mut builder = tauri::Builder::default().setup(|app| {
-        setup_app_window(app.get_window("main").unwrap());
+        
+        let locale = get_locale().unwrap_or_else(|| String::from("en-US"));
+        info!("🚩Locale: {}", locale);
 
-        let local_window =
-            tauri::WindowBuilder::new(app, "local", tauri::WindowUrl::App("index.html".into()))
-                .hidden_title(true)
-                .title_bar_style(tauri::TitleBarStyle::Overlay)
-                .build();
-        setup_app_window(local_window.unwrap());
+        let data = app.state::<AppDataState>();
+        *data.data() = AppData::load(&app.app_handle());
 
+        info!(
+            "🚩Locale in settings: {:?}",
+            app.state::<AppDataState>()
+                .data()
+                .get_settings()
+                .get_language().clone()
+                .unwrap_or_else(|| String::from("OS defined"))
+        );
+
+        new_window(app, String::from("/Users/clement/Downloads/Gallery"));
+        new_window(app, String::from("/Users/clement/Images/Gal&lery"));
         Ok(())
     });
 
@@ -44,6 +65,18 @@ fn main() {
     }
 
     builder
+        .on_window_event(|event| match event.event() {
+            tauri::WindowEvent::Focused(_) => {
+                
+            }
+            tauri::WindowEvent::Destroyed => {
+                if event.window().app_handle().windows().len() == 0 {
+                    info!("🚩No more windows, exiting");
+                    event.window().app_handle().state::<AppDataState>().save(&event.window().app_handle());
+                }
+            }
+            _ => {}
+        })
         .on_menu_event(|event| {
             // Only custom menus
             println!("MenuEvent: {}", event.menu_item_id());
@@ -80,7 +113,9 @@ fn main() {
             };
             local_img
         })
+        .manage(AppDataState::default())
         .plugin(get_logger_plugin())
+        .plugin(tauri_plugin_window_state::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             greet,
             log_from_front,

@@ -1,4 +1,3 @@
-use utils::logger::{info};
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 use yew::suspense::Suspense;

@@ -19,6 +19,8 @@ fluent-fallback = "0.7.0"
 fluent-resmgr = "0.0.6"
 fluent-langneg = "0.13.0"
 unic-langid = { version="0.9.1", features = ["macros"]}
+url = "2.3.1"
+urlencoding = "2.1.2"
 
 [workspace]
 members = ["src-tauri"]

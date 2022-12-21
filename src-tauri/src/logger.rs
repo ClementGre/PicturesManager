@@ -33,7 +33,7 @@ pub fn get_logger_plugin<R: Runtime>() -> TauriPlugin<R>{
     let colors = ColoredLevelConfig::default();
 
     LoggerBuilder::new()
-                .targets([LogTarget::Stdout, LogTarget::Webview])
+                .targets([LogTarget::Stdout, LogTarget::LogDir, LogTarget::Webview])
                 .level(LevelFilter::Debug)
                 .level_for("pictures_manager", LevelFilter::Trace)
                 .format(move |out, message, record| {
