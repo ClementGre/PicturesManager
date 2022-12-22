@@ -1,6 +1,6 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use tauri::{App, Manager};
+use tauri::{App, Manager, AppHandle};
 use urlencoding::encode;
 
 use super::macos::{ToolbarThickness, WindowExt};
@@ -25,10 +25,10 @@ pub fn window_close(window: tauri::Window) {
     let _ = window.close();
 }
 
-pub fn new_window(app: &mut App, gallery_path: String) {
+pub fn new_window(app_handle: &AppHandle, label: String, gallery_path: String) {
     let window = tauri::WindowBuilder::new(
-        app,
-        format!("local-{}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis()),
+        app_handle,
+        label,
         tauri::WindowUrl::App(format!("index.html?p={}", encode(&gallery_path.as_str())).into()),
     )
     .visible(false) // tauri-plugin-window-state is responsible for showing the window after the state is restored.
@@ -39,7 +39,6 @@ pub fn new_window(app: &mut App, gallery_path: String) {
     .build()
     .unwrap();
 
-    window.manage(GalleryData { gallery_path });
 
     #[cfg(target_os = "macos")]
     {
@@ -53,8 +52,4 @@ pub fn new_window(app: &mut App, gallery_path: String) {
         use window_shadows::set_shadow;
         set_shadow(&window, true).expect("Unsupported platform! (Applying window decorations)");
     }
-}
-
-pub struct GalleryData {
-    pub gallery_path: String,
 }

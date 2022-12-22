@@ -4,16 +4,18 @@
 )]
 
 use app_data::{AppData, AppDataState};
+use gallery::windows_galleries::WindowsGalleriesState;
 use sys_locale::get_locale;
 use tauri::{http::ResponseBuilder, Manager, Window};
 mod header;
-use header::window::{new_window, window_close, window_maximize, window_minimize, GalleryData};
+use header::window::{new_window, window_close, window_maximize, window_minimize};
 use log::{info, trace};
 use std::fs::read;
 use std::{env};
 mod logger;
 use logger::{get_logger_plugin, log_from_front};
 mod app_data;
+mod gallery;
 
 #[cfg(target_os = "macos")]
 use header::menubar::setup_menubar;
@@ -22,17 +24,17 @@ use header::menubar::setup_menubar;
 fn greet(
     window: Window,
     app_handle: tauri::AppHandle,
-    state: tauri::State<GalleryData>,
+    state: tauri::State<AppDataState>,
     name: &str,
 ) -> String {
     trace!("FROM TRACE !!! {:?}", env::var("CARGO_CFG_TARGET_OS"));
 
     format!(
-        "Hello, {}!  window = {}  gallery = {} app = {}",
+        "Hello, {}!  window = {}  gallery = {}  app = {}",
         name,
         window.label(),
-        state.gallery_path,
-        app_handle.package_info().name
+        state.data().get_settings().get_language().clone().unwrap_or(String::from("Os defined")),
+        app_handle.package_info().authors
     )
 }
 
@@ -54,8 +56,8 @@ fn main() {
                 .unwrap_or_else(|| String::from("OS defined"))
         );
 
-        new_window(app, String::from("/Users/clement/Downloads/Gallery"));
-        new_window(app, String::from("/Users/clement/Images/Gal&lery"));
+        new_window(&app.app_handle(), "gallery-0".into(), String::from("/Users/clement/Downloads/Gallery"));
+        new_window(&app.app_handle(), "gallery-1".into(), String::from("/Users/clement/Images/Gal&lery"));
         Ok(())
     });
 
@@ -114,6 +116,7 @@ fn main() {
             local_img
         })
         .manage(AppDataState::default())
+        .manage(WindowsGalleriesState::default())
         .plugin(get_logger_plugin())
         .plugin(tauri_plugin_window_state::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
