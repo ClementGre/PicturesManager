@@ -2155,7 +2155,9 @@ dependencies = [
  "cocoa",
  "fluent",
  "fluent-fallback",
+ "fluent-langneg",
  "fluent-resmgr",
+ "intl-memoizer",
  "log",
  "serde",
  "serde_json",
@@ -2178,7 +2180,6 @@ version = "0.0.0"
 dependencies = [
  "fluent",
  "fluent-fallback",
- "fluent-langneg",
  "fluent-resmgr",
  "js-sys",
  "log",

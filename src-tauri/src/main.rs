@@ -5,20 +5,22 @@
 
 use app_data::{AppData, AppDataState};
 use gallery::windows_galleries::WindowsGalleriesState;
-use sys_locale::get_locale;
 use tauri::{http::ResponseBuilder, Manager, Window};
 mod header;
 use header::window::{new_window, window_close, window_maximize, window_minimize};
 use log::{info, trace};
+use std::env;
 use std::fs::read;
-use std::{env};
-mod logger;
-use logger::{get_logger_plugin, log_from_front};
+use utils::translator::TranslatorState;
+mod utils;
+use utils::logger::{get_logger_plugin, log_from_front};
 mod app_data;
 mod gallery;
 
 #[cfg(target_os = "macos")]
 use header::menubar::setup_menubar;
+
+use crate::utils::translator::{get_language, Translator};
 
 #[tauri::command]
 fn greet(
@@ -33,31 +35,50 @@ fn greet(
         "Hello, {}!  window = {}  gallery = {}  app = {}",
         name,
         window.label(),
-        state.data().get_settings().get_language().clone().unwrap_or(String::from("Os defined")),
+        state
+            .data()
+            .get_settings()
+            .get_language()
+            .clone()
+            .unwrap_or(String::from("Os defined")),
         app_handle.package_info().authors
     )
 }
 
 fn main() {
     let mut builder = tauri::Builder::default().setup(|app| {
-        
-        let locale = get_locale().unwrap_or_else(|| String::from("en-US"));
-        info!("🚩Locale: {}", locale);
-
         let data = app.state::<AppDataState>();
         *data.data() = AppData::load(&app.app_handle());
+
+        let translator = app.state::<TranslatorState>();
+        *translator.translator.lock().unwrap() = Some(Translator::new(data.data().get_settings().get_language().clone()));
 
         info!(
             "🚩Locale in settings: {:?}",
             app.state::<AppDataState>()
                 .data()
                 .get_settings()
-                .get_language().clone()
+                .get_language()
+                .clone()
                 .unwrap_or_else(|| String::from("OS defined"))
         );
 
-        new_window(&app.app_handle(), "gallery-0".into(), String::from("/Users/clement/Downloads/Gallery"));
-        new_window(&app.app_handle(), "gallery-1".into(), String::from("/Users/clement/Images/Gal&lery"));
+
+        let mut errors = vec![];
+        let bundle = translator.translator.lock().unwrap();
+        let bundle = &bundle.as_ref().unwrap().bundles;
+        info!("Test translation: {}", bundle.format_pattern(bundle.get_message("test").unwrap().value().unwrap(), None, &mut errors));
+
+        new_window(
+            &app.app_handle(),
+            "gallery-0".into(),
+            String::from("/Users/clement/Downloads/Gallery"),
+        );
+        new_window(
+            &app.app_handle(),
+            "gallery-1".into(),
+            String::from("/Users/clement/Images/Gal&lery"),
+        );
         Ok(())
     });
 
@@ -68,13 +89,15 @@ fn main() {
 
     builder
         .on_window_event(|event| match event.event() {
-            tauri::WindowEvent::Focused(_) => {
-                
-            }
+            tauri::WindowEvent::Focused(_) => {}
             tauri::WindowEvent::Destroyed => {
                 if event.window().app_handle().windows().len() == 0 {
                     info!("🚩No more windows, exiting");
-                    event.window().app_handle().state::<AppDataState>().save(&event.window().app_handle());
+                    event
+                        .window()
+                        .app_handle()
+                        .state::<AppDataState>()
+                        .save(&event.window().app_handle());
                 }
             }
             _ => {}
@@ -115,16 +138,18 @@ fn main() {
             };
             local_img
         })
+        .manage(TranslatorState::default())
         .manage(AppDataState::default())
         .manage(WindowsGalleriesState::default())
         .plugin(get_logger_plugin())
-        .plugin(tauri_plugin_window_state::Builder::default().build())
+        //.plugin(tauri_plugin_window_state::Builder::default().build())
         .invoke_handler(tauri::generate_handler![
             greet,
             log_from_front,
             window_minimize,
             window_maximize,
-            window_close
+            window_close,
+            get_language
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

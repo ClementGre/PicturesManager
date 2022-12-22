@@ -2,9 +2,11 @@ use crate::{invoke_async};
 use crate::utils::logger::*;
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::to_value;
+use wasm_bindgen::JsValue;
 use wasm_bindgen_futures::spawn_local;
 use web_sys::window;
 use yew::prelude::*;
+use yew::suspense::use_future;
 
 use crate::header::header::Header;
 use crate::leftbar::leftbar::LeftBar;
@@ -26,8 +28,9 @@ struct GreetArgs<'a> {
 #[function_component]
 pub fn App() -> HtmlResult {
 
-    let lang = window().unwrap().navigator().languages().to_vec().iter().map(|val| val.as_string().unwrap()).collect::<Vec<String>>();
-    info(lang.join(",").as_str());
+    let lang = use_future(|| async { invoke_async("get_language", JsValue::default()).await.as_string().unwrap() })?;
+    info(lang.as_str());
+
 
     //let os = *use_future(|| async { invoke_async("get_os", JsValue::default()).await.as_f64().unwrap() as u16 })?;
 
