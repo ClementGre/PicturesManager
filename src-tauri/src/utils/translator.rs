@@ -1,10 +1,7 @@
 use std::{env, fs, io, sync::Mutex};
 
 use fluent::{bundle::FluentBundle, FluentResource};
-use fluent_fallback::Localization;
 use fluent_langneg::{negotiate_languages, NegotiationStrategy};
-use fluent_resmgr::ResourceManager;
-use intl_memoizer;
 use sys_locale::get_locale;
 use unic_langid::{langid, LanguageIdentifier};
 
@@ -15,14 +12,14 @@ pub struct TranslatorState {
 
 pub struct Translator {
     pub lang: LanguageIdentifier,
-    pub bundles: TranslationType,
+    pub bundles: TranslationType
 }
 
 type TranslationType = FluentBundle<FluentResource, intl_memoizer::concurrent::IntlLangMemoizer>;
 
 impl Translator {
     pub fn new(app_language: Option<String>) -> Self{
-        let res_mgr = ResourceManager::new("../translations/{locale}/{res_id}".to_string());
+        //let res_mgr = ResourceManager::new("../translations/{locale}/{res_id}".to_string());
 
         let requested: Vec<LanguageIdentifier> = if app_language.is_some() {
             vec![app_language
@@ -48,18 +45,17 @@ impl Translator {
         .cloned()
         .collect();
 
-        let bundle = Localization::with_env(
-            vec!["back.ftl".into(), "common.ftl".into()],
-            true,
-            locales.clone(),
-            res_mgr,
-        )
-        .bundles()
-        .to_owned();
+        // let bundles = Localization::with_env(
+        //     vec!["back.ftl".into(), "common.ftl".into()],
+        //     true,
+        //     locales.clone(),
+        //     res_mgr,
+        // )
+        // .bundles()
+        // .to_owned();
 
-        let lang = locales[0].clone();
 
-        let mut bundles = FluentBundle::new_concurrent(locales);
+        let mut bundles = FluentBundle::new_concurrent(locales.clone());
         bundles
             .add_resource(
                 FluentResource::try_new(String::from(include_str!(
@@ -69,7 +65,7 @@ impl Translator {
             )
             .unwrap();
 
-        Self { lang, bundles }
+        Self { lang: locales[0].clone(), bundles }
     }
 
     fn get_available_locales() -> io::Result<Vec<LanguageIdentifier>> {

@@ -11,7 +11,7 @@ use header::window::{new_window, window_close, window_maximize, window_minimize}
 use log::{info, trace};
 use std::env;
 use std::fs::read;
-use utils::translator::TranslatorState;
+use utils::translator::{TranslatorState, self};
 mod utils;
 use utils::logger::{get_logger_plugin, log_from_front};
 mod app_data;
@@ -25,23 +25,25 @@ use crate::utils::translator::{get_language, Translator};
 #[tauri::command]
 fn greet(
     window: Window,
-    app_handle: tauri::AppHandle,
-    state: tauri::State<AppDataState>,
+    _: tauri::AppHandle,
+    app_data: tauri::State<AppDataState>,
+    galleries: tauri::State<WindowsGalleriesState>,
+    translator: tauri::State<TranslatorState>,
     name: &str,
 ) -> String {
     trace!("FROM TRACE !!! {:?}", env::var("CARGO_CFG_TARGET_OS"));
 
     format!(
-        "Hello, {}!  window = {}  gallery = {}  app = {}",
+        "Hello, {}!  window_label = {}  settings_language = {}  gallery_path = {}",
         name,
         window.label(),
-        state
+        app_data
             .data()
             .get_settings()
             .get_language()
             .clone()
             .unwrap_or(String::from("Os defined")),
-        app_handle.package_info().authors
+        galleries.get_galleries().iter().find(|gallery| gallery.get_label() == window.label()).unwrap().get_path()
     )
 }
 
@@ -69,16 +71,11 @@ fn main() {
         let bundle = &bundle.as_ref().unwrap().bundles;
         info!("Test translation: {}", bundle.format_pattern(bundle.get_message("test").unwrap().value().unwrap(), None, &mut errors));
 
-        new_window(
-            &app.app_handle(),
-            "gallery-0".into(),
-            String::from("/Users/clement/Downloads/Gallery"),
-        );
-        new_window(
-            &app.app_handle(),
-            "gallery-1".into(),
-            String::from("/Users/clement/Images/Gal&lery"),
-        );
+        let galleries = app.state::<WindowsGalleriesState>();
+
+        galleries.open_from_path(&mut app.app_handle(), String::from("/Users/clement/Downloads/MyPictures/test"));
+        galleries.open_from_path(&mut app.app_handle(), String::from("/Users/clement/Downloads/Gallery"));
+        
         Ok(())
     });
 
@@ -91,6 +88,12 @@ fn main() {
         .on_window_event(|event| match event.event() {
             tauri::WindowEvent::Focused(_) => {}
             tauri::WindowEvent::Destroyed => {
+
+                let app_handle = event.window().app_handle();
+
+                let galleries = app_handle.state::<WindowsGalleriesState>();
+                galleries.on_close(event.window().label().into());
+
                 if event.window().app_handle().windows().len() == 0 {
                     info!("🚩No more windows, exiting");
                     event

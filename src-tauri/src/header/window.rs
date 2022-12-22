@@ -31,7 +31,7 @@ pub fn new_window(app_handle: &AppHandle, label: String, gallery_path: String) {
         label,
         tauri::WindowUrl::App(format!("index.html?p={}", encode(&gallery_path.as_str())).into()),
     )
-    .visible(false) // tauri-plugin-window-state is responsible for showing the window after the state is restored.
+    .visible(true) // tauri-plugin-window-state is responsible for showing the window after the state is restored.
     .hidden_title(true)
     .title_bar_style(tauri::TitleBarStyle::Overlay)
     .min_inner_size(500.0, 300.0)

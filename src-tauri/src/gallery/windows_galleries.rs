@@ -18,7 +18,7 @@ pub struct WindowGallery {
 }
 
 impl WindowsGalleriesState {
-    fn get_galleries(&self) -> MutexGuard<'_, Vec<WindowGallery>> {
+    pub fn get_galleries(&self) -> MutexGuard<'_, Vec<WindowGallery>> {
         self.galleries
             .lock()
             .unwrap()
@@ -34,19 +34,29 @@ impl WindowsGalleriesState {
         label
     }
 
-    fn add_and_get_label(&self, path: String) -> String {
+    // Called in order to open a new gallery window
+    pub fn open_from_path(&self, app_handle: &mut AppHandle, path: String){
         let label = self.get_new_unique_label();
+
         self.galleries.lock().unwrap().push(WindowGallery {
             window_label: label.clone(),
-            path,
-            gallery: Gallery::default()
+            path: path.clone(),
+            gallery: Gallery::load(path.clone())
         });
-        label
-    }
 
-    pub fn open_from_path(&self, app_handle: &mut AppHandle, path: String){
-        let label = self.add_and_get_label(path.clone());
         new_window(app_handle, label, path);
+    }
+    // Called when a gallery window is closed
+    pub fn on_close(&self, label: String) {
+        let mut galleries = self.galleries.lock().unwrap();
+        galleries.retain(|gallery| {
+            if(gallery.window_label != label){
+                true
+            }else{
+                gallery.gallery.save(gallery.path.clone());
+                false
+            }
+        });
     }
 }
 
