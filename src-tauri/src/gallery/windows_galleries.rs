@@ -50,7 +50,7 @@ impl WindowsGalleriesState {
     pub fn on_close(&self, label: String) {
         let mut galleries = self.galleries.lock().unwrap();
         galleries.retain(|gallery| {
-            if(gallery.window_label != label){
+            if gallery.window_label != label {
                 true
             }else{
                 gallery.gallery.save(gallery.path.clone());

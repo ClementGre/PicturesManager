@@ -1,9 +1,12 @@
 use std::{env, fs, io, sync::Mutex};
 
 use fluent::{bundle::FluentBundle, FluentResource};
+use fluent_fallback::{Localization};
 use fluent_langneg::{negotiate_languages, NegotiationStrategy};
+use fluent_resmgr::ResourceManager;
 use sys_locale::get_locale;
 use unic_langid::{langid, LanguageIdentifier};
+
 
 #[derive(Default)]
 pub struct TranslatorState {
@@ -19,7 +22,7 @@ type TranslationType = FluentBundle<FluentResource, intl_memoizer::concurrent::I
 
 impl Translator {
     pub fn new(app_language: Option<String>) -> Self{
-        //let res_mgr = ResourceManager::new("../translations/{locale}/{res_id}".to_string());
+        let res_mgr = ResourceManager::new("../translations/{locale}/{res_id}".to_string());
 
         let requested: Vec<LanguageIdentifier> = if app_language.is_some() {
             vec![app_language
@@ -45,14 +48,14 @@ impl Translator {
         .cloned()
         .collect();
 
-        // let bundles = Localization::with_env(
-        //     vec!["back.ftl".into(), "common.ftl".into()],
-        //     true,
-        //     locales.clone(),
-        //     res_mgr,
-        // )
-        // .bundles()
-        // .to_owned();
+        let _ = Localization::with_env(
+            vec!["back.ftl".into(), "common.ftl".into()],
+            true,
+            locales.clone(),
+            res_mgr,
+        )
+        .bundles()
+        .to_owned();
 
 
         let mut bundles = FluentBundle::new_concurrent(locales.clone());

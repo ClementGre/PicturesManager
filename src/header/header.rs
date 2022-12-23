@@ -37,8 +37,11 @@ pub fn Header() -> Html {
                         } else {
                             html! {
                                 <>
+                                    <div class="macos-spacer" data-tauri-drag-region="true">
+                                        {{"Macos"}}
+                                    </div>
                                     <div class="windows-icon" data-tauri-drag-region="true">
-                                        {{"Windows"}}
+                                        <img src="public/yew.png" alt="app icon" data-tauri-drag-region="true" />
                                     </div>
                                     <div class="windows-menu" data-tauri-drag-region="true">
 
@@ -47,9 +50,10 @@ pub fn Header() -> Html {
                             }
                         }
                     }
-                    <div class="buttons">
-
+                    <div class="buttons" data-tauri-drag-region="true">
+                        
                     </div>
+                    <div class="spacer" data-tauri-drag-region="true"/>
                     {
                          if !macos {
                             html! {

@@ -7,11 +7,11 @@ use app_data::{AppData, AppDataState};
 use gallery::windows_galleries::WindowsGalleriesState;
 use tauri::{http::ResponseBuilder, Manager, Window};
 mod header;
-use header::window::{new_window, window_close, window_maximize, window_minimize};
+use header::window::{window_close, window_maximize, window_minimize};
 use log::{info, trace};
 use std::env;
 use std::fs::read;
-use utils::translator::{TranslatorState, self};
+use utils::translator::TranslatorState;
 mod utils;
 use utils::logger::{get_logger_plugin, log_from_front};
 mod app_data;
@@ -28,7 +28,7 @@ fn greet(
     _: tauri::AppHandle,
     app_data: tauri::State<AppDataState>,
     galleries: tauri::State<WindowsGalleriesState>,
-    translator: tauri::State<TranslatorState>,
+    _: tauri::State<TranslatorState>,
     name: &str,
 ) -> String {
     trace!("FROM TRACE !!! {:?}", env::var("CARGO_CFG_TARGET_OS"));
@@ -43,7 +43,12 @@ fn greet(
             .get_language()
             .clone()
             .unwrap_or(String::from("Os defined")),
-        galleries.get_galleries().iter().find(|gallery| gallery.get_label() == window.label()).unwrap().get_path()
+        galleries
+            .get_galleries()
+            .iter()
+            .find(|gallery| gallery.get_label() == window.label())
+            .unwrap()
+            .get_path()
     )
 }
 
@@ -53,29 +58,22 @@ fn main() {
         *data.data() = AppData::load(&app.app_handle());
 
         let translator = app.state::<TranslatorState>();
-        *translator.translator.lock().unwrap() = Some(Translator::new(data.data().get_settings().get_language().clone()));
+        *translator.translator.lock().unwrap() = Some(Translator::new(
+            data.data().get_settings().get_language().clone(),
+        ));
 
-        info!(
-            "🚩Locale in settings: {:?}",
-            app.state::<AppDataState>()
-                .data()
-                .get_settings()
-                .get_language()
-                .clone()
-                .unwrap_or_else(|| String::from("OS defined"))
-        );
-
-
-        let mut errors = vec![];
-        let bundle = translator.translator.lock().unwrap();
-        let bundle = &bundle.as_ref().unwrap().bundles;
-        info!("Test translation: {}", bundle.format_pattern(bundle.get_message("test").unwrap().value().unwrap(), None, &mut errors));
+        // let mut errors = vec![];
+        // let bundle = translator.translator.lock().unwrap();
+        // let bundle = &bundle.as_ref().unwrap().bundles;
+        // info!("Test translation: {}", bundle.format_pattern(bundle.get_message("test").unwrap().value().unwrap(), None, &mut errors));
 
         let galleries = app.state::<WindowsGalleriesState>();
 
-        galleries.open_from_path(&mut app.app_handle(), String::from("/Users/clement/Downloads/MyPictures/test"));
-        galleries.open_from_path(&mut app.app_handle(), String::from("/Users/clement/Downloads/Gallery"));
-        
+        galleries.open_from_path(
+            &mut app.app_handle(),
+            String::from("/Users/clement/Downloads/Gallery"),
+        );
+
         Ok(())
     });
 
@@ -88,7 +86,6 @@ fn main() {
         .on_window_event(|event| match event.event() {
             tauri::WindowEvent::Focused(_) => {}
             tauri::WindowEvent::Destroyed => {
-
                 let app_handle = event.window().app_handle();
 
                 let galleries = app_handle.state::<WindowsGalleriesState>();
@@ -145,7 +142,12 @@ fn main() {
         .manage(AppDataState::default())
         .manage(WindowsGalleriesState::default())
         .plugin(get_logger_plugin())
-        //.plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(
+            tauri_plugin_window_state::Builder::default()
+            .with_denylist(&vec!["settings"])
+                .with_show_mode(tauri_plugin_window_state::ShowMode::Always)
+                .build(),
+        )
         .invoke_handler(tauri::generate_handler![
             greet,
             log_from_front,

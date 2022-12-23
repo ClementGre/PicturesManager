@@ -1,7 +1,6 @@
 use std::{collections::HashMap, fs::{File, create_dir_all}, io::{BufReader, BufWriter}, path::PathBuf};
 
 use serde::{Deserialize, Serialize};
-use tauri::AppHandle;
 
 use super::gallery_cache::{PictureCache, PathsCache, LocationCache};
 

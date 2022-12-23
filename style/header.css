@@ -17,9 +17,50 @@ header {
     justify-content: space-between;
 }
 
+/* MACOS SPACER */
+
+header .macos-spacer {
+    flex-shrink: 0;
+    width: 78px;
+}
+
+header .spacer {
+    flex-shrink: 1;
+    flex-grow: 2;
+}
+
+/* WINDOWS ICON */
+
+header .windows-icon {
+    flex-shrink: 0;
+    position: relative;
+    width: 40px;
+}
+header .windows-icon img {
+    width: 25px;
+    height: 25px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+}
+
+/* WINDOWS MENU */
+
+header .windows-menu {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    padding: 10px;
+}
+
+/* BUTTONS */
+
 /* WINDOWS BUTTONS */
 
 header .windows-buttons {
+    flex-shrink: 0;
     display: flex;
     flex-direction: row;
 }
