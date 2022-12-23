@@ -1,5 +1,6 @@
 use crate::{invoke_async};
 use crate::utils::logger::*;
+use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::to_value;
 use wasm_bindgen::JsValue;
@@ -13,6 +14,8 @@ use crate::leftbar::leftbar::LeftBar;
 use crate::mainpane::mainpane::MainPane;
 use crate::rightbar::rightbar::RightBar;
 
+
+pub static MACOS: OnceCell<bool> = OnceCell::new();
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Context {
@@ -31,10 +34,9 @@ pub fn App() -> HtmlResult {
     let lang = use_future(|| async { invoke_async("get_language", JsValue::default()).await.as_string().unwrap() })?;
     info(lang.as_str());
 
-
     //let os = *use_future(|| async { invoke_async("get_os", JsValue::default()).await.as_f64().unwrap() as u16 })?;
-
     let os = window().unwrap().navigator().app_version().unwrap();
+    let _ = MACOS.set(os.contains("Mac")).unwrap();
     let context = use_state(|| Context { macos: os.contains("Mac"), windows: os.contains("Win") });
 
     /*let greet_input_ref = use_node_ref();

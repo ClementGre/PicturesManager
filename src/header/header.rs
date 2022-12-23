@@ -1,6 +1,7 @@
 use crate::{app::{Context}, invoke};
 use wasm_bindgen::JsValue;
 use yew::{prelude::*};
+use crate::header::menubar::MenuBar;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -23,29 +24,24 @@ pub fn Header() -> Html {
         invoke("window_close", JsValue::default());
     });
 
+
+
     html! {
             <>
                 <header data-tauri-drag-region="true">
-
                     {
                         if macos {
                             html! {
-                                <div class="macos-spacer" data-tauri-drag-region="true">
-                                    {{"Macos"}}
-                                </div>
+                                <div class="macos-spacer" data-tauri-drag-region="true"/>
                             }
                         } else {
                             html! {
                                 <>
-                                    <div class="macos-spacer" data-tauri-drag-region="true">
-                                        {{"Macos"}}
-                                    </div>
+                                    <div class="macos-spacer" data-tauri-drag-region="true"/>
                                     <div class="windows-icon" data-tauri-drag-region="true">
                                         <img src="public/yew.png" alt="app icon" data-tauri-drag-region="true" />
                                     </div>
-                                    <div class="windows-menu" data-tauri-drag-region="true">
-
-                                    </div>
+                                    <MenuBar/>
                                 </>
                             }
                         }

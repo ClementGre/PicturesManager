@@ -2184,6 +2184,7 @@ dependencies = [
  "fluent-resmgr",
  "js-sys",
  "log",
+ "once_cell",
  "serde",
  "serde-wasm-bindgen 0.4.5",
  "unic-langid",
