@@ -55,62 +55,68 @@ pub fn MenuBar() -> Html {
         <div class="windows-menu" data-tauri-drag-region="true">
             <div class="menu">
                 <p>{{"Fichier"}}</p>
-                <div class="children">
-                    <div class="menu-item" onclick={&on_open_gallery}>
-                        <p>{{"Ouvrir une galerie"}}</p>
-                        <p>{{register_shortcut(shortcuts.clone(), KeyStroke::from("shortcut+o"), on_open_gallery)}}</p>
+                <div class="children-box">
+                    <div class="children">
+                        <div class="menu-item" onclick={&on_open_gallery}>
+                            <p>{{"Ouvrir une galerie"}}</p>
+                            <p>{{register_shortcut(shortcuts.clone(), KeyStroke::from("shortcut+o"), on_open_gallery)}}</p>
 
-                    </div>
-                    <div class="menu-item">
-                        <p>{{"Nouvelle galerie"}}</p>
-                    </div>
-                    <div class="menu-item">
-                        <p>{{"Fermer la fenêtre"}}</p>
-                    </div>
-                    <div class="menu-item">
-                        <p>{{"Quitter"}}</p>
-                    </div>
-                    <div class="split"/>
-                    <div class="menu-item">
-                        <p>{{"Paramètres"}}</p>
-                    </div>
-                    <div class="menu-item">
-                        <p>{{"À propos"}}</p>
+                        </div>
+                        <div class="menu-item">
+                            <p>{{"Nouvelle galerie"}}</p>
+                        </div>
+                        <div class="menu-item">
+                            <p>{{"Fermer la fenêtre"}}</p>
+                        </div>
+                        <div class="menu-item">
+                            <p>{{"Quitter"}}</p>
+                        </div>
+                        <div class="split"/>
+                        <div class="menu-item">
+                            <p>{{"Paramètres"}}</p>
+                        </div>
+                        <div class="menu-item">
+                            <p>{{"À propos"}}</p>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="menu">
                 <p>{{"Édition"}}</p>
-                <div class="children">
-                    <div class="menu-item">
-                        <p>{{"Annuler"}}</p>
-                    </div>
-                    <div class="menu-item">
-                        <p>{{"Rétablir"}}</p>
-                    </div>
-                    <div class="split"/>
-                    <div class="menu-item">
-                        <p>{{"Couper"}}</p>
-                    </div>
-                    <div class="menu-item">
-                        <p>{{"Copier"}}</p>
-                    </div>
-                    <div class="menu-item">
-                        <p>{{"Coller"}}</p>
-                    </div>
-                    <div class="menu-item">
-                        <p>{{"Tout sélectionner"}}</p>
+                <div class="children-box">
+                    <div class="children">
+                        <div class="menu-item">
+                            <p>{{"Annuler"}}</p>
+                        </div>
+                        <div class="menu-item">
+                            <p>{{"Rétablir"}}</p>
+                        </div>
+                        <div class="split"/>
+                        <div class="menu-item">
+                            <p>{{"Couper"}}</p>
+                        </div>
+                        <div class="menu-item">
+                            <p>{{"Copier"}}</p>
+                        </div>
+                        <div class="menu-item">
+                            <p>{{"Coller"}}</p>
+                        </div>
+                        <div class="menu-item">
+                            <p>{{"Tout sélectionner"}}</p>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="menu">
                 <p>{{"Outils"}}</p>
-                <div class="children">
-                    <div class="menu-item">
-                        <p>{{"Actualiser la galerie"}}</p>
-                    </div>
-                    <div class="menu-item">
-                        <p>{{"Corriger données Exif"}}</p>
+                <div class="children-box">
+                    <div class="children">
+                        <div class="menu-item">
+                            <p>{{"Actualiser la galerie"}}</p>
+                        </div>
+                        <div class="menu-item">
+                            <p>{{"Corriger données Exif"}}</p>
+                        </div>
                     </div>
                 </div>
             </div>

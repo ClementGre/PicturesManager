@@ -11,7 +11,6 @@ header {
     color: white;
     background-color: rgb(55, 56, 58);
     overflow: visible;
-
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -67,21 +66,28 @@ header .windows-menu .menu:hover {
 header .windows-menu .menu p{
     line-height: 40px;
 }
-header .windows-menu .menu .children {
-    flex-direction: column;
-    display: none;
+header .windows-menu .menu .children-box {
     position: absolute;
+    display: none;
     bottom: 0;
     left: 0;
     transform: translateY(100%);
-    width: 200px;
+    width: calc(100vw);
+    height: calc(100vh - 40px);
+    align-items: flex-start;
+}
+header .windows-menu .menu:hover .children-box {
+    display: flex;
+}
+header .windows-menu .menu .children {
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
     border-radius: 0 0 5px 5px;
     background-color: rgba(55, 56, 58, 0.9);
     -webkit-backdrop-filter: blur(6px);
     backdrop-filter: blur(6px);
-}
-header .windows-menu .menu:hover .children {
-    display: flex;
+    overflow: auto;
 }
 header .windows-menu .menu .menu-item {
     padding: 0 10px;
