@@ -76,7 +76,7 @@ header .windows-menu .menu .children-box {
     height: calc(100vh - 40px);
     align-items: flex-start;
 }
-header .windows-menu .menu:hover .children-box {
+header .windows-menu.opened .menu.opened .children-box {
     display: flex;
 }
 header .windows-menu .menu .children {
