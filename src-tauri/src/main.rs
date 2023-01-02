@@ -53,7 +53,7 @@ fn greet(
 }
 
 fn main() {
-    let mut builder = tauri::Builder::default().setup(|app| {
+    let builder = tauri::Builder::default().setup(|app| {
         let data = app.state::<AppDataState>();
         *data.data() = AppData::load(&app.app_handle());
 

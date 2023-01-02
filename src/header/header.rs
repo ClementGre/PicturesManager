@@ -10,7 +10,7 @@ pub struct Props {
 
 #[function_component]
 pub fn Header() -> Html {
-    let macos = !use_context::<Context>().unwrap().macos;
+    let macos = use_context::<Context>().unwrap().macos;
 
     let on_minimize = Callback::from(move |_: MouseEvent| {
         invoke("window_minimize", JsValue::default());
@@ -30,7 +30,7 @@ pub fn Header() -> Html {
             <>
                 <header data-tauri-drag-region="true">
                     {
-                        if macos {
+                        if macos && false {
                             html! {
                                 <div class="macos-spacer" data-tauri-drag-region="true"/>
                             }
