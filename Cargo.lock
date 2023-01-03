@@ -2159,6 +2159,7 @@ dependencies = [
  "fluent-resmgr",
  "intl-memoizer",
  "log",
+ "pm-common",
  "rustc-hash",
  "serde",
  "serde_json",
@@ -2185,6 +2186,7 @@ dependencies = [
  "js-sys",
  "log",
  "once_cell",
+ "pm-common",
  "serde",
  "serde-wasm-bindgen 0.4.5",
  "unic-langid",
@@ -2259,6 +2261,10 @@ dependencies = [
  "time",
  "xml-rs",
 ]
+
+[[package]]
+name = "pm-common"
+version = "0.0.0"
 
 [[package]]
 name = "png"

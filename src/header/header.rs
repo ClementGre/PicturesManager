@@ -51,7 +51,7 @@ pub fn Header() -> Html {
                     </div>
                     <div class="spacer" data-tauri-drag-region="true"/>
                     {
-                         if !macos {
+                         if !macos || true {
                             html! {
                                 <div class="windows-buttons" data-tauri-drag-region="true">
                                     <div class="minimize" onclick={on_minimize}>

@@ -1,0 +1,13 @@
+[package]
+name = "pm-common"
+version = "0.0.0"
+description = "Common library for PicturesManager"
+authors = ["Clément GRENNERAT"]
+license = ""
+repository = "https://github.com/ClementGre/PicturesManager"
+edition = "2021"
+rust-version = "1.57"
+
+[lib]
+name = "pm_common"
+path = "src/lib.rs"

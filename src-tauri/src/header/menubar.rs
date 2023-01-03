@@ -56,12 +56,14 @@ pub fn setup_menubar(app_name: String) -> Menu {
 
     ////////// OTHERS MENUS //////////
 
-    let quit = CustomMenuItem::new("quit".to_string(), "Quit");
+    let quit = CustomMenuItem::new("quit".to_string(), "Quit").accelerator("Cmd+F");
     let close = CustomMenuItem::new("close".to_string(), "Close");
     let submenu = Submenu::new("Test", Menu::new().add_item(quit).add_item(close));
     menu = menu
         .add_item(CustomMenuItem::new("hide", "Hide"))
         .add_submenu(submenu);
+
+    
 
     menu
 }

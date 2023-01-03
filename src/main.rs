@@ -12,6 +12,22 @@ mod mainpane;
 mod rightbar;
 mod utils;
 
+use pm_common::menu::Menu;
+
+// Cargo.toml
+// src
+// ├── main.rs
+// src-tauri
+// ├── Cargo.toml
+// ├── src
+// │   ├── main.rs
+// src-common
+// ├── Cargo.toml
+// ├── src
+// │   ├── main.rs
+
+
+
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
