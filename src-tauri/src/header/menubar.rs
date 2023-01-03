@@ -63,7 +63,11 @@ pub fn setup_menubar(app_name: String) -> Menu {
         .add_item(CustomMenuItem::new("hide", "Hide"))
         .add_submenu(submenu);
 
-    
-
     menu
+}
+
+
+#[tauri::command]
+pub fn menu_quit(app: tauri::AppHandle) {
+    app.exit(0);
 }

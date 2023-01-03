@@ -12,8 +12,6 @@ mod mainpane;
 mod rightbar;
 mod utils;
 
-use pm_common::menu::Menu;
-
 // Cargo.toml
 // src
 // ├── main.rs

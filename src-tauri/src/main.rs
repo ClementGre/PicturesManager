@@ -19,6 +19,7 @@ mod gallery;
 
 #[cfg(target_os = "macos")]
 use header::menubar::setup_menubar;
+use header::menubar::menu_quit;
 
 use crate::utils::translator::{get_language, Translator};
 
@@ -157,7 +158,8 @@ fn main() {
             window_minimize,
             window_maximize,
             window_close,
-            get_language
+            get_language,
+            menu_quit
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

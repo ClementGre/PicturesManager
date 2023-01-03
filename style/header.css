@@ -57,10 +57,9 @@ header .windows-menu {
 header .windows-menu .menu{
     position: relative;
     padding: 0 5px;
-    transition: all 0.2s ease-in-out;  
 }
 
-header .windows-menu .menu:hover {
+header .windows-menu.opened .menu.opened {
     background-color: rgba(0, 0, 0, 0.1);
 }
 header .windows-menu .menu p{
@@ -75,6 +74,7 @@ header .windows-menu .menu .children-box {
     width: calc(100vw);
     height: calc(100vh - 40px);
     align-items: flex-start;
+    pointer-events: none;
 }
 header .windows-menu.opened .menu.opened .children-box {
     display: flex;
@@ -88,10 +88,10 @@ header .windows-menu .menu .children {
     -webkit-backdrop-filter: blur(6px);
     backdrop-filter: blur(6px);
     overflow: auto;
+    pointer-events: all;
 }
 header .windows-menu .menu .menu-item {
     padding: 0 10px;
-    transition: all 0.1s ease-in-out;
     display: flex;
     justify-content: space-between;
     flex-direction: row;
