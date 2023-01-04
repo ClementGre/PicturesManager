@@ -49,33 +49,23 @@ pub fn get_menus() -> Vec<MenuItem> {
         "file".to_string(),
         "Fichier".to_string(),
         vec![
-            MenuItem::new_item_acc(
-                "open_gallery".to_string(),
-                "Ouvrir une gallery".to_string(),
-                "Ctrl+O".to_string(),
-            ),
-            MenuItem::new_item_acc(
-                "new_gallery".to_string(),
-                "Nouvelle gallerie".to_string(),
-                "Ctrl+N".to_string(),
-            ),
+            MenuItem::new_item_acc("open_gallery".to_string(), "Ouvrir une gallerie".to_string(), "Ctrl+O".to_string()),
+            MenuItem::new_menu("open_recent_gallery".to_string(), "Ouvrir une gallerie récente".to_string(), vec![
+                MenuItem::new_item("recent_gallery_1".to_string(), "Gallerie récente 1".to_string()),
+                MenuItem::new_item("recent_gallery_2".to_string(), "Gallerie récente 2".to_string()),
+                MenuItem::new_item("recent_gallery_3".to_string(), "Gallerie récente 3".to_string()),
+                MenuItem::new_menu("recent_gallery_other".to_string(), "Autre".to_string(), vec![
+                    MenuItem::new_item("recent_gallery_4".to_string(), "Gallerie récente 4".to_string()),
+                    MenuItem::new_item("recent_gallery_5".to_string(), "Gallerie récente 5".to_string()),
+                ]),
+                MenuItem::new_item("recent_gallery_5".to_string(), "Gallerie récente 5".to_string()),
+            ]),
+            MenuItem::new_item_acc("new_gallery".to_string(), "Nouvelle gallerie".to_string(), "Ctrl+N".to_string()),
             MenuItem::new_separator(0),
-            MenuItem::new_item_acc(
-                "close_window".to_string(),
-                "Fermer la fenêtre".to_string(),
-                "Ctrl+W".to_string(),
-            ),
-            MenuItem::new_item_acc(
-                "quit".to_string(),
-                "Quitter".to_string(),
-                "Ctrl+Q".to_string(),
-            ),
+            MenuItem::new_item_acc("close_window".to_string(), "Fermer la fenêtre".to_string(), "Ctrl+W".to_string()),
+            MenuItem::new_item_acc("quit".to_string(), "Quitter".to_string(), "Ctrl+Q".to_string()),
             MenuItem::new_separator(1),
-            MenuItem::new_item_acc(
-                "settings".to_string(),
-                "Paramètres".to_string(),
-                "Ctrl+Alt+S".to_string(),
-            ),
+            MenuItem::new_item_acc("settings".to_string(), "Paramètres".to_string(), "Ctrl+Alt+S".to_string()),
             MenuItem::new_item("about".to_string(), "À propos".to_string()),
         ],
     ));
@@ -83,51 +73,21 @@ pub fn get_menus() -> Vec<MenuItem> {
         "edit".to_string(),
         "Édition".to_string(),
         vec![
-            MenuItem::new_item_acc(
-                "undo".to_string(),
-                "Annuler".to_string(),
-                "Ctrl+Z".to_string(),
-            ),
-            MenuItem::new_item_acc(
-                "redo".to_string(),
-                "Rétablir".to_string(),
-                "Ctrl+Shift+Z".to_string(),
-            ),
+            MenuItem::new_item_acc("undo".to_string(), "Annuler".to_string(), "Ctrl+Z".to_string()),
+            MenuItem::new_item_acc("redo".to_string(), "Rétablir".to_string(), "Ctrl+Shift+Z".to_string()),
             MenuItem::new_separator(0),
-            MenuItem::new_item_acc(
-                "cut".to_string(),
-                "Couper".to_string(),
-                "Ctrl+X".to_string(),
-            ),
-            MenuItem::new_item_acc(
-                "copy".to_string(),
-                "Copier".to_string(),
-                "Ctrl+C".to_string(),
-            ),
-            MenuItem::new_item_acc(
-                "paste".to_string(),
-                "Coller".to_string(),
-                "Ctrl+V".to_string(),
-            ),
-            MenuItem::new_item_acc(
-                "select_all".to_string(),
-                "Select all".to_string(),
-                "Ctrl+A".to_string(),
-            ),
+            MenuItem::new_item_acc("cut".to_string(), "Couper".to_string(), "Ctrl+X".to_string()),
+            MenuItem::new_item_acc("copy".to_string(), "Copier".to_string(), "Ctrl+C".to_string()),
+            MenuItem::new_item_acc("paste".to_string(), "Coller".to_string(), "Ctrl+V".to_string()),
+            MenuItem::new_item_acc("select_all".to_string(), "Select all".to_string(), "Ctrl+A".to_string()),
         ],
     ));
     menus.push(MenuItem::new_menu(
         "tools".to_string(),
         "Outils".to_string(),
         vec![
-            MenuItem::new_item(
-                "update_Gallery".to_string(),
-                "Actualiser la galerie".to_string(),
-            ),
-            MenuItem::new_item(
-                "edit_exif".to_string(),
-                "Corriger les données Exif".to_string(),
-            ),
+            MenuItem::new_item("update_Gallery".to_string(), "Actualiser la galerie".to_string()),
+            MenuItem::new_item("edit_exif".to_string(), "Corriger les données Exif".to_string()),
         ],
     ));
     menus

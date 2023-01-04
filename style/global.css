@@ -8,6 +8,9 @@ body{
     display: flex;
     flex-flow: column;
     align-items: stretch;
+    font-family: 'Open Sans';
+    font-weight: 400;
+    font-size: 11pt;
 }
 * {
     box-sizing: border-box;
