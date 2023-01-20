@@ -4,7 +4,7 @@ use crate::{
     utils::keystroke::KeyStroke,
 };
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
-use web_sys::{window, HtmlElement, Element};
+use web_sys::{window, Element, HtmlElement};
 use yew::prelude::*;
 
 fn register_shortcuts(items: &Vec<MenuItem>, shortcuts: &mut Vec<(KeyStroke, String)>) {
@@ -55,7 +55,7 @@ pub fn MenuBar() -> Html {
                 let target = e.target().and_then(|div| div.dyn_into::<HtmlElement>().ok());
                 if let Some(div) = target {
                     if !div.class_name().split_whitespace().any(|c| "menu-item" == c) {
-                        is_open.set(false); // Close minu only if the target is not a menu item
+                        is_open.set(false); // Close menu only if the target is not a menu item
                     }
                 }
             }
@@ -120,7 +120,6 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
     let menu_ref = use_node_ref();
 
     if let Some(items) = menu.items {
-
         let update_menu_xy = {
             let menu_x = menu_x.clone();
             let menu_y = menu_y.clone();
@@ -152,13 +151,15 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
                 <div class="children-box"
                     style={format!("padding: {}px 0 0 {}px; display: {};", *menu_y, *menu_x, if *selected == menu.id { "flex" } else { "none" } )}>
                     <div class="children">
-                        {
-                            items.into_iter().map(|item| {
-                                html!{
-                                    <MenuItemComponent menu={item} selected={selected_child.clone()} is_root={{false}}/>
-                                }
-                            }).collect::<Html>()
-                        }
+                        <div class="children-scroll">
+                            {
+                                items.into_iter().map(|item| {
+                                    html!{
+                                        <MenuItemComponent menu={item} selected={selected_child.clone()} is_root={{false}}/>
+                                    }
+                                }).collect::<Html>()
+                            }
+                        </div>
                     </div>
                 </div>
 
