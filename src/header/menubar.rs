@@ -4,7 +4,7 @@ use crate::{
     utils::keystroke::KeyStroke,
 };
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
-use web_sys::{window, HtmlElement};
+use web_sys::{window, HtmlElement, Element};
 use yew::prelude::*;
 
 fn register_shortcuts(items: &Vec<MenuItem>, shortcuts: &mut Vec<(KeyStroke, String)>) {
@@ -104,6 +104,8 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
     let selected = props.selected.clone();
     let is_root = props.is_root;
     let selected_child = use_state(|| "".to_string());
+    let menu_x = use_state(|| 0);
+    let menu_y = use_state(|| 40);
 
     let on_mouse_enter = {
         let selected = selected.clone();
@@ -115,14 +117,40 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
         })
     };
 
+    let menu_ref = use_node_ref();
+
     if let Some(items) = menu.items {
+
+        let update_menu_xy = {
+            let menu_x = menu_x.clone();
+            let menu_y = menu_y.clone();
+            let menu_ref = menu_ref.clone();
+            let is_root = is_root.clone();
+            Callback::from(move |_| {
+                if let Some(menu) = menu_ref.cast::<Element>() {
+                    let rect = menu.get_bounding_client_rect();
+                    if is_root {
+                        menu_x.set(rect.x() as i32);
+                        menu_y.set((rect.y() + rect.height()) as i32);
+                    } else {
+                        menu_x.set((rect.x() + rect.width()) as i32);
+                        menu_y.set(rect.y() as i32);
+                    }
+                }
+            })
+        };
+
+
         html! {
             <div key={menu.id.clone()}
+                ref={menu_ref.clone()}
+                onmousemove={update_menu_xy}
                 class={classes!("menu", if !is_root {Some("menu-item")} else {None}, if *selected == menu.id {Some("opened")} else {None})}
                 onmouseenter={on_mouse_enter}>
                 <p>{{menu.name.clone()}}</p>
 
-                <div class="children-box">
+                <div class="children-box"
+                    style={format!("padding: {}px 0 0 {}px; display: {};", *menu_y, *menu_x, if *selected == menu.id { "flex" } else { "none" } )}>
                     <div class="children">
                         {
                             items.into_iter().map(|item| {
@@ -133,6 +161,7 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
                         }
                     </div>
                 </div>
+
             </div>
         }
     } else if let Some(name) = menu.name {

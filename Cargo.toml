@@ -16,7 +16,7 @@ serde = { version = "1.0.140", features = ["derive"] }
 wasm-bindgen = { version = "0.2.82", features = ["serde-serialize"] }
 wasm-bindgen-futures = "0.4.32"
 wasm-logger = "0.2.0"
-web-sys = { version = "0.3.59", features = ["Window", "Navigator"]}
+web-sys = { version = "0.3.59", features = ["Window", "Navigator", "Element", "DomRect"]}
 yew = { version="0.20.0", features = ["csr"] }
 log = "^0.4"
 fluent = "0.16.0"
