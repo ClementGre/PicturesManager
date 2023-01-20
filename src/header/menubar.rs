@@ -149,7 +149,7 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
                 <p>{{menu.name.clone()}}</p>
 
                 <div class="children-box"
-                    style={format!("padding: {}px 0 0 {}px; display: {};", *menu_y, *menu_x, if *selected == menu.id { "flex" } else { "none" } )}>
+                    style={format!("padding: {}px 0 0 {}px;", *menu_y, *menu_x)}>
                     <div class="children">
                         <div class="children-scroll">
                             {

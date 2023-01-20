@@ -75,6 +75,7 @@ header .windows-menu .menu p {
 
 header .windows-menu .menu .children-box {
     position: fixed;
+    display: none;
     width: calc(100vw);
     height: calc(100vh);
     align-items: flex-start;
@@ -84,6 +85,9 @@ header .windows-menu .menu .children-box {
 header .windows-menu .children-box {
     top: 0;
     left: 0;
+}
+header .windows-menu.opened .menu.opened>.children-box {
+    display: flex;
 }
 
 header .windows-menu .children-scroll {
