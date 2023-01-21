@@ -22,53 +22,51 @@ fn register_shortcuts(items: &Vec<MenuItem>, shortcuts: &mut Vec<(KeyStroke, Str
 pub fn MenuBar() -> Html {
     let menus = get_menus();
 
-    // KEYBOARD GLOBAL EVENT FOR SHORTCUTS
-
     let mut shortcuts = vec![];
     register_shortcuts(&menus, &mut shortcuts);
-
-    let keyboard_event = Closure::wrap(Box::new(move |e: web_sys::KeyboardEvent| {
-        shortcuts.clone().iter().for_each(|(ks, id)| {
-            if ks.matches(&e) {
-                invoke(format!("menu_{}", id).as_str(), JsValue::default());
-            }
-        });
-    }) as Box<dyn FnMut(_)>);
-
-    let _ = window()
-        .unwrap()
-        .add_event_listener_with_callback("keydown", keyboard_event.as_ref().unchecked_ref())
-        .unwrap();
-    keyboard_event.forget(); // Makes a memory leak, but this closure is global and needs to live as long as the window is open
-
-    // OPEN STATE
 
     let is_open = use_state_eq(|| false);
     let selected = use_state_eq(|| "".to_string());
 
-    // MOUSE GLOBAL EVENT
+    // GLOBAL EVENTS
 
-    let mouse_event = {
+    {
         let is_open = is_open.clone();
-        Closure::wrap(Box::new(move |e: web_sys::MouseEvent| {
-            if *is_open {
-                let target = e.target().and_then(|div| div.dyn_into::<HtmlElement>().ok());
-                if let Some(div) = target {
-                    if !div.class_name().split_whitespace().any(|c| "menu-item" == c || "menu" == c) {
-                        is_open.set(false); // Close menu only if the target is not a menu-item
-                    }
-                }
-            }
-        }) as Box<dyn FnMut(_)>)
-    };
+        use_memo( |_| {
 
-    let _ = window()
-        .unwrap()
-        .add_event_listener_with_callback("mousedown", mouse_event.as_ref().unchecked_ref())
-        .unwrap();
-    mouse_event.forget(); // Makes a memory leak, but this closure is global and needs to live as long as the window is open
-    info("forgetting mouse event");
-    
+            let keyboard_event = Closure::wrap(Box::new(move |e: web_sys::KeyboardEvent| {
+                shortcuts.clone().iter().for_each(|(ks, id)| {
+                    if ks.matches(&e) {
+                        invoke(format!("menu_{}", id).as_str(), JsValue::default());
+                    }
+                });
+            }) as Box<dyn FnMut(_)>);
+
+            let _ = window()
+                .unwrap()
+                .add_event_listener_with_callback("keydown", keyboard_event.as_ref().unchecked_ref())
+                .unwrap();
+            keyboard_event.forget(); // Makes a memory leak, but this closure is global and needs to live as long as the window is open
+
+            let mouse_event = {
+                Closure::wrap(Box::new(move |e: web_sys::MouseEvent| {
+                    let target = e.target().and_then(|div| div.dyn_into::<HtmlElement>().ok());
+                    if let Some(div) = target {
+                        if !div.class_name().split_whitespace().any(|c| "menu-item" == c || "menu" == c) {
+                            is_open.set(false); // Close menu only if the target is not a menu-item
+                        }
+                    }
+                }) as Box<dyn FnMut(_)>)
+            };
+
+            let _ = window()
+                .unwrap()
+                .add_event_listener_with_callback("mousedown", mouse_event.as_ref().unchecked_ref())
+                .unwrap();
+            mouse_event.forget(); // Makes a memory leak, but this closure is global and needs to live as long as the window is open
+            info("forgetting mouse event");
+        }, ());
+    }
 
     let on_bar_click = {
         let is_open = is_open.clone();
