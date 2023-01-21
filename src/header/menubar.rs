@@ -1,7 +1,7 @@
 use crate::{
     header::menu::{get_menus, MenuItem},
     invoke,
-    utils::keystroke::KeyStroke,
+    utils::{keystroke::KeyStroke, logger::info},
 };
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys::{window, Element, HtmlElement};
@@ -43,8 +43,8 @@ pub fn MenuBar() -> Html {
 
     // OPEN STATE
 
-    let is_open = use_state(|| false);
-    let selected = use_state(|| "".to_string());
+    let is_open = use_state_eq(|| false);
+    let selected = use_state_eq(|| "".to_string());
 
     // MOUSE GLOBAL EVENT
 
@@ -54,8 +54,8 @@ pub fn MenuBar() -> Html {
             if *is_open {
                 let target = e.target().and_then(|div| div.dyn_into::<HtmlElement>().ok());
                 if let Some(div) = target {
-                    if !div.class_name().split_whitespace().any(|c| "menu-item" == c) {
-                        is_open.set(false); // Close menu only if the target is not a menu item
+                    if !div.class_name().split_whitespace().any(|c| "menu-item" == c || "menu" == c) {
+                        is_open.set(false); // Close menu only if the target is not a menu-item
                     }
                 }
             }
@@ -67,13 +67,13 @@ pub fn MenuBar() -> Html {
         .add_event_listener_with_callback("mousedown", mouse_event.as_ref().unchecked_ref())
         .unwrap();
     mouse_event.forget(); // Makes a memory leak, but this closure is global and needs to live as long as the window is open
+    info("forgetting mouse event");
+    
 
     let on_bar_click = {
         let is_open = is_open.clone();
         Callback::from(move |_: MouseEvent| {
-            if !*is_open {
-                is_open.set(!*is_open);
-            }
+            is_open.set(!*is_open);
         })
     };
 
@@ -103,9 +103,9 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
     let menu: MenuItem = props.menu.clone();
     let selected = props.selected.clone();
     let is_root = props.is_root;
-    let selected_child = use_state(|| "".to_string());
-    let menu_x = use_state(|| 0);
-    let menu_y = use_state(|| 40);
+    let selected_child = use_state_eq(|| "".to_string());
+    let menu_x = use_state_eq(|| 0);
+    let menu_y = use_state_eq(|| 40);
 
     let on_mouse_enter = {
         let selected = selected.clone();
@@ -118,39 +118,46 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
     };
 
     let menu_ref = use_node_ref();
+    {
+        let menu_x = menu_x.clone();
+        let menu_y = menu_y.clone();
+        let menu_ref = menu_ref.clone();
+        let is_root = is_root.clone();
+
+        use_effect(move || {
+            if let Some(menu) = menu_ref.cast::<Element>() {
+                let rect = menu.get_bounding_client_rect();
+                if is_root {
+                    menu_x.set(rect.x() as i32);
+                    menu_y.set((rect.y() + rect.height()) as i32);
+                } else {
+                    menu_x.set((rect.x() + rect.width()) as i32);
+                    menu_y.set(rect.y() as i32);
+                }
+            }
+        });
+    }
 
     if let Some(items) = menu.items {
-        let update_menu_xy = {
-            let menu_x = menu_x.clone();
-            let menu_y = menu_y.clone();
-            let menu_ref = menu_ref.clone();
-            let is_root = is_root.clone();
-            Callback::from(move |_| {
-                if let Some(menu) = menu_ref.cast::<Element>() {
-                    let rect = menu.get_bounding_client_rect();
-                    if is_root {
-                        menu_x.set(rect.x() as i32);
-                        menu_y.set((rect.y() + rect.height()) as i32);
-                    } else {
-                        menu_x.set((rect.x() + rect.width()) as i32);
-                        menu_y.set(rect.y() as i32);
-                    }
-                }
-            })
-        };
-
-
         html! {
             <div key={menu.id.clone()}
                 ref={menu_ref.clone()}
-                onmousemove={update_menu_xy}
                 class={classes!("menu", if !is_root {Some("menu-item")} else {None}, if *selected == menu.id {Some("opened")} else {None})}
                 onmouseenter={on_mouse_enter}>
                 <p>{{menu.name.clone()}}</p>
+                {
+                    if !is_root {
+                        html! {
+                            <div class="menu-arrow"><div></div></div>
+                        }
+                    } else {
+                        html! {}
+                    }
+                }
 
                 <div class="children-box"
                     style={format!("padding: {}px 0 0 {}px;", *menu_y, *menu_x)}>
-                    <div class="children">
+                    <div class="children no-scrollbar">
                         <div class="children-scroll">
                             {
                                 items.into_iter().map(|item| {
