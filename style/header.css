@@ -60,9 +60,10 @@ header .windows-menu {
 header .windows-menu .menu {
     padding: 0 7px;
     overflow: visible;
+    outline: none;
 }
 
-header .windows-menu .menu:hover,
+header .windows-menu .menu:focus,
 header .windows-menu.opened .menu.opened {
     background-color: rgba(0, 0, 0, 0.1);
 }
@@ -122,10 +123,11 @@ header .windows-menu .menu .menu-item {
     border-radius: 5px;
     min-width: fit-content;
     width: 100%;
+    outline: none;
 }
 
-header .windows-menu .menu:hover,
-header .windows-menu .item:hover,
+header .windows-menu .menu:focus,
+header .windows-menu .item:focus,
 header .windows-menu.opened .menu.opened {
     background-color: rgba(0, 0, 0, 0.2);
 }
@@ -174,11 +176,11 @@ header .windows-buttons>div {
     transition: all 0.2s ease-in-out;
 }
 
-header .windows-buttons>div:hover {
+header .windows-buttons>div:focus {
     background-color: rgba(0, 0, 0, 0.1);
 }
 
-header .windows-buttons>div.close:hover {
+header .windows-buttons>div.close:focus {
     background-color: rgba(180, 25, 23);
 }
 

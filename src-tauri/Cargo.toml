@@ -14,10 +14,10 @@ tauri-build = {version = "1.2", features = [] }
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = {version = "1.2", features = ["dialog-all", "http-all", "shell-open", "window-maximize", "window-start-dragging", "window-unmaximize"] }
+tauri = {version = "1.2.3", features = ["dialog-all", "http-all", "shell-open", "window-maximize", "window-start-dragging", "window-unmaximize"] }
 tauri-utils = "1.2.1"
-tauri-plugin-window-state = { git = "https://github.com/tauri-apps/tauri-plugin-window-state" }
-tauri-plugin-log = { git = "https://github.com/tauri-apps/tauri-plugin-log", features = ["colored"] }
+tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "dev" }
+tauri-plugin-log = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "dev", features = ["colored"] }
 log = "^0.4"
 time = "0.3.17"
 fluent = "0.16.0"

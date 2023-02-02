@@ -1,7 +1,10 @@
 use crate::{
     header::menu::{get_menus, MenuItem},
     invoke,
-    utils::{keystroke::KeyStroke, logger::info},
+    utils::{
+        keystroke::KeyStroke,
+        logger::{info, tr},
+    },
 };
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys::{window, Element, HtmlElement};
@@ -29,7 +32,6 @@ pub fn MenuBar() -> Html {
     let selected = use_state_eq(|| "".to_string());
 
     // GLOBAL EVENTS
-
     {
         let is_open = is_open.clone();
         use_memo( |_| {
@@ -76,11 +78,11 @@ pub fn MenuBar() -> Html {
     };
 
     html! {
-        <div class={classes!("windows-menu", if *is_open {Some("opened")} else {None})} onclick={on_bar_click}>
+        <div class={classes!("windows-menu", if *is_open.clone() {Some("opened")} else {None})} onclick={on_bar_click}>
             {
                 menus.into_iter().map(|menu| {
                     html!{
-                        <MenuItemComponent menu={menu} selected={selected.clone()} is_root={{true}} />
+                        <MenuItemComponent menu={menu} selected={selected.clone()} is_root={true} is_open={is_open.clone()} />
                     }
                 }).collect::<Html>()
             }
@@ -94,6 +96,7 @@ struct MenuItemProps {
     menu: MenuItem,
     selected: UseStateHandle<String>,
     is_root: bool,
+    is_open: UseStateHandle<bool>,
 }
 
 #[function_component]
@@ -101,21 +104,66 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
     let menu: MenuItem = props.menu.clone();
     let selected = props.selected.clone();
     let is_root = props.is_root;
+    let is_open = props.is_open.clone();
     let selected_child = use_state_eq(|| "".to_string());
     let menu_x = use_state_eq(|| 0);
     let menu_y = use_state_eq(|| 40);
+    let menu_ref = use_node_ref();
+    let item_ref = use_node_ref();
 
     let on_mouse_enter = {
         let selected = selected.clone();
         let selected_child = selected_child.clone();
+        let menu_ref = menu_ref.clone();
+        let item_ref = item_ref.clone();
         let id = menu.id.clone();
-        Callback::from(move |_: MouseEvent| {
+        Callback::from(move |_| {
+            if let Some(menu) = menu_ref.cast::<HtmlElement>() {
+                menu.focus().unwrap();
+            } else {
+                item_ref.cast::<HtmlElement>().unwrap().focus().unwrap();
+            }
+
             selected_child.set("".to_string());
             selected.set(id.clone())
         })
     };
+    let on_key_press = {
+        let selected = selected.clone();
+        let id = menu.id.clone();
+        let is_menu = menu.items.is_some();
+        let is_root = is_root.clone();
+        let is_open = is_open.clone();
+        let item_ref = item_ref.clone();
+        Callback::from(move |e: KeyboardEvent| {
+            // Enter key
+            if e.key_code() == 13 {
+                e.prevent_default();
+                e.stop_propagation();
+                if is_menu {
+                    if *selected == id.clone() {
+                        selected.set("".to_string());
+                        if is_root { is_open.clone().set(false); }
+                    }else{
+                        selected.set(id.clone());
+                        if is_root { is_open.clone().set(true); }
+                    }
+                } else {
+                    invoke(format!("menu_{}", id).as_str(), JsValue::default());
+                    is_open.clone().set(false);
+                    item_ref.clone().cast::<HtmlElement>().unwrap().blur().unwrap();
+                }
+            }
+        })
+    };
 
-    let menu_ref = use_node_ref();
+    let on_focus = {
+        let selected = selected.clone();
+        Callback::from(move |_| {
+            selected.set("".to_string());
+        })
+    };
+
     {
         let menu_x = menu_x.clone();
         let menu_y = menu_y.clone();
@@ -141,13 +189,14 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
             <div key={menu.id.clone()}
                 ref={menu_ref.clone()}
                 class={classes!("menu", if !is_root {Some("menu-item")} else {None}, if *selected == menu.id {Some("opened")} else {None})}
+                tabindex="0"
+                onfocus={on_focus}
+                onkeydown={on_key_press}
                 onmouseenter={on_mouse_enter}>
                 <p>{{menu.name.clone()}}</p>
                 {
                     if !is_root {
-                        html! {
-                            <div class="menu-arrow"><div></div></div>
-                        }
+                        html! { <div class="menu-arrow"><div></div></div> }
                     } else {
                         html! {}
                     }
@@ -160,7 +209,7 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
                             {
                                 items.into_iter().map(|item| {
                                     html!{
-                                        <MenuItemComponent menu={item} selected={selected_child.clone()} is_root={{false}}/>
+                                        <MenuItemComponent menu={item} selected={selected_child.clone()} is_root={false} is_open={is_open.clone()}/>
                                     }
                                 }).collect::<Html>()
                             }
@@ -171,9 +220,25 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
             </div>
         }
     } else if let Some(name) = menu.name {
+
+        let on_click = {
+            let event = format!("menu_{}", menu.id);
+            let item_ref = item_ref.clone();
+
+            Callback::from(move |_: MouseEvent| {
+                invoke(event.as_str(), JsValue::default());
+                // Menu closed from global click event
+                item_ref.clone().cast::<HtmlElement>().unwrap().blur().unwrap();
+            })
+        };
+
         html! {
             <div key={menu.id.clone()} class="menu-item item"
-                onclick={let event = format!("menu_{}", menu.id); Callback::from(move |_: MouseEvent| { invoke(event.as_str(), JsValue::default()); })}
+                ref={item_ref.clone()}
+                tabindex="0"
+                onclick={on_click}
+                onfocus={on_focus}
+                onkeydown={on_key_press}
                 onmouseenter={on_mouse_enter}>
 
                 <p>{name}</p>
