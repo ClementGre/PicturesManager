@@ -73,6 +73,14 @@ header .windows-menu .menu p {
     pointer-events: none;
     white-space: nowrap;
 }
+header .windows-menu .menu p span{
+    line-height: 40px;
+    pointer-events: none;
+    white-space: nowrap;
+    text-decoration: underline;
+    text-decoration-color: rgb(175, 175, 175);
+    text-underline-offset: 2px;
+}
 
 header .windows-menu .menu .children-box {
     position: fixed;
@@ -176,11 +184,11 @@ header .windows-buttons>div {
     transition: all 0.2s ease-in-out;
 }
 
-header .windows-buttons>div:focus {
+header .windows-buttons>div:hover {
     background-color: rgba(0, 0, 0, 0.1);
 }
 
-header .windows-buttons>div.close:focus {
+header .windows-buttons>div.close:hover {
     background-color: rgba(180, 25, 23);
 }
 

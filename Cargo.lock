@@ -2201,6 +2201,7 @@ dependencies = [
  "serde",
  "serde-wasm-bindgen",
  "unic-langid",
+ "unidecode",
  "url",
  "urlencoding",
  "wasm-bindgen",
@@ -3562,6 +3563,12 @@ name = "unicode-segmentation"
 version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fdbf052a0783de01e944a6ce7a8cb939e295b1e7be835a1112c3b9a7f047a5a"
+
+[[package]]
+name = "unidecode"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "402bb19d8e03f1d1a7450e2bd613980869438e0666331be3e073089124aa1adc"
 
 [[package]]
 name = "url"
