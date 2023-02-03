@@ -53,17 +53,12 @@ header .windows-menu {
     flex-direction: row;
     padding: 0;
     align-items: stretch;
+    outline: none;
 }
 
 header .windows-menu .menu {
     padding: 0 7px;
     overflow: visible;
-    outline: none;
-}
-
-header .windows-menu .menu:focus,
-header .windows-menu.opened .menu.opened {
-    background-color: rgba(0, 0, 0, 0.1);
 }
 
 header .windows-menu .menu p {
@@ -134,9 +129,9 @@ header .windows-menu .menu .menu-item {
     outline: none;
 }
 
-header .windows-menu .menu:focus,
-header .windows-menu .item:focus,
-header .windows-menu.opened .menu.opened {
+header .windows-menu .menu.selected,
+header .windows-menu .menu.opened,
+header .windows-menu .item.selected {
     background-color: rgba(0, 0, 0, 0.2);
 }
 

@@ -27,7 +27,7 @@ pub fn MenuBar() -> Html {
     register_shortcuts(&menus, &mut shortcuts);
     let mut alt_shortcuts = vec![];
     menus.iter().for_each(|menu| {
-        let name = menu.name.clone().unwrap_or("".to_string());
+        let name = menu.name.clone().unwrap_or(String::new());
         let split = name.split("_");
         if split.clone().count() >= 2 {
             alt_shortcuts.push((unidecode(split.skip(1).next().unwrap().to_lowercase().as_str())[..1].to_string(), menu.id.clone()));
@@ -35,137 +35,71 @@ pub fn MenuBar() -> Html {
     });
 
     let is_open = use_state_eq(|| false);
-    let selected = use_state_eq(|| "".to_string());
+    let opened_menus = use_state_eq(|| vec![]);
+    let selected_item = use_state_eq(|| String::new());
+
+    let bar_ref = use_node_ref();
 
     // GLOBAL EVENTS
-    {
-        let is_open = is_open.clone();
-        use_memo(
-            |_| {
-                let keyboard_event = {
-                    let is_open = is_open.clone();
-                    let selected = selected.clone();
-                    Closure::wrap(Box::new(move |e: web_sys::KeyboardEvent| {
-                        shortcuts.clone().iter().for_each(|(ks, id)| {
-                            if ks.matches(&e) {
-                                invoke(format!("menu_{}", id).as_str(), JsValue::default());
+    use_memo(
+        |_| {
+            let keyboard_event = {
+                let is_open = is_open.clone();
+                let slected_item = selected_item.clone();
+                Closure::wrap(Box::new(move |e: web_sys::KeyboardEvent| {
+                    shortcuts.clone().iter().for_each(|(ks, id)| {
+                        if ks.matches(&e) {
+                            invoke(format!("menu_{}", id).as_str(), JsValue::default());
+                        }
+                    });
+                    if e.alt_key() {
+                        alt_shortcuts.clone().iter().for_each(|(ks, id)| {
+                            if ks == &unidecode(e.key().to_lowercase().as_str())[..1].to_string() {
+                                is_open.set(true);
+                                slected_item.set(id.clone());
                             }
                         });
-                        if e.alt_key() {
-                            alt_shortcuts.clone().iter().for_each(|(ks, id)| {
-                                if ks == &unidecode(e.key().to_lowercase().as_str())[..1].to_string() {
-                                    is_open.set(true);
-                                    selected.set(id.clone());
-                                }
-                            });
-                        }
-                    }) as Box<dyn FnMut(_)>)
-                };
-
-                let _ = window()
-                    .unwrap()
-                    .add_event_listener_with_callback("keydown", keyboard_event.as_ref().unchecked_ref())
-                    .unwrap();
-                keyboard_event.forget(); // Makes a memory leak, but this closure is global and needs to live as long as the window is open
-
-                let mouse_event = {
-                    Closure::wrap(Box::new(move |e: web_sys::MouseEvent| {
-                        let target = e.target().and_then(|div| div.dyn_into::<HtmlElement>().ok());
-                        if let Some(div) = target {
-                            if !div.class_name().split_whitespace().any(|c| "menu-item" == c || "menu" == c) {
-                                is_open.set(false); // Close menu only if the target is not a menu-item
-                            }
-                        }
-                    }) as Box<dyn FnMut(_)>)
-                };
-
-                let _ = window()
-                    .unwrap()
-                    .add_event_listener_with_callback("mousedown", mouse_event.as_ref().unchecked_ref())
-                    .unwrap();
-                mouse_event.forget(); // Makes a memory leak, but this closure is global and needs to live as long as the window is open
-            },
-            (),
-        );
-    }
-
-    let on_bar_click = {
-        let is_open = is_open.clone();
-        Callback::from(move |_: MouseEvent| {
-            is_open.set(!*is_open);
-        })
-    };
-
-    html! {
-        <div class={classes!("windows-menu", if *is_open.clone() {Some("opened")} else {None})} onclick={on_bar_click}>
-            {
-                menus.into_iter().map(|menu| {
-                    html!{
-                        <MenuItemComponent menu={menu} selected={selected.clone()} is_root={true} is_open={is_open.clone()} />
                     }
-                }).collect::<Html>()
-            }
+                }) as Box<dyn FnMut(_)>)
+            };
 
-        </div>
-    }
-}
+            let _ = window()
+                .unwrap()
+                .add_event_listener_with_callback("keydown", keyboard_event.as_ref().unchecked_ref())
+                .unwrap();
+            keyboard_event.forget(); // Makes a memory leak, but this closure is global and needs to live as long as the window is open
 
-#[derive(Clone, Properties, PartialEq)]
-struct MenuItemProps {
-    menu: MenuItem,
-    selected: UseStateHandle<String>,
-    is_root: bool,
-    is_open: UseStateHandle<bool>,
-}
+            let mouse_event = {
+                let is_open = is_open.clone();
+                Closure::wrap(Box::new(move |e: web_sys::MouseEvent| {
+                    let target = e.target().and_then(|div| div.dyn_into::<HtmlElement>().ok());
+                    if let Some(div) = target {
+                        if !div.class_name().split_whitespace().any(|c| "menu-item" == c || "menu" == c) {
+                            is_open.set(false); // Close menu only if the target is not a menu-item
+                        }
+                    }
+                }) as Box<dyn FnMut(_)>)
+            };
 
-#[function_component]
-fn MenuItemComponent(props: &MenuItemProps) -> Html {
-    let menu: MenuItem = props.menu.clone();
-    let selected = props.selected.clone();
-    let is_root = props.is_root;
-    let is_open = props.is_open.clone();
-    let selected_child = use_state_eq(|| "".to_string());
-    let menu_x = use_state_eq(|| 0);
-    let menu_y = use_state_eq(|| 40);
-    let menu_ref = use_node_ref();
-    let item_ref = use_node_ref();
+            let _ = window()
+                .unwrap()
+                .add_event_listener_with_callback("mousedown", mouse_event.as_ref().unchecked_ref())
+                .unwrap();
+            mouse_event.forget(); // Makes a memory leak, but this closure is global and needs to live as long as the window is open
+        },
+        (),
+    );
 
-    let on_mouse_enter = {
-        let selected = selected.clone();
-        let selected_child = selected_child.clone();
-        let menu_ref = menu_ref.clone();
-        let item_ref = item_ref.clone();
-        let id = menu.id.clone();
-        Callback::from(move |_| {
-            if let Some(menu) = menu_ref.cast::<HtmlElement>() {
-                menu.focus().unwrap();
-            } else {
-                item_ref.cast::<HtmlElement>().unwrap().focus().unwrap();
-            }
-
-            selected_child.set("".to_string());
-            selected.set(id.clone())
-        })
-    };
-    let on_mouse_leave = {
-        let menu_ref = menu_ref.clone();
-        let item_ref = item_ref.clone();
-        Callback::from(move |_| {
-            if let Some(menu) = menu_ref.cast::<HtmlElement>() {
-                menu.blur().unwrap();
-            } else {
-                item_ref.cast::<HtmlElement>().unwrap().blur().unwrap();
-            }
-        })
-    };
+    /*
     let on_key_press = {
-        let selected = selected.clone();
         let id = menu.id.clone();
         let is_menu = menu.items.is_some();
         let is_root = is_root.clone();
-        let is_open = is_open.clone();
-        let menu_ref = menu_ref.clone();
+        let is_open = ctxt.is_open.clone();
+        let opened_menus = ctxt.opened_menus.clone();
+        let selected_item = ctxt.selected_item.clone();
         let item_ref = item_ref.clone();
+
         Callback::from(move |e: KeyboardEvent| {
             // Enter key
             if e.key_code() == 13 {
@@ -173,7 +107,7 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
                 e.stop_propagation();
                 if is_menu {
                     if *selected == id.clone() {
-                        selected.set("".to_string());
+                        selected.set(String::new());
                         if is_root {
                             is_open.clone().set(false);
                         }
@@ -202,69 +136,134 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
             }
         })
     };
+    */
 
-    let on_focus = {
-        let selected = selected.clone();
-        Callback::from(move |_: _| {
-            //selected.set("".to_string());
+    let on_bar_click = {
+        let is_open = is_open.clone();
+        let opened_menus = opened_menus.clone();
+        let bar_ref = bar_ref.clone();
+        Callback::from(move |_: MouseEvent| {
+            if *is_open {
+                is_open.set(false);
+                opened_menus.set(vec![]);
+            }else{
+                bar_ref.cast::<HtmlElement>().unwrap().focus().unwrap();
+                is_open.set(true);
+            }
         })
     };
 
-    {
+    let ctxt = MenuContext {
+        is_open: is_open.clone(),
+        opened_menus: opened_menus.clone(),
+        selected_item: selected_item.clone(),
+    };
+
+    
+    let brothers = menus.iter().map(|menu| menu.id.clone()).collect::<Vec<String>>();
+    html! {
+        <div
+            ref={bar_ref.clone()}
+            tabindex="0"
+            class={classes!("windows-menu", if *is_open.clone() {Some("opened")} else {None})} onclick={on_bar_click}>
+
+            <ContextProvider<MenuContext> context={ctxt.clone()}>
+                {
+                    menus.into_iter().map(|item| {
+                        html!{
+                            <MenuItemComponent item={item} brothers={brothers.clone()} is_root={true} />
+                        }
+                    }).collect::<Html>()
+                }
+            </ContextProvider<MenuContext>>
+        </div>
+    }
+}
+
+#[derive(Clone, Properties, PartialEq)]
+struct MenuContext {
+    is_open: UseStateHandle<bool>,
+    opened_menus: UseStateHandle<Vec<String>>,
+    selected_item: UseStateHandle<String>,
+}
+
+#[derive(Clone, Properties, PartialEq)]
+struct MenuItemProps {
+    item: MenuItem,
+    brothers: Vec<String>,
+    is_root: bool,
+}
+
+#[function_component]
+fn MenuItemComponent(props: &MenuItemProps) -> Html {
+
+    let ctxt = use_context::<MenuContext>().unwrap();
+    let item: MenuItem = props.item.clone();
+    let brothers = props.brothers.clone();
+    let is_root = props.is_root;
+
+    let menu_x = use_state_eq(|| 0);
+    let menu_y = use_state_eq(|| 40);
+    let item_ref = use_node_ref();
+
+    let on_mouse_enter = {
+        let selected_item = ctxt.selected_item.clone();
+        let opened_menus = ctxt.opened_menus.clone();
+        let is_menu = item.items.is_some();
+        let id = item.id.clone();
+        Callback::from(move |_| {
+            selected_item.set(id.clone());
+            if is_menu { open_menu(id.clone(), brothers.clone(), opened_menus.clone()); }
+        })
+    };
+    let on_mouse_leave = {
+        let selected_item = ctxt.selected_item.clone();
+        let opened_menus = ctxt.opened_menus.clone();
+        let is_root = is_root.clone();
+        let is_menu = item.items.is_some();
+        let id = item.id.clone();
+        Callback::from(move |_| {
+            selected_item.set(String::new());
+            //if !is_root { close_menu(id.clone(), opened_menus.clone()); }
+        })
+    };
+    
+
+    // Menu positionning
+    { 
+        let is_root = is_root.clone();
+        let is_menu = item.items.is_some();
         let menu_x = menu_x.clone();
         let menu_y = menu_y.clone();
-        let menu_ref = menu_ref.clone();
-        let is_root = is_root.clone();
-
+        let item_ref = item_ref.clone();
+        
         use_effect(move || {
-            if let Some(menu) = menu_ref.cast::<Element>() {
-                let rect = menu.get_bounding_client_rect();
-                if is_root {
-                    menu_x.set(rect.x() as i32);
-                    menu_y.set((rect.y() + rect.height()) as i32);
-                } else {
-                    menu_x.set((rect.x() + rect.width()) as i32);
-                    menu_y.set(rect.y() as i32);
+            if is_menu {
+                if let Some(menu) = item_ref.cast::<Element>() {
+                    let rect = menu.get_bounding_client_rect();
+                    if is_root {
+                        menu_x.set(rect.x() as i32);
+                        menu_y.set((rect.y() + rect.height()) as i32);
+                    } else {
+                        menu_x.set((rect.x() + rect.width()) as i32);
+                        menu_y.set(rect.y() as i32);
+                    }
                 }
             }
         });
     }
 
-    {
-        // let selected = selected.clone();
-        // let menu_ref = menu_ref.clone();
-        // let item_ref = item_ref.clone();
-        // let id = menu.id.clone();
-        // let is_menu = menu.items.is_some();
-        // use_effect(move || {
-        //     if is_menu && *selected == id {
-        //         if let Some(menu) = menu_ref.cast::<HtmlElement>() {
-        //             if menu_ref.cast::<Element>() != window().unwrap().document().unwrap().active_element() {
-        //                 info(format!("focusing menu {}", id).as_str());
-        //                 menu.focus().unwrap();
-        //             }else {
-        //                 info("menu already focused");
-        //             }
-                    
-        //         } else if let Some(item) = item_ref.cast::<HtmlElement>() {
-        //             item.focus().unwrap();
-        //         }
-        //     }
-        // });
-    }
+    if let Some(items) = item.items {
+        let brothers = items.iter().map(|menu| menu.id.clone()).collect::<Vec<String>>();
 
-    if let Some(items) = menu.items {
         html! {
-            <div key={menu.id.clone()}
-                ref={menu_ref.clone()}
-                class={classes!("menu", if !is_root {Some("menu-item")} else {None}, if *selected == menu.id {Some("opened")} else {None})}
-                tabindex="0"
-                onfocus={on_focus}
-                onkeydown={on_key_press}
+            <div key={item.id.clone()}
+                ref={item_ref.clone()}
+                class={classes!(if !is_root {Some("menu-item")} else {None}, "menu", if is_menu_opened(item.id.clone(), ctxt.opened_menus.clone()) {Some("opened")} else {None}, if *ctxt.selected_item == item.id {Some("selected")} else {None})}
                 onmouseenter={on_mouse_enter}
                 onmouseleave={on_mouse_leave}>
 
-                <MenuTextComponent text={menu.name.clone().unwrap()} />
+                <MenuTextComponent text={item.name.clone().unwrap()} />
                 {
                     if !is_root {
                         html! { <div class="menu-arrow"><div></div></div> }
@@ -280,7 +279,7 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
                             {
                                 items.into_iter().map(|item| {
                                     html!{
-                                        <MenuItemComponent menu={item} selected={selected_child.clone()} is_root={false} is_open={is_open.clone()}/>
+                                        <MenuItemComponent  item={item} brothers={brothers.clone()} is_root={false} />
                                     }
                                 }).collect::<Html>()
                             }
@@ -290,34 +289,35 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
 
             </div>
         }
-    } else if let Some(name) = menu.name {
+    } else if let Some(name) = item.name {
         let on_click = {
-            let event = format!("menu_{}", menu.id);
-            let item_ref = item_ref.clone();
+            let event = format!("menu_{}", item.id);
+            let is_open = ctxt.is_open.clone();
+            let opened_menus = ctxt.opened_menus.clone();
+            let selected_item = ctxt.selected_item.clone();
 
             Callback::from(move |_: MouseEvent| {
                 invoke(event.as_str(), JsValue::default());
-                // Menu closed from global click event
-                item_ref.clone().cast::<HtmlElement>().unwrap().blur().unwrap();
+                is_open.set(false);
+                opened_menus.set(vec![]);
+                selected_item.set(String::new());
             })
         };
 
         html! {
-            <div key={menu.id.clone()} class="menu-item item"
+            <div key={item.id.clone()}
+                class={classes!("menu-item", "item", if *ctxt.selected_item == item.id {Some("selected")} else {None})}
                 ref={item_ref.clone()}
-                tabindex="0"
                 onclick={on_click}
-                onfocus={on_focus}
-                onkeydown={on_key_press}
                 onmouseenter={on_mouse_enter}
                 onmouseleave={on_mouse_leave}>
 
                 <MenuTextComponent text={name} />
 
                 {
-                    if menu.accelerator.is_some() {
+                    if item.accelerator.is_some() {
                         html!{
-                            <p>{{menu.accelerator.unwrap()}}</p>
+                            <p>{{item.accelerator.unwrap()}}</p>
                         }
                     }else{
                         html!{}
@@ -328,7 +328,7 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
     } else {
         // Separator
         html! {
-            <div key={menu.id.clone()} class="menu-item separator">
+            <div key={item.id.clone()} class="menu-item separator">
                 <hr />
             </div>
         }
@@ -371,5 +371,66 @@ fn MenuTextComponent(props: &MenuTextProps) -> Html {
             <span>{shortcut}</span>
             {right_part}
         </p>
+    }
+}
+
+
+fn get_previous_item(id: String, brothers_id: &Vec<String>) -> Option<String> {
+    let mut previous = None;
+    for brother_id in brothers_id {
+        if *brother_id == id {
+            return previous;
+        }
+        previous = Some(brother_id.clone());
+    }
+    None
+}
+fn get_next_item(id: String, brothers_ids: &Vec<String>) -> Option<String> {
+    let mut detected = false;
+    for brother_id in brothers_ids {
+        if *brother_id == id {
+            detected = true
+        }else if detected {
+            return Some(brother_id.clone());
+        }
+    }
+    None
+}
+
+
+fn is_menu_opened(id: String, opened_menus: UseStateHandle<Vec<String>>) -> bool {
+    opened_menus.iter().position(|x| *x == id).is_some()
+}
+fn open_menu(id: String, brothers: Vec<String>, opened_menus: UseStateHandle<Vec<String>>) {
+
+    if is_menu_opened(id.clone(), opened_menus.clone()) {
+        return;
+    }
+
+    let mut new_opened_menus = (*opened_menus.clone()).clone();
+    brothers.iter().for_each(|brother| {
+        if let Some(index) = opened_menus.iter().position(|x| x == brother) {
+            new_opened_menus.remove(index);
+        }
+    });
+    new_opened_menus.push(id);
+    opened_menus.set(new_opened_menus);
+}
+fn close_menu(id: String, opened_menus: UseStateHandle<Vec<String>>) {
+    remove_id_from_vec_handle(id, opened_menus)
+}
+
+fn push_id_to_vec_handle(id: String, vec: UseStateHandle<Vec<String>>) {
+    let mut vec_copy = (*vec.clone()).clone();
+    vec_copy.push(id);
+    vec.set(vec_copy);
+}
+fn remove_id_from_vec_handle(id: String, vec: UseStateHandle<Vec<String>>) {
+    let mut vec_copy = (*vec.clone()).clone();
+    let index = vec_copy.iter().position(|x| *x == id);
+
+    if let Some(index) = index {
+        vec_copy.remove(index);
+        vec.set(vec_copy);
     }
 }

@@ -50,15 +50,19 @@ pub fn get_menus() -> Vec<MenuItem> {
         "_Fichier".to_string(),
         vec![
             MenuItem::new_item_acc("open_gallery".to_string(), "_Ouvrir une gallerie".to_string(), "Ctrl+O".to_string()),
-            MenuItem::new_menu("open_recent_gallery".to_string(), "Ouvrir une gallerie _récente".to_string(), vec![
+            MenuItem::new_menu("open_recent_gallery".to_string(), "Ouvrir une gallerie récente".to_string(), vec![
                 MenuItem::new_item("recent_gallery_1".to_string(), "Gallerie récente 1".to_string()),
                 MenuItem::new_item("recent_gallery_2".to_string(), "Gallerie récente 2".to_string()),
-                MenuItem::new_item("recent_gallery_3".to_string(), "Gallerie récente 3".to_string()),
-                MenuItem::new_menu("recent_gallery_other".to_string(), "Autre".to_string(), vec![
+                MenuItem::new_menu("recent_gallery_other_1".to_string(), "Autre (1)".to_string(), vec![
+                    MenuItem::new_item("recent_gallery_3".to_string(), "Gallerie récente 3".to_string()),
                     MenuItem::new_item("recent_gallery_4".to_string(), "Gallerie récente 4".to_string()),
-                    MenuItem::new_item("recent_gallery_5".to_string(), "Gallerie récente 5".to_string()),
                 ]),
                 MenuItem::new_item("recent_gallery_5".to_string(), "Gallerie récente 5".to_string()),
+                MenuItem::new_menu("recent_gallery_other_2".to_string(), "Autre (2)".to_string(), vec![
+                    MenuItem::new_item("recent_gallery_6".to_string(), "Gallerie récente 6".to_string()),
+                    MenuItem::new_item("recent_gallery_7".to_string(), "Gallerie récente 7".to_string()),
+                ]),
+                MenuItem::new_item("recent_gallery_8".to_string(), "Gallerie récente 8".to_string()),
             ]),
             MenuItem::new_item_acc("new_gallery".to_string(), "_Nouvelle gallerie".to_string(), "Ctrl+N".to_string()),
             MenuItem::new_separator(0),
@@ -75,7 +79,7 @@ pub fn get_menus() -> Vec<MenuItem> {
         vec![
             MenuItem::new_item_acc("undo".to_string(), "_Annuler".to_string(), "Ctrl+Z".to_string()),
             MenuItem::new_item_acc("redo".to_string(), "_Rétablir".to_string(), "Ctrl+Shift+Z".to_string()),
-            MenuItem::new_separator(0),
+            MenuItem::new_separator(3),
             MenuItem::new_item_acc("cut".to_string(), "_Couper".to_string(), "Ctrl+X".to_string()),
             MenuItem::new_item_acc("copy".to_string(), "Co_pier".to_string(), "Ctrl+C".to_string()),
             MenuItem::new_item_acc("paste".to_string(), "Co_ller".to_string(), "Ctrl+V".to_string()),
