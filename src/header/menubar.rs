@@ -3,6 +3,7 @@ use crate::{
     invoke,
     utils::{keystroke::KeyStroke, logger::info},
 };
+use gloo_timers::callback::Timeout;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys::{window, Element, HtmlElement};
 use yew::prelude::*;
@@ -35,9 +36,9 @@ pub fn MenuBar() -> Html {
     });
 
     let is_open = use_state_eq(|| false);
-    let opened_menus = use_state_eq(|| vec![]);
     let selected_item = use_state_eq(|| String::new());
 
+    let opened_menu = use_state_eq(|| String::new());
     let bar_ref = use_node_ref();
 
     // GLOBAL EVENTS
@@ -140,12 +141,10 @@ pub fn MenuBar() -> Html {
 
     let on_bar_click = {
         let is_open = is_open.clone();
-        let opened_menus = opened_menus.clone();
         let bar_ref = bar_ref.clone();
         Callback::from(move |_: MouseEvent| {
             if *is_open {
                 is_open.set(false);
-                opened_menus.set(vec![]);
             }else{
                 bar_ref.cast::<HtmlElement>().unwrap().focus().unwrap();
                 is_open.set(true);
@@ -155,7 +154,6 @@ pub fn MenuBar() -> Html {
 
     let ctxt = MenuContext {
         is_open: is_open.clone(),
-        opened_menus: opened_menus.clone(),
         selected_item: selected_item.clone(),
     };
 
@@ -171,7 +169,7 @@ pub fn MenuBar() -> Html {
                 {
                     menus.into_iter().map(|item| {
                         html!{
-                            <MenuItemComponent item={item} brothers={brothers.clone()} is_root={true} />
+                            <MenuItemComponent item={item} opened_menu={opened_menu.clone()} brothers={brothers.clone()} is_root={true} />
                         }
                     }).collect::<Html>()
                 }
@@ -183,13 +181,13 @@ pub fn MenuBar() -> Html {
 #[derive(Clone, Properties, PartialEq)]
 struct MenuContext {
     is_open: UseStateHandle<bool>,
-    opened_menus: UseStateHandle<Vec<String>>,
     selected_item: UseStateHandle<String>,
 }
 
 #[derive(Clone, Properties, PartialEq)]
 struct MenuItemProps {
     item: MenuItem,
+    opened_menu: UseStateHandle<String>,
     brothers: Vec<String>,
     is_root: bool,
 }
@@ -199,33 +197,80 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
 
     let ctxt = use_context::<MenuContext>().unwrap();
     let item: MenuItem = props.item.clone();
+    let opened_menu = props.opened_menu.clone();
     let brothers = props.brothers.clone();
     let is_root = props.is_root;
 
+    let children_opened_menu = use_state(|| String::new());
     let menu_x = use_state_eq(|| 0);
     let menu_y = use_state_eq(|| 40);
     let item_ref = use_node_ref();
 
     let on_mouse_enter = {
         let selected_item = ctxt.selected_item.clone();
-        let opened_menus = ctxt.opened_menus.clone();
+        let opened_menu = opened_menu.clone();
+        let is_open = ctxt.is_open.clone();
+        let is_root = is_root.clone();
+
         let is_menu = item.items.is_some();
         let id = item.id.clone();
         Callback::from(move |_| {
             selected_item.set(id.clone());
-            if is_menu { open_menu(id.clone(), brothers.clone(), opened_menus.clone()); }
+            if *is_open {
+                if is_menu { 
+                    if is_root{
+                        opened_menu.set(id.clone()); 
+                    }else{
+                        let timeout = {
+                            let id = id.clone();
+                            let opened_menu = opened_menu.clone();
+                            let selected_item = selected_item.clone();
+                            Timeout::new(300, move || {
+                                info(format!("Timer fired: opened_menu = {}, selected_item = {}", *opened_menu.clone(), *selected_item.clone()).as_str());
+                                if *opened_menu != id && *selected_item == id {
+                                    opened_menu.set(id.clone()); 
+                                }
+                            })
+                        };
+                        timeout.forget();
+                    }
+                }else if *(opened_menu.clone()) != "" {
+                    info("mouse enter of a non menu item");
+                    let timeout = {
+                        let opened_menu = opened_menu.clone();
+                        let selected_item = selected_item.clone();
+                        info("Setup timer");
+                        Timeout::new(500, move || {
+                            info("Timer fired");
+                            if opened_menu != selected_item && *selected_item != "" {
+                                info("Timer fired and remove opened menu");
+                                opened_menu.set(String::new());
+                            }else{
+                                info(format!("Timer fired but not remove opened menu because opened_menu = {} and selected_item = {}", *opened_menu.clone(), *selected_item.clone()).as_str());
+                            }
+                        })
+                    };
+                }
+            }
         })
     };
     let on_mouse_leave = {
         let selected_item = ctxt.selected_item.clone();
-        let opened_menus = ctxt.opened_menus.clone();
+        let opened_menu = opened_menu.clone();
         let is_root = is_root.clone();
+        let is_open = ctxt.is_open.clone();
         let is_menu = item.items.is_some();
         let id = item.id.clone();
+
         Callback::from(move |_| {
             selected_item.set(String::new());
-            //if !is_root { close_menu(id.clone(), opened_menus.clone()); }
+
+            if *is_open && is_menu {
+                
+            }
+
         })
+
     };
     
 
@@ -259,7 +304,7 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
         html! {
             <div key={item.id.clone()}
                 ref={item_ref.clone()}
-                class={classes!(if !is_root {Some("menu-item")} else {None}, "menu", if is_menu_opened(item.id.clone(), ctxt.opened_menus.clone()) {Some("opened")} else {None}, if *ctxt.selected_item == item.id {Some("selected")} else {None})}
+                class={classes!(if !is_root {Some("menu-item")} else {None}, "menu", if *opened_menu == item.id {Some("opened")} else {None}, if *ctxt.selected_item == item.id {Some("selected")} else {None})}
                 onmouseenter={on_mouse_enter}
                 onmouseleave={on_mouse_leave}>
 
@@ -279,7 +324,7 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
                             {
                                 items.into_iter().map(|item| {
                                     html!{
-                                        <MenuItemComponent  item={item} brothers={brothers.clone()} is_root={false} />
+                                        <MenuItemComponent  item={item} opened_menu={children_opened_menu.clone()} brothers={brothers.clone()} is_root={false} />
                                     }
                                 }).collect::<Html>()
                             }
@@ -293,14 +338,10 @@ fn MenuItemComponent(props: &MenuItemProps) -> Html {
         let on_click = {
             let event = format!("menu_{}", item.id);
             let is_open = ctxt.is_open.clone();
-            let opened_menus = ctxt.opened_menus.clone();
-            let selected_item = ctxt.selected_item.clone();
 
             Callback::from(move |_: MouseEvent| {
                 invoke(event.as_str(), JsValue::default());
                 is_open.set(false);
-                opened_menus.set(vec![]);
-                selected_item.set(String::new());
             })
         };
 
