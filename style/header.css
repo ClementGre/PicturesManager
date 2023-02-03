@@ -53,8 +53,6 @@ header .windows-menu {
     flex-direction: row;
     padding: 0;
     align-items: stretch;
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
 }
 
 header .windows-menu .menu {
@@ -110,6 +108,8 @@ header .windows-menu .menu>.children-box>.children {
     max-height: 100%;
     border-radius: 0 0 5px 5px;
     background-color: rgba(55, 56, 58, 0.99);
+    /* -webkit-backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px); */
     pointer-events: all;
     overflow: scroll;
 }
