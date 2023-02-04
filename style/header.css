@@ -130,8 +130,8 @@ header .windows-menu .menu .menu-item {
 }
 
 header .windows-menu .menu.selected,
-header .windows-menu .menu.opened,
-header .windows-menu .item.selected {
+header .windows-menu.opened .menu.opened,
+header .windows-menu.opened .item.selected {
     background-color: rgba(0, 0, 0, 0.2);
 }
 
