@@ -13,6 +13,7 @@ pub enum MenuItemMsg {
     OpenMenuFromTimeout,
     OpenMenu,
     CloseMenuFromTimeout,
+    CloseMenu,
     MouseEnter,
     MouseLeave,
     UpdateChildrenSelectedItem(String),
@@ -79,8 +80,13 @@ impl Component for MenuItemComponent {
             }
             MenuItemMsg::CloseMenuFromTimeout => {
                 if ctx.props().selected_item != "" && ctx.props().opened_menu != "" && ctx.props().selected_item != ctx.props().opened_menu {
-                    ctx.props().update_opened_menu.emit(String::new());
+                    ctx.link().send_message(MenuItemMsg::CloseMenu);
                 }
+            }
+            MenuItemMsg::CloseMenu => {
+                self.children_selected_item = String::new();
+                self.children_opened_menu = String::new();
+                ctx.props().update_opened_menu.emit(String::new());
             }
             MenuItemMsg::MouseEnter => {
                 if ctx.props().selected_item != ctx.props().item.id {
@@ -95,7 +101,7 @@ impl Component for MenuItemComponent {
                         .forget();
                     }
                 }
-                // Opening menu
+                // Opening this menu
                 if self.is_menu && ctx.props().opened_menu != ctx.props().item.id {
                     if ctx.props().is_root {
                         ctx.link().send_message(MenuItemMsg::OpenMenu);
@@ -131,7 +137,7 @@ impl Component for MenuItemComponent {
         false
     }
 
-    fn rendered(&mut self, ctx: &Context<Self>, first_render: bool) {
+    fn rendered(&mut self, ctx: &Context<Self>, _first_render: bool) {
         if ctx.props().is_open {
 
             // Update menu position
@@ -156,6 +162,12 @@ impl Component for MenuItemComponent {
             return html! {}; // Useless to render if not open
         }
 
+        let onmousedownup = {
+            let is_root = ctx.props().is_root.clone();
+            Callback::from(move |e: MouseEvent| if !is_root { e.stop_propagation() })
+        };
+
+
         let onmouseenter = ctx.link().callback(move |_: MouseEvent| MenuItemMsg::MouseEnter);
         let onmouseleave = ctx.link().callback(|_: MouseEvent| MenuItemMsg::MouseLeave);
 
@@ -164,19 +176,25 @@ impl Component for MenuItemComponent {
             let update_children_opened_menu = ctx.link().callback(|id: String| MenuItemMsg::UpdateChildrenOpenedMenu(id));
 
             let brothers = items.iter().map(|menu| menu.id.clone()).collect::<Vec<String>>();
+            let is_opened = ctx.props().opened_menu == ctx.props().item.id;
+            let is_selected = ctx.props().selected_item == ctx.props().item.id;
+            let has_selected_browser = ctx.props().selected_item != "";
+            let has_children_selected_item = self.children_selected_item != "";
+            let has_children_opened_menu =  self.children_opened_menu != "";
+            let is_root = ctx.props().is_root;
             html! {
                 <div key={ctx.props().item.id.clone()} ref={self.item_ref.clone()}
                     class={classes!(
-                        if !ctx.props().is_root {Some("menu-item")} else {None},
+                        if !is_root {Some("menu-item")} else {None},
                         "menu",
-                        if *ctx.props().opened_menu == ctx.props().item.id /*&& (!ctx.props().is_root || ctx.props().is_open)*/ {Some("opened")} else {None},
-                        if *ctx.props().selected_item == ctx.props().item.id {Some("selected")} else {None}
+                        if is_opened {Some("opened")} else {None},
+                        if is_selected || (!is_root && is_opened && !has_selected_browser && (has_children_selected_item || has_children_opened_menu)) {Some("selected")} else {None}
                     )}
-                    {onmouseenter} {onmouseleave}>
+                    onmousedown={onmousedownup.clone()} onmouseup={onmousedownup} {onmouseenter} {onmouseleave}>
 
                     <MenuTextComponent text={ctx.props().item.name.clone().unwrap()} />
                     {
-                        if !ctx.props().is_root {
+                        if !is_root {
                             html! { <div class="menu-arrow"><div></div></div> }
                         } else {
                             html! {}

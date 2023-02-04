@@ -129,9 +129,9 @@ header .windows-menu .menu .menu-item {
     outline: none;
 }
 
+header .windows-menu.opened > .menu.opened,
 header .windows-menu .menu.selected,
-header .windows-menu.opened .menu.opened,
-header .windows-menu.opened .item.selected {
+header .windows-menu .item.selected {
     background-color: rgba(0, 0, 0, 0.2);
 }
 

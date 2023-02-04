@@ -4,7 +4,6 @@ use crate::{
     invoke,
     utils::{keystroke::KeyStroke, logger::info},
 };
-use gloo_timers::callback::Timeout;
 use unidecode::unidecode;
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys::{window, HtmlElement};
@@ -39,7 +38,6 @@ pub fn MenuBar() -> Html {
         }
     });
 
-    let is_mouse_over = use_state_eq(|| false);
     let is_open = use_state_eq(|| false);
     let selected_item = use_state_eq(|| String::new());
 
@@ -80,6 +78,7 @@ pub fn MenuBar() -> Html {
                 Closure::wrap(Box::new(move |e: web_sys::MouseEvent| {
                     let target = e.target().and_then(|div| div.dyn_into::<HtmlElement>().ok());
                     if let Some(div) = target {
+                        info(format!("target: {}", div.class_name()).as_str());
                         if !div.class_name().split_whitespace().any(|c| "menu-item" == c || "menu" == c) {
                             is_open.set(false); // Close menu only if the target is not a menu-item
                         }
@@ -145,15 +144,15 @@ pub fn MenuBar() -> Html {
     */
 
 
-    let is_mouse_opening = use_state_eq(|| false);
+    let opened_at_click_time = use_state_eq(|| Some(false));
 
     let onmousedown = {
         let is_open = is_open.clone();
-        let is_mouse_opening = is_mouse_opening.clone();
+        let opened_at_click_time = opened_at_click_time.clone();
         let bar_ref = bar_ref.clone();
-        Callback::from(move |e: MouseEvent| {
+        Callback::from(move |_: MouseEvent| {
+            opened_at_click_time.set(Some(*is_open));
             if !*is_open {
-                is_mouse_opening.set(true);
                 is_open.set(true);
                 bar_ref.cast::<HtmlElement>().unwrap().focus().unwrap();
             }
@@ -161,25 +160,25 @@ pub fn MenuBar() -> Html {
     };
     let onmouseup = {
         let is_open = is_open.clone();
-        let is_mouse_opening = is_mouse_opening.clone();
+        let opened_at_click_time = opened_at_click_time.clone();
         let bar_ref = bar_ref.clone();
         Callback::from(move |_: MouseEvent| {
-            if !*is_mouse_opening {
+            if *opened_at_click_time == Some(true) {
                 is_open.set(false);
                 bar_ref.cast::<HtmlElement>().unwrap().blur().unwrap();
             }
-            is_mouse_opening.set(false);
+            opened_at_click_time.set(None);
         })
     };
 
     let onfocus = {
         let menus = menus.clone();
-        let is_mouse_opening = is_mouse_opening.clone();
+        let opened_at_click_time = opened_at_click_time.clone();
         let selected_item = selected_item.clone();
         let opened_menu = opened_menu.clone();
         Callback::from(move |_: FocusEvent| {
             // Keyboard tab navigation
-            if !*is_mouse_opening {
+            if *opened_at_click_time == None {
                 if *selected_item == "" {
                     selected_item.set(menus.clone()[0].id.clone());
                     opened_menu.set(menus.clone()[0].id.clone());
@@ -191,12 +190,16 @@ pub fn MenuBar() -> Html {
     };
     let onfocusout = {
         let is_open = is_open.clone();
+        let opened_at_click_time = opened_at_click_time.clone();
         let selected_item = selected_item.clone();
         let opened_menu = opened_menu.clone();
         Callback::from(move |_: _| {
-            is_open.set(false);
-            selected_item.set(String::new());
-            //opened_menu.set(String::new());
+            // Keyboard tab navigation
+            if *opened_at_click_time == None {
+                is_open.set(false);
+                selected_item.set(String::new());
+            }
+            opened_menu.set(String::new());
         })
     };
 
