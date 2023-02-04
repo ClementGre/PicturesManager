@@ -50,19 +50,19 @@ pub fn get_menus() -> Vec<MenuItem> {
         "_Fichier".to_string(),
         vec![
             MenuItem::new_item_acc("open_gallery".to_string(), "_Ouvrir une gallerie".to_string(), "Ctrl+O".to_string()),
-            MenuItem::new_menu("open_recent_gallery".to_string(), "Ouvrir une gallerie récente".to_string(), vec![
-                MenuItem::new_item("recent_gallery_1".to_string(), "Gallerie récente 1".to_string()),
-                MenuItem::new_item("recent_gallery_2".to_string(), "Gallerie récente 2".to_string()),
-                MenuItem::new_menu("recent_gallery_other_1".to_string(), "Autre (1)".to_string(), vec![
-                    MenuItem::new_item("recent_gallery_3".to_string(), "Gallerie récente 3".to_string()),
-                    MenuItem::new_item("recent_gallery_4".to_string(), "Gallerie récente 4".to_string()),
+            MenuItem::new_menu("open_recent_gallery".to_string(), "Ouvrir une gallerie _récente".to_string(), vec![
+                MenuItem::new_item("recent_gallery_1".to_string(), "Gallerie récente _1".to_string()),
+                MenuItem::new_item("recent_gallery_2".to_string(), "Gallerie récente _2".to_string()),
+                MenuItem::new_menu("recent_gallery_other_1".to_string(), "_Autre (1)".to_string(), vec![
+                    MenuItem::new_item("recent_gallery_3".to_string(), "Gallerie récente _3".to_string()),
+                    MenuItem::new_item("recent_gallery_4".to_string(), "Gallerie récente _4".to_string()),
                 ]),
-                MenuItem::new_item("recent_gallery_5".to_string(), "Gallerie récente 5".to_string()),
-                MenuItem::new_menu("recent_gallery_other_2".to_string(), "Autre (2)".to_string(), vec![
-                    MenuItem::new_item("recent_gallery_6".to_string(), "Gallerie récente 6".to_string()),
-                    MenuItem::new_item("recent_gallery_7".to_string(), "Gallerie récente 7".to_string()),
+                MenuItem::new_item("recent_gallery_5".to_string(), "_Gallerie récente 5".to_string()),
+                MenuItem::new_menu("recent_gallery_other_2".to_string(), "A_utre (2)".to_string(), vec![
+                    MenuItem::new_item("recent_gallery_6".to_string(), "G_allerie récente 6".to_string()),
+                    MenuItem::new_item("recent_gallery_7".to_string(), "Ga_llerie récente 7".to_string()),
                 ]),
-                MenuItem::new_item("recent_gallery_8".to_string(), "Gallerie récente 8".to_string()),
+                MenuItem::new_item("recent_gallery_8".to_string(), "Gallerie r_écente 8".to_string()),
             ]),
             MenuItem::new_item_acc("new_gallery".to_string(), "_Nouvelle gallerie".to_string(), "Ctrl+N".to_string()),
             MenuItem::new_separator(0),

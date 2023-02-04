@@ -74,6 +74,9 @@ impl Component for MenuItemComponent {
                 }
             }
             MenuItemMsg::OpenMenu => {
+                if ctx.props().is_root && !ctx.props().is_open {
+                    return false;
+                }
                 self.children_selected_item = String::new();
                 self.children_opened_menu = String::new();
                 ctx.props().update_opened_menu.emit(ctx.props().item.id.clone());
@@ -182,6 +185,9 @@ impl Component for MenuItemComponent {
             let has_children_selected_item = self.children_selected_item != "";
             let has_children_opened_menu =  self.children_opened_menu != "";
             let is_root = ctx.props().is_root;
+
+            let onclick = ctx.link().callback(|_: MouseEvent| MenuItemMsg::OpenMenu);
+
             html! {
                 <div key={ctx.props().item.id.clone()} ref={self.item_ref.clone()}
                     class={classes!(
@@ -190,7 +196,7 @@ impl Component for MenuItemComponent {
                         if is_opened {Some("opened")} else {None},
                         if is_selected || (!is_root && is_opened && !has_selected_browser && (has_children_selected_item || has_children_opened_menu)) {Some("selected")} else {None}
                     )}
-                    onmousedown={onmousedownup.clone()} onmouseup={onmousedownup} {onmouseenter} {onmouseleave}>
+                    onmousedown={onmousedownup.clone()} onmouseup={onmousedownup} {onclick} {onmouseenter} {onmouseleave}>
 
                     <MenuTextComponent text={ctx.props().item.name.clone().unwrap()} />
                     {

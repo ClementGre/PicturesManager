@@ -18,6 +18,9 @@ wasm-bindgen-futures = "0.4.32"
 wasm-logger = "0.2.0"
 web-sys = { version = "0.3.59", features = ["Window", "Navigator", "Element", "DomRect"]}
 yew = { version="0.20.0", features = ["csr"] }
+gloo = "0.8.0"
+gloo-console = "0.2.3"
+gloo-utils = "0.1.6"
 gloo-timers = "0.2.6"
 log = "^0.4"
 fluent = "0.16.0"

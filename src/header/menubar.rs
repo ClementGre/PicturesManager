@@ -4,9 +4,10 @@ use crate::{
     invoke,
     utils::{keystroke::KeyStroke, logger::info},
 };
+use gloo::events::EventListener;
 use unidecode::unidecode;
-use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
-use web_sys::{window, HtmlElement};
+use wasm_bindgen::{JsCast, JsValue};
+use web_sys::{HtmlElement};
 use yew::prelude::*;
 
 fn register_shortcuts(items: &Vec<MenuItem>, shortcuts: &mut Vec<(KeyStroke, String)>) {
@@ -20,80 +21,178 @@ fn register_shortcuts(items: &Vec<MenuItem>, shortcuts: &mut Vec<(KeyStroke, Str
     });
 }
 
+pub fn extract_key_from_text(s: &str) -> String {
+    return unidecode(s.to_lowercase().as_str())[..1].to_string();
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum NavigationMessage{
+    None,
+    Next,
+    Previous,
+    Fire,
+    Close,
+    Alt(char),
+}
+
 #[function_component]
 pub fn MenuBar() -> Html {
     let menus = get_menus();
 
     let mut shortcuts = vec![];
     register_shortcuts(&menus, &mut shortcuts);
+
     let mut alt_shortcuts = vec![];
     menus.iter().for_each(|menu| {
         let name = menu.name.clone().unwrap_or(String::new());
         let split = name.split("_");
         if split.clone().count() >= 2 {
-            alt_shortcuts.push((
-                unidecode(split.skip(1).next().unwrap().to_lowercase().as_str())[..1].to_string(),
-                menu.id.clone(),
-            ));
+            alt_shortcuts.push((extract_key_from_text(&split.skip(1).next().unwrap()), menu.id.clone()));
         }
     });
 
     let is_open = use_state_eq(|| false);
     let selected_item = use_state_eq(|| String::new());
-
     let opened_menu = use_state_eq(|| String::new());
     let bar_ref = use_node_ref();
 
-    // GLOBAL EVENTS
-    use_memo(
-        |_| {
-            let keyboard_event = {
-                let is_open = is_open.clone();
-                let slected_item = selected_item.clone();
-                Closure::wrap(Box::new(move |e: web_sys::KeyboardEvent| {
-                    shortcuts.clone().iter().for_each(|(ks, id)| {
-                        if ks.matches(&e) {
-                            invoke(format!("menu_{}", id).as_str(), JsValue::default());
+    let alt_down = use_state_eq(|| false);
+    let is_alt_mode = use_state_eq(|| false);
+    let is_alt_mode_opening = use_state_eq(|| false);
+
+    let navigation_message = use_state_eq(|| NavigationMessage::None);
+    let navigation_message_received = {
+        let is_alt_mode = is_alt_mode.clone();
+        let is_alt_mode_opening = is_alt_mode_opening.clone();
+        let navigation_message = navigation_message.clone();
+        Callback::from(move |ignored: bool| {
+            if let NavigationMessage::Alt(_) = *navigation_message {
+                if ignored {
+                    is_alt_mode_opening.set(false);
+                }else {
+                    is_alt_mode.set(true);
+                    is_alt_mode_opening.set(true);
+                }
+            }
+            navigation_message.set(NavigationMessage::None);
+        })
+    };
+
+    // Global keydown event
+    {
+        let is_open = is_open.clone();
+        let selected_item = selected_item.clone();
+        let opened_menu = opened_menu.clone();
+        let shortcuts = shortcuts.clone();
+        let alt_shortcuts = alt_shortcuts.clone();
+        let alt_down = alt_down.clone();
+        let is_alt_mode = is_alt_mode.clone();
+        let is_alt_mode_opening = is_alt_mode_opening.clone();
+        let bar_ref = bar_ref.clone();
+        use_effect(move || {
+            let document = gloo::utils::document();
+            let listener = EventListener::new(&document, "keydown", move |e| {
+                let e = e.dyn_ref::<web_sys::KeyboardEvent>().unwrap();
+
+                shortcuts.clone().iter().for_each(|(ks, id)| {
+                    if ks.matches(&e) {
+                        invoke(format!("menu_{}", id).as_str(), JsValue::default());
+                    }
+                });
+
+                if e.key_code() == 18 {
+                    // Alt pressed alone
+                    if *alt_down {
+                        return;
+                    }
+                    alt_down.set(true);
+
+                    if !*is_alt_mode {
+                        is_alt_mode_opening.set(true);
+                        bar_ref.cast::<HtmlElement>().unwrap().focus().unwrap();
+                    } else {
+                        // Closing the menu
+                        bar_ref.cast::<HtmlElement>().unwrap().blur().unwrap();
+                    }
+                    is_alt_mode.set(!*is_alt_mode);
+
+                }else{
+                    // Alt + Key
+                    let mut found_target = false;
+                    alt_shortcuts.clone().iter().for_each(|(ks, id)| {
+                        if *ks == extract_key_from_text(e.key().as_str()) {
+                            is_open.set(true);
+                            selected_item.set(id.clone());
+                            opened_menu.set(id.clone());
+                            found_target = true;
                         }
                     });
-                    if e.alt_key() {
-                        alt_shortcuts.clone().iter().for_each(|(ks, id)| {
-                            if ks == &unidecode(e.key().to_lowercase().as_str())[..1].to_string() {
-                                is_open.set(true);
-                                slected_item.set(id.clone());
-                            }
-                        });
+                    if !found_target {
+                        is_alt_mode_opening.set(false);
+                    }else{
+                        is_alt_mode.set(true);
+                        is_alt_mode_opening.set(true);
                     }
-                }) as Box<dyn FnMut(_)>)
-            };
+                }
+            });
+            // Called when the component is unmounted.  The closure has to hold on to `listener`, because if it gets
+            // dropped, `gloo` de taches it from the DOM. So it's important to do _something_, even if it's just dropping it.
+            || drop(listener)
+        });
+    }
+    // Global keyup event
+    {
+        let is_open = is_open.clone();
+        let is_alt_mode = is_alt_mode.clone();
+        let selected_item = selected_item.clone();
+        let opened_menu = opened_menu.clone();
+        let alt_down = alt_down.clone();
+        let is_alt_mode_opening = is_alt_mode_opening.clone();
+        use_effect(move || {
+            let document = gloo::utils::document();
+            let listener = EventListener::new(&document, "keyup", move |e| {
+                let e = e.dyn_ref::<web_sys::KeyboardEvent>().unwrap();
+                // Alt key
+                if e.key_code() == 18 {
+                    alt_down.set(false);
 
-            let _ = window()
-                .unwrap()
-                .add_event_listener_with_callback("keydown", keyboard_event.as_ref().unchecked_ref())
-                .unwrap();
-            keyboard_event.forget(); // Makes a memory leak, but this closure is global and needs to live as long as the window is open
-
-            let mouse_event = {
-                let is_open = is_open.clone();
-                Closure::wrap(Box::new(move |e: web_sys::MouseEvent| {
-                    let target = e.target().and_then(|div| div.dyn_into::<HtmlElement>().ok());
-                    if let Some(div) = target {
-                        info(format!("target: {}", div.class_name()).as_str());
-                        if !div.class_name().split_whitespace().any(|c| "menu-item" == c || "menu" == c) {
-                            is_open.set(false); // Close menu only if the target is not a menu-item
-                        }
+                    if *is_alt_mode && !*is_alt_mode_opening {
+                        is_alt_mode.set(false);
+                        is_open.set(false);
+                        selected_item.set(String::new());
+                        opened_menu.set(String::new());
                     }
-                }) as Box<dyn FnMut(_)>)
-            };
+                    is_alt_mode_opening.set(false);
+                }
+            });
+            || drop(listener)
+        });
+    }
+    // Global mousedown event
+    {
+        let is_open = is_open.clone();
+        let selected_item = selected_item.clone();
+        let opened_menu = opened_menu.clone();
+        let is_alt_mode = is_alt_mode.clone();
+        use_effect(move || {
+            let document = gloo::utils::document();
+            let listener = EventListener::new(&document, "mousedown", move |e| {
+                let e = e.dyn_ref::<web_sys::MouseEvent>().unwrap();
 
-            let _ = window()
-                .unwrap()
-                .add_event_listener_with_callback("mousedown", mouse_event.as_ref().unchecked_ref())
-                .unwrap();
-            mouse_event.forget(); // Makes a memory leak, but this closure is global and needs to live as long as the window is open
-        },
-        (),
-    );
+                let target = e.target().and_then(|div| div.dyn_into::<HtmlElement>().ok());
+                if let Some(div) = target {
+                    info(format!("target: {}", div.class_name()).as_str());
+                    if !div.class_name().split_whitespace().any(|c| "menu-item" == c || "menu" == c) {
+                        is_open.set(false); // Close menu only if the target is not a menu-item
+                        is_alt_mode.set(false);
+                        selected_item.set(String::new());
+                        opened_menu.set(String::new());
+                    }
+                }
+            });
+            || drop(listener)
+        });
+    }
 
     /*
     let on_key_press = {
@@ -143,7 +242,6 @@ pub fn MenuBar() -> Html {
     };
     */
 
-
     let opened_at_click_time = use_state_eq(|| Some(false));
 
     let onmousedown = {
@@ -181,8 +279,8 @@ pub fn MenuBar() -> Html {
             if *opened_at_click_time == None {
                 if *selected_item == "" {
                     selected_item.set(menus.clone()[0].id.clone());
-                    opened_menu.set(menus.clone()[0].id.clone());
-                }else{
+                    opened_menu.set(String::new());
+                } else {
                     opened_menu.set((*selected_item).clone());
                 }
             }
@@ -193,12 +291,14 @@ pub fn MenuBar() -> Html {
         let opened_at_click_time = opened_at_click_time.clone();
         let selected_item = selected_item.clone();
         let opened_menu = opened_menu.clone();
+        let is_alt_mode = is_alt_mode.clone(); 
         Callback::from(move |_: _| {
             // Keyboard tab navigation
             if *opened_at_click_time == None {
                 is_open.set(false);
                 selected_item.set(String::new());
             }
+            is_alt_mode.set(false);
             opened_menu.set(String::new());
         })
     };
@@ -222,7 +322,7 @@ pub fn MenuBar() -> Html {
             id="app-menu-bar"
             ref={bar_ref.clone()}
             tabindex="0"
-            class={classes!("windows-menu", if *is_open.clone() {Some("opened")} else {None})}
+            class={classes!("windows-menu", if *is_open.clone() {Some("opened")} else {None}, if *is_alt_mode {Some("alt-mode")} else {None})}
             {onmousedown} {onmouseup} {onfocus} {onfocusout}>
 
             {
