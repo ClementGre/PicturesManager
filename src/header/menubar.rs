@@ -1,14 +1,15 @@
+use gloo::events::EventListener;
+use unidecode::unidecode;
+use wasm_bindgen::{JsCast, JsValue};
+use web_sys::HtmlElement;
+use yew::prelude::*;
+
 use crate::{
     header::menu::{get_menus, MenuItem},
     header::menu_item_component::MenuItemComponent,
     invoke,
     utils::{keystroke::KeyStroke, logger::info},
 };
-use gloo::events::EventListener;
-use unidecode::unidecode;
-use wasm_bindgen::{JsCast, JsValue};
-use web_sys::{HtmlElement};
-use yew::prelude::*;
 
 fn register_shortcuts(items: &Vec<MenuItem>, shortcuts: &mut Vec<(KeyStroke, String)>) {
     items.into_iter().for_each(|item| {
@@ -26,7 +27,7 @@ pub fn extract_key_from_text(s: &str) -> String {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub enum NavigationMessage{
+pub enum NavigationMessage {
     None,
     Next,
     Previous,
@@ -69,7 +70,7 @@ pub fn MenuBar() -> Html {
             if let NavigationMessage::Alt(_) = *navigation_message {
                 if ignored {
                     is_alt_mode_opening.set(false);
-                }else {
+                } else {
                     is_alt_mode.set(true);
                     is_alt_mode_opening.set(true);
                 }
@@ -115,8 +116,7 @@ pub fn MenuBar() -> Html {
                         bar_ref.cast::<HtmlElement>().unwrap().blur().unwrap();
                     }
                     is_alt_mode.set(!*is_alt_mode);
-
-                }else{
+                } else {
                     // Alt + Key
                     let mut found_target = false;
                     alt_shortcuts.clone().iter().for_each(|(ks, id)| {
@@ -129,7 +129,7 @@ pub fn MenuBar() -> Html {
                     });
                     if !found_target {
                         is_alt_mode_opening.set(false);
-                    }else{
+                    } else {
                         is_alt_mode.set(true);
                         is_alt_mode_opening.set(true);
                     }
@@ -194,54 +194,6 @@ pub fn MenuBar() -> Html {
         });
     }
 
-    /*
-    let on_key_press = {
-        let id = menu.id.clone();
-        let is_menu = menu.items.is_some();
-        let is_root = is_root.clone();
-        let is_open = ctxt.is_open.clone();
-        let opened_menus = ctxt.opened_menus.clone();
-        let selected_item = ctxt.selected_item.clone();
-        let item_ref = item_ref.clone();
-
-        Callback::from(move |e: KeyboardEvent| {
-            // Enter key
-            if e.key_code() == 13 {
-                e.prevent_default();
-                e.stop_propagation();
-                if is_menu {
-                    if *selected == id.clone() {
-                        selected.set(String::new());
-                        if is_root {
-                            is_open.clone().set(false);
-                        }
-                    } else {
-                        selected.set(id.clone());
-                        if is_root {
-                            is_open.clone().set(true);
-                        }
-                    }
-                } else {
-                    invoke(format!("menu_{}", id).as_str(), JsValue::default());
-                    is_open.clone().set(false);
-                    item_ref.clone().cast::<HtmlElement>().unwrap().blur().unwrap();
-                }
-            }
-            // Escape key
-            else if e.key_code() == 27 {
-                e.prevent_default();
-                e.stop_propagation();
-                is_open.clone().set(false);
-                if let Some(menu) = menu_ref.cast::<HtmlElement>() {
-                    menu.blur().unwrap();
-                } else {
-                    item_ref.cast::<HtmlElement>().unwrap().blur().unwrap();
-                }
-            }
-        })
-    };
-    */
-
     let opened_at_click_time = use_state_eq(|| Some(false));
 
     let onmousedown = {
@@ -291,7 +243,7 @@ pub fn MenuBar() -> Html {
         let opened_at_click_time = opened_at_click_time.clone();
         let selected_item = selected_item.clone();
         let opened_menu = opened_menu.clone();
-        let is_alt_mode = is_alt_mode.clone(); 
+        let is_alt_mode = is_alt_mode.clone();
         Callback::from(move |_: _| {
             // Keyboard tab navigation
             if *opened_at_click_time == None {
@@ -381,63 +333,5 @@ pub fn MenuTextComponent(props: &MenuTextProps) -> Html {
             <span>{shortcut}</span>
             {right_part}
         </p>
-    }
-}
-
-fn get_previous_item(id: String, brothers_id: &Vec<String>) -> Option<String> {
-    let mut previous = None;
-    for brother_id in brothers_id {
-        if *brother_id == id {
-            return previous;
-        }
-        previous = Some(brother_id.clone());
-    }
-    None
-}
-fn get_next_item(id: String, brothers_ids: &Vec<String>) -> Option<String> {
-    let mut detected = false;
-    for brother_id in brothers_ids {
-        if *brother_id == id {
-            detected = true
-        } else if detected {
-            return Some(brother_id.clone());
-        }
-    }
-    None
-}
-
-fn is_menu_opened(id: String, opened_menus: UseStateHandle<Vec<String>>) -> bool {
-    opened_menus.iter().position(|x| *x == id).is_some()
-}
-fn open_menu(id: String, brothers: Vec<String>, opened_menus: UseStateHandle<Vec<String>>) {
-    if is_menu_opened(id.clone(), opened_menus.clone()) {
-        return;
-    }
-
-    let mut new_opened_menus = (*opened_menus.clone()).clone();
-    brothers.iter().for_each(|brother| {
-        if let Some(index) = opened_menus.iter().position(|x| x == brother) {
-            new_opened_menus.remove(index);
-        }
-    });
-    new_opened_menus.push(id);
-    opened_menus.set(new_opened_menus);
-}
-fn close_menu(id: String, opened_menus: UseStateHandle<Vec<String>>) {
-    remove_id_from_vec_handle(id, opened_menus)
-}
-
-fn push_id_to_vec_handle(id: String, vec: UseStateHandle<Vec<String>>) {
-    let mut vec_copy = (*vec.clone()).clone();
-    vec_copy.push(id);
-    vec.set(vec_copy);
-}
-fn remove_id_from_vec_handle(id: String, vec: UseStateHandle<Vec<String>>) {
-    let mut vec_copy = (*vec.clone()).clone();
-    let index = vec_copy.iter().position(|x| *x == id);
-
-    if let Some(index) = index {
-        vec_copy.remove(index);
-        vec.set(vec_copy);
     }
 }
