@@ -148,8 +148,8 @@ fn main() {
         .plugin(get_logger_plugin())
         .plugin(
             tauri_plugin_window_state::Builder::default()
-            .with_denylist(&vec!["settings"])
-                .with_show_mode(tauri_plugin_window_state::ShowMode::Always)
+                .with_denylist(&vec!["settings"])
+                //.with_state_flags(tauri_plugin_window_state::StateFlags::VISIBLE)
                 .build(),
         )
         .invoke_handler(tauri::generate_handler![
