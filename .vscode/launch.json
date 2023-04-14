@@ -1,0 +1,10 @@
+{
+    "configurations": [
+    {
+        "command": "cargo tauri dev",
+        "name": "Run tauri dev",
+        "request": "launch",
+        "type": "node-terminal"
+    }
+    ]
+}

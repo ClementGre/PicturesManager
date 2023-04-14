@@ -11,7 +11,7 @@ pub struct MenuItem {
 impl MenuItem {
     pub fn new_separator(count: u16) -> Self {
         Self {
-            id: "sepatator_".to_string() + count.to_string().as_str(),
+            id: "separator_".to_string() + count.to_string().as_str(),
             name: None,
             accelerator: None,
             items: None,

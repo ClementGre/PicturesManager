@@ -29,10 +29,15 @@ pub fn extract_key_from_text(s: &str) -> String {
 #[derive(Clone, Debug, PartialEq)]
 pub enum NavigationMessage {
     None,
-    Next,
-    Previous,
+    Up,
+    Down,
+    Left,
+    Right,
     Fire,
     Close,
+    LeftRoot, // Called when Left is not possible on children item
+    RightRoot, // Called when Right is not possible on children item
+    CloseRoot, // Called when Close or Up is not possible on children item
     Alt(char),
 }
 
@@ -59,36 +64,39 @@ pub fn MenuBar() -> Html {
 
     let alt_down = use_state_eq(|| false);
     let is_alt_mode = use_state_eq(|| false);
-    let is_alt_mode_opening = use_state_eq(|| false);
+    // True if alt has been used by an action (opening menu or selecting menu). If false, alt release will close menu.
+    let is_alt_consumed = use_state_eq(|| false);
 
     let navigation_message = use_state_eq(|| NavigationMessage::None);
     let navigation_message_received = {
         let is_alt_mode = is_alt_mode.clone();
-        let is_alt_mode_opening = is_alt_mode_opening.clone();
+        let is_alt_consumed = is_alt_consumed.clone();
         let navigation_message = navigation_message.clone();
-        Callback::from(move |ignored: bool| {
+        Callback::from(move |consumed: bool| {
             if let NavigationMessage::Alt(_) = *navigation_message {
-                if ignored {
-                    is_alt_mode_opening.set(false);
+                if !consumed {
+                    is_alt_consumed.set(false);
                 } else {
                     is_alt_mode.set(true);
-                    is_alt_mode_opening.set(true);
+                    is_alt_consumed.set(true);
                 }
             }
             navigation_message.set(NavigationMessage::None);
         })
     };
+    let send_navigation_message = {
+        let navigation_message = navigation_message.clone();
+        Callback::from(move |new_nm: NavigationMessage| {
+            navigation_message.set(new_nm);
+        })
+    };
 
     // Global keydown event
     {
-        let is_open = is_open.clone();
-        let selected_item = selected_item.clone();
-        let opened_menu = opened_menu.clone();
         let shortcuts = shortcuts.clone();
-        let alt_shortcuts = alt_shortcuts.clone();
         let alt_down = alt_down.clone();
         let is_alt_mode = is_alt_mode.clone();
-        let is_alt_mode_opening = is_alt_mode_opening.clone();
+        let is_alt_consumed = is_alt_consumed.clone();
         let bar_ref = bar_ref.clone();
         use_effect(move || {
             let document = gloo::utils::document();
@@ -101,7 +109,7 @@ pub fn MenuBar() -> Html {
                     }
                 });
 
-                if e.key_code() == 18 {
+                if e.key() == "Alt" {
                     // Alt pressed alone
                     if *alt_down {
                         return;
@@ -109,29 +117,9 @@ pub fn MenuBar() -> Html {
                     alt_down.set(true);
 
                     if !*is_alt_mode {
-                        is_alt_mode_opening.set(true);
-                        bar_ref.cast::<HtmlElement>().unwrap().focus().unwrap();
-                    } else {
-                        // Closing the menu
-                        bar_ref.cast::<HtmlElement>().unwrap().blur().unwrap();
-                    }
-                    is_alt_mode.set(!*is_alt_mode);
-                } else {
-                    // Alt + Key
-                    let mut found_target = false;
-                    alt_shortcuts.clone().iter().for_each(|(ks, id)| {
-                        if *ks == extract_key_from_text(e.key().as_str()) {
-                            is_open.set(true);
-                            selected_item.set(id.clone());
-                            opened_menu.set(id.clone());
-                            found_target = true;
-                        }
-                    });
-                    if !found_target {
-                        is_alt_mode_opening.set(false);
-                    } else {
+                        is_alt_consumed.set(true);
                         is_alt_mode.set(true);
-                        is_alt_mode_opening.set(true);
+                        bar_ref.cast::<HtmlElement>().unwrap().focus().unwrap();
                     }
                 }
             });
@@ -147,22 +135,24 @@ pub fn MenuBar() -> Html {
         let selected_item = selected_item.clone();
         let opened_menu = opened_menu.clone();
         let alt_down = alt_down.clone();
-        let is_alt_mode_opening = is_alt_mode_opening.clone();
+        let is_alt_consumed = is_alt_consumed.clone();
+        let bar_ref = bar_ref.clone();
         use_effect(move || {
             let document = gloo::utils::document();
             let listener = EventListener::new(&document, "keyup", move |e| {
                 let e = e.dyn_ref::<web_sys::KeyboardEvent>().unwrap();
                 // Alt key
-                if e.key_code() == 18 {
+                if e.key() == "Alt" {
                     alt_down.set(false);
 
-                    if *is_alt_mode && !*is_alt_mode_opening {
+                    if *is_alt_mode && !*is_alt_consumed {
+                        bar_ref.cast::<HtmlElement>().unwrap().blur().unwrap();
                         is_alt_mode.set(false);
                         is_open.set(false);
                         selected_item.set(String::new());
                         opened_menu.set(String::new());
                     }
-                    is_alt_mode_opening.set(false);
+                    is_alt_consumed.set(false);
                 }
             });
             || drop(listener)
@@ -220,6 +210,59 @@ pub fn MenuBar() -> Html {
             opened_at_click_time.set(None);
         })
     };
+    let onkeydown = {
+        let alt_shortcuts = alt_shortcuts.clone();
+        let is_open = is_open.clone();
+        let selected_item = selected_item.clone();
+        let opened_menu = opened_menu.clone();
+        let is_alt_mode = is_alt_mode.clone();
+        let is_alt_consumed = is_alt_consumed.clone();
+        let alt_down = alt_down.clone();
+        let navigation_message = navigation_message.clone();
+        Callback::from(move |e: KeyboardEvent| {
+            let mut found_target = false;
+
+            if *alt_down {
+                alt_shortcuts.clone().iter().for_each(|(ks, id)| {
+                    if *ks == extract_key_from_text(e.key().as_str()) {
+                        is_open.set(true);
+                        selected_item.set(id.clone());
+                        opened_menu.set(id.clone());
+                        found_target = true;
+                    }
+                });
+
+                if !found_target {
+                    is_alt_consumed.set(false);
+                } else {
+                    is_alt_mode.set(true);
+                    is_alt_consumed.set(true);
+                }
+            } else {
+                match e.key().as_str() {
+                    "Escape" => {
+                        navigation_message.set(NavigationMessage::Close);
+                    }
+                    "Enter" | " " => {
+                        navigation_message.set(NavigationMessage::Fire);
+                    }
+                    "ArrowUp" => {
+                        navigation_message.set(NavigationMessage::Up);
+                    }
+                    "ArrowDown" => {
+                        navigation_message.set(NavigationMessage::Down);
+                    }
+                    "ArrowLeft" => {
+                        navigation_message.set(NavigationMessage::Left);
+                    }
+                    "ArrowRight" => {
+                        navigation_message.set(NavigationMessage::Right);
+                    }
+                    _ => {}
+                }
+            }
+        })
+    };
 
     let onfocus = {
         let menus = menus.clone();
@@ -275,7 +318,7 @@ pub fn MenuBar() -> Html {
             ref={bar_ref.clone()}
             tabindex="0"
             class={classes!("windows-menu", if *is_open.clone() {Some("opened")} else {None}, if *is_alt_mode {Some("alt-mode")} else {None})}
-            {onmousedown} {onmouseup} {onfocus} {onfocusout}>
+            {onmousedown} {onmouseup} {onkeydown} {onfocus} {onfocusout}>
 
             {
                 menus.into_iter().map(|item| {
@@ -289,6 +332,9 @@ pub fn MenuBar() -> Html {
                             brothers={brothers.clone()}
                             update_selected_item={update_children_selected_item.clone()}
                             update_opened_menu={update_children_opened_menu.clone()}
+                            navigation_message={(*navigation_message).clone()}
+                            navigation_message_received={navigation_message_received.clone()}
+                            send_navigation_message={send_navigation_message.clone()}
                         />
                     }
                 }).collect::<Html>()
