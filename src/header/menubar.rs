@@ -3,6 +3,7 @@ use unidecode::unidecode;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::HtmlElement;
 use yew::prelude::*;
+use crate::utils::logger::tr;
 
 use crate::{
     header::menu::{get_menus, MenuItem},
@@ -37,7 +38,7 @@ pub enum NavigationMessage {
     Close,
     LeftRoot, // Called when Left is not possible on children item
     RightRoot, // Called when Right is not possible on children item
-    CloseRoot, // Called when Close or Up is not possible on children item
+    CloseRoot, // Called to close root menu properly (meaning closing submenus too)
     Alt(char),
 }
 
@@ -56,6 +57,7 @@ pub fn MenuBar() -> Html {
             alt_shortcuts.push((extract_key_from_text(&split.skip(1).next().unwrap()), menu.id.clone()));
         }
     });
+
 
     let is_open = use_state_eq(|| false);
     let selected_item = use_state_eq(|| String::new());
@@ -124,19 +126,18 @@ pub fn MenuBar() -> Html {
                 }
             });
             // Called when the component is unmounted.  The closure has to hold on to `listener`, because if it gets
-            // dropped, `gloo` de taches it from the DOM. So it's important to do _something_, even if it's just dropping it.
+            // dropped, `gloo` detaches it from the DOM. So it's important to do _something_, even if it's just dropping it.
             || drop(listener)
         });
     }
     // Global keyup event
     {
-        let is_open = is_open.clone();
         let is_alt_mode = is_alt_mode.clone();
         let selected_item = selected_item.clone();
-        let opened_menu = opened_menu.clone();
         let alt_down = alt_down.clone();
         let is_alt_consumed = is_alt_consumed.clone();
         let bar_ref = bar_ref.clone();
+        let navigation_message = navigation_message.clone();
         use_effect(move || {
             let document = gloo::utils::document();
             let listener = EventListener::new(&document, "keyup", move |e| {
@@ -148,9 +149,8 @@ pub fn MenuBar() -> Html {
                     if *is_alt_mode && !*is_alt_consumed {
                         bar_ref.cast::<HtmlElement>().unwrap().blur().unwrap();
                         is_alt_mode.set(false);
-                        is_open.set(false);
+                        navigation_message.set(NavigationMessage::CloseRoot); // Will automatically close menu bar
                         selected_item.set(String::new());
-                        opened_menu.set(String::new());
                     }
                     is_alt_consumed.set(false);
                 }
@@ -160,10 +160,9 @@ pub fn MenuBar() -> Html {
     }
     // Global mousedown event
     {
-        let is_open = is_open.clone();
         let selected_item = selected_item.clone();
-        let opened_menu = opened_menu.clone();
         let is_alt_mode = is_alt_mode.clone();
+        let navigation_message = navigation_message.clone();
         use_effect(move || {
             let document = gloo::utils::document();
             let listener = EventListener::new(&document, "mousedown", move |e| {
@@ -173,10 +172,10 @@ pub fn MenuBar() -> Html {
                 if let Some(div) = target {
                     info(format!("target: {}", div.class_name()).as_str());
                     if !div.class_name().split_whitespace().any(|c| "menu-item" == c || "menu" == c) {
-                        is_open.set(false); // Close menu only if the target is not a menu-item
+                        // Close menu only if the target is not a menu-item (menu will otherwise be closed on click RELEASE)
                         is_alt_mode.set(false);
+                        navigation_message.set(NavigationMessage::CloseRoot); // Will automatically close menu bar
                         selected_item.set(String::new());
-                        opened_menu.set(String::new());
                     }
                 }
             });
@@ -184,7 +183,7 @@ pub fn MenuBar() -> Html {
         });
     }
 
-    let opened_at_click_time = use_state_eq(|| Some(false));
+    let opened_at_click_time = use_state_eq(|| None);
 
     let onmousedown = {
         let is_open = is_open.clone();
@@ -199,12 +198,16 @@ pub fn MenuBar() -> Html {
         })
     };
     let onmouseup = {
-        let is_open = is_open.clone();
         let opened_at_click_time = opened_at_click_time.clone();
+        let is_alt_mode = is_alt_mode.clone();
+        let navigation_message = navigation_message.clone();
+        let selected_item = selected_item.clone();
         let bar_ref = bar_ref.clone();
         Callback::from(move |_: MouseEvent| {
             if *opened_at_click_time == Some(true) {
-                is_open.set(false);
+                is_alt_mode.set(false);
+                navigation_message.set(NavigationMessage::CloseRoot); // Will automatically close menu bar
+                selected_item.set(String::new());
                 bar_ref.cast::<HtmlElement>().unwrap().blur().unwrap();
             }
             opened_at_click_time.set(None);
@@ -219,9 +222,9 @@ pub fn MenuBar() -> Html {
         let is_alt_consumed = is_alt_consumed.clone();
         let alt_down = alt_down.clone();
         let navigation_message = navigation_message.clone();
+        let bar_ref = bar_ref.clone();
         Callback::from(move |e: KeyboardEvent| {
             let mut found_target = false;
-
             if *alt_down {
                 alt_shortcuts.clone().iter().for_each(|(ks, id)| {
                     if *ks == extract_key_from_text(e.key().as_str()) {
@@ -241,21 +244,29 @@ pub fn MenuBar() -> Html {
             } else {
                 match e.key().as_str() {
                     "Escape" => {
-                        navigation_message.set(NavigationMessage::Close);
+                        if !*is_open {
+                            bar_ref.cast::<HtmlElement>().unwrap().blur().unwrap();
+                        }else{
+                            navigation_message.set(NavigationMessage::Close);
+                        }
                     }
                     "Enter" | " " => {
+                        if !*is_open { is_open.set(true) }
                         navigation_message.set(NavigationMessage::Fire);
                     }
                     "ArrowUp" => {
                         navigation_message.set(NavigationMessage::Up);
                     }
                     "ArrowDown" => {
+                        if !*is_open { is_open.set(true) }
                         navigation_message.set(NavigationMessage::Down);
                     }
                     "ArrowLeft" => {
+                        if !*is_open { is_open.set(true) }
                         navigation_message.set(NavigationMessage::Left);
                     }
                     "ArrowRight" => {
+                        if !*is_open { is_open.set(true) }
                         navigation_message.set(NavigationMessage::Right);
                     }
                     _ => {}
@@ -269,12 +280,14 @@ pub fn MenuBar() -> Html {
         let opened_at_click_time = opened_at_click_time.clone();
         let selected_item = selected_item.clone();
         let opened_menu = opened_menu.clone();
+        let navigation_message = navigation_message.clone();
         Callback::from(move |_: FocusEvent| {
-            // Keyboard tab navigation
-            if *opened_at_click_time == None {
-                if *selected_item == "" {
+            if *opened_at_click_time == None { // Oppened by keyboard tab navigation
+                if selected_item.is_empty() {
                     selected_item.set(menus.clone()[0].id.clone());
-                    opened_menu.set(String::new());
+                    if !opened_menu.is_empty(){
+                        navigation_message.set(NavigationMessage::CloseRoot); // Will automatically close menu bar
+                    }
                 } else {
                     opened_menu.set((*selected_item).clone());
                 }
@@ -282,19 +295,15 @@ pub fn MenuBar() -> Html {
         })
     };
     let onfocusout = {
-        let is_open = is_open.clone();
-        let opened_at_click_time = opened_at_click_time.clone();
         let selected_item = selected_item.clone();
-        let opened_menu = opened_menu.clone();
         let is_alt_mode = is_alt_mode.clone();
+        let navigation_message = navigation_message.clone();
         Callback::from(move |_: _| {
-            // Keyboard tab navigation
             if *opened_at_click_time == None {
-                is_open.set(false);
+                navigation_message.set(NavigationMessage::CloseRoot); // Will automatically close menu bar
                 selected_item.set(String::new());
             }
             is_alt_mode.set(false);
-            opened_menu.set(String::new());
         })
     };
 
@@ -306,7 +315,11 @@ pub fn MenuBar() -> Html {
     };
     let update_children_opened_menu = {
         let opened_menu = opened_menu.clone();
+        let is_open = is_open.clone();
         Callback::from(move |id: String| {
+            if id.is_empty() { // Automatically close the menu bar when the last menu is closed
+                is_open.set(false);
+            }
             opened_menu.set(id);
         })
     };
@@ -319,7 +332,6 @@ pub fn MenuBar() -> Html {
             tabindex="0"
             class={classes!("windows-menu", if *is_open.clone() {Some("opened")} else {None}, if *is_alt_mode {Some("alt-mode")} else {None})}
             {onmousedown} {onmouseup} {onkeydown} {onfocus} {onfocusout}>
-
             {
                 menus.into_iter().map(|item| {
                     html!{

@@ -1,9 +1,14 @@
 use gloo_timers::callback::Timeout;
+use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
+use web_sys::HtmlElement;
 use web_sys::{Element, MouseEvent};
 use yew::{classes, html, AttrValue, Callback, Component, Context, Html, NodeRef, Properties};
 
-use crate::{invoke, utils::logger::info};
+use crate::{
+    invoke,
+    utils::logger::{info, tr},
+};
 
 use super::{
     menu::MenuItem,
@@ -92,6 +97,7 @@ impl Component for MenuItemComponent {
                     self.children_selected_item = String::new();
                 }
                 self.children_opened_menu = String::new();
+                ctx.props().update_selected_item.emit(ctx.props().item.id.clone());
                 ctx.props().update_opened_menu.emit(ctx.props().item.id.clone());
             }
             MenuItemMsg::CloseMenuFromTimeout => {
@@ -152,22 +158,28 @@ impl Component for MenuItemComponent {
             MenuItemMsg::SelectNext => {
                 if let Some(id) = self.get_next_item_id(ctx.clone()) {
                     self.children_selected_item = String::new();
-                    self.children_opened_menu = String::new();
 
                     ctx.props().update_selected_item.emit(id.clone());
-                    if ctx.props().is_root {
+                    if ctx.props().is_root && !ctx.props().opened_menu.is_empty() {
+                        // Update opened menu too if root
+                        self.children_opened_menu = String::new();
                         ctx.props().update_opened_menu.emit(id.clone());
+                    } else {
+                        self.children_opened_menu = String::new();
                     }
                 }
             }
             MenuItemMsg::SelectPrevious => {
                 if let Some(id) = self.get_previous_item_id(ctx.clone()) {
                     self.children_selected_item = String::new();
-                    self.children_opened_menu = String::new();
 
                     ctx.props().update_selected_item.emit(id.clone());
-                    if ctx.props().is_root {
+                    if ctx.props().is_root && !ctx.props().opened_menu.is_empty() {
+                        // Update opened menu too if root
+                        self.children_opened_menu = String::new();
                         ctx.props().update_opened_menu.emit(id.clone());
+                    } else {
+                        self.children_opened_menu = String::new();
                     }
                 }
             }
@@ -195,14 +207,13 @@ impl Component for MenuItemComponent {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         if !ctx.props().is_open && !ctx.props().is_root {
-            return html! {}; // Useless to render if not open
+            return html! {}; // Useless to render if not open and not root
         }
 
-        if ctx.props().is_root.clone() { // ROOT MENU
-            // IF selected AND (not opened OR no children selected)
-            if ctx.props().selected_item == ctx.props().item.id
-                && (ctx.props().opened_menu != ctx.props().item.id || self.children_selected_item == "")
-            {
+        if ctx.props().is_root.clone() {
+            // ROOT MENU
+            // IF (selected OR oppened) AND (not opened OR no children selected)
+            if self.is_selected_or_opened(ctx) && (!self.is_opened(ctx) || !self.has_selected_children()) {
                 match ctx.props().navigation_message {
                     NavigationMessage::Fire | NavigationMessage::Down => {
                         ctx.link().send_message(MenuItemMsg::OpenMenu(true));
@@ -227,8 +238,8 @@ impl Component for MenuItemComponent {
                     _ => {}
                 }
             }
-            // IF selected AND no children opened
-            if ctx.props().opened_menu == ctx.props().item.id && self.children_opened_menu == "" {
+            // IF opened AND no children opened
+            if self.is_opened(ctx) && !self.has_opened_children() {
                 match ctx.props().navigation_message {
                     NavigationMessage::LeftRoot => {
                         ctx.link().send_message(MenuItemMsg::SelectPrevious);
@@ -248,12 +259,21 @@ impl Component for MenuItemComponent {
                     _ => {}
                 }
             }
-        } else { // NOT ROOT MENU
-            
+            if ctx.props().navigation_message == NavigationMessage::CloseRoot {
+                if ctx.props().opened_menu.is_empty() {
+                    // If no menu oppened, able to catch this event
+                    ctx.props().navigation_message_received.emit(true);
+                } else if self.is_opened(ctx) {
+                    // Closing menu from menubar.rs
+                    ctx.link().send_message(MenuItemMsg::CloseMenu);
+                    ctx.props().navigation_message_received.emit(true);
+                    return html! {};
+                }
+            }
+        } else {
+            // NOT ROOT MENU
             // IF selected AND (not a menu OR menu not opened OR no children selected)
-            if ctx.props().selected_item == ctx.props().item.id
-                && (!self.is_menu || ctx.props().opened_menu != ctx.props().item.id || self.children_selected_item == "")
-            {
+            if self.is_selected(ctx) && (!self.is_menu || !self.is_opened(ctx) || !self.has_selected_children()) {
                 match ctx.props().navigation_message {
                     NavigationMessage::Up => {
                         ctx.link().send_message(MenuItemMsg::SelectPrevious);
@@ -266,20 +286,16 @@ impl Component for MenuItemComponent {
                         return html! {};
                     }
                     NavigationMessage::Right => {
-                            info("Receiving right");
-
                         if self.is_menu {
                             ctx.link().send_message(MenuItemMsg::OpenMenu(true));
                             ctx.props().navigation_message_received.emit(true);
                             return html! {};
-                        }else{
-                            info("Sending right root");
+                        } else {
                             ctx.props().send_navigation_message.emit(NavigationMessage::RightRoot);
                         }
                     }
                     NavigationMessage::Left => {
                         ctx.props().send_navigation_message.emit(NavigationMessage::LeftRoot);
-
                     }
                     NavigationMessage::Fire => {
                         if self.is_menu {
@@ -294,13 +310,13 @@ impl Component for MenuItemComponent {
                 }
             }
             // IF isMenu AND selected AND opened AND no children opened
-            if self.is_menu && ctx.props().selected_item == ctx.props().item.id && ctx.props().opened_menu == ctx.props().item.id && self.children_opened_menu == "" {
+            if self.is_menu && self.is_selected(ctx) && self.is_selected(ctx) && !self.has_opened_children() {
                 match ctx.props().navigation_message {
                     NavigationMessage::Left => {
                         if ctx.props().opened_menu == ctx.props().item.id {
                             ctx.link().send_message(MenuItemMsg::CloseMenu);
                             ctx.props().navigation_message_received.emit(true);
-                            return html! {}; 
+                            return html! {};
                         }
                     }
                     NavigationMessage::Close => {
@@ -317,7 +333,13 @@ impl Component for MenuItemComponent {
             let is_root = ctx.props().is_root.clone();
             Callback::from(move |e: MouseEvent| {
                 if !is_root {
-                    e.stop_propagation()
+                    let target = e.target().and_then(|div| div.dyn_into::<HtmlElement>().ok());
+                    if let Some(div) = target {
+                        if div.class_name().split_whitespace().any(|c| "menu" == c) {
+                            // Prevent menu closing only if the click were performed on this menu and not on a children item
+                            e.stop_propagation()
+                        }
+                    }
                 }
             })
         };
@@ -430,7 +452,7 @@ impl MenuItemComponent {
             }
             if pos > 0 {
                 return Some(ctx.props().brothers[pos - 1].clone());
-            }else{
+            } else {
                 return Some(ctx.props().brothers[ctx.props().brothers.len() - 1].clone());
             }
         }
@@ -445,10 +467,25 @@ impl MenuItemComponent {
             }
             if pos < ctx.props().brothers.len() - 1 {
                 return Some(ctx.props().brothers[pos + 1].clone());
-            }else{
+            } else {
                 return Some(ctx.props().brothers[0].clone());
             }
         }
         None
+    }
+    pub fn is_selected(&self, ctx: &Context<Self>) -> bool {
+        ctx.props().selected_item == ctx.props().item.id
+    }
+    pub fn is_opened(&self, ctx: &Context<Self>) -> bool {
+        ctx.props().opened_menu == ctx.props().item.id
+    }
+    pub fn is_selected_or_opened(&self, ctx: &Context<Self>) -> bool {
+        self.is_selected(ctx) || self.is_opened(ctx)
+    }
+    pub fn has_selected_children(&self) -> bool {
+        self.children_selected_item != ""
+    }
+    pub fn has_opened_children(&self) -> bool {
+        self.children_opened_menu != ""
     }
 }
