@@ -1,3 +1,4 @@
+use crate::header::menubar::extract_key_from_text;
 use gloo_timers::callback::Timeout;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
@@ -10,6 +11,8 @@ use crate::{
     utils::logger::{info, tr},
 };
 
+use super::menubar::NavigationMessageResult;
+use super::menubar::NavigationMessageResult::Consumed;
 use super::{
     menu::MenuItem,
     menubar::{MenuTextComponent, NavigationMessage},
@@ -41,7 +44,7 @@ pub struct MenuItemProps {
     pub update_selected_item: Callback<String>,
     pub update_opened_menu: Callback<String>,
     pub navigation_message: NavigationMessage,
-    pub navigation_message_received: Callback<bool>,
+    pub navigation_message_received: Callback<NavigationMessageResult>,
     pub send_navigation_message: Callback<NavigationMessage>,
 }
 
@@ -52,6 +55,7 @@ pub struct MenuItemComponent {
     item_ref: NodeRef,
     menu_x: i32,
     menu_y: i32,
+    alt_shortcuts: Vec<(char, String)>,
 }
 
 impl Component for MenuItemComponent {
@@ -59,6 +63,17 @@ impl Component for MenuItemComponent {
     type Properties = MenuItemProps;
 
     fn create(ctx: &Context<Self>) -> Self {
+        let mut alt_shortcuts = vec![];
+        if let Some(items) = ctx.props().item.items.clone() {
+            items.iter().for_each(|item| {
+                let name = item.name.clone().unwrap_or(String::new());
+                let split = name.split("_");
+                if split.clone().count() >= 2 {
+                    alt_shortcuts.push((extract_key_from_text(&split.skip(1).next().unwrap()), item.id.clone()));
+                }
+            });
+        }
+
         Self {
             children_selected_item: String::new(),
             children_opened_menu: String::new(),
@@ -66,6 +81,7 @@ impl Component for MenuItemComponent {
             item_ref: NodeRef::default(),
             menu_x: 0,
             menu_y: 0,
+            alt_shortcuts: alt_shortcuts,
         }
     }
 
@@ -109,6 +125,7 @@ impl Component for MenuItemComponent {
                 self.children_selected_item = String::new();
                 self.children_opened_menu = String::new();
                 ctx.props().update_opened_menu.emit(String::new());
+                return true;
             }
             MenuItemMsg::MouseEnter => {
                 if ctx.props().selected_item != ctx.props().item.id {
@@ -217,22 +234,22 @@ impl Component for MenuItemComponent {
                 match ctx.props().navigation_message {
                     NavigationMessage::Fire | NavigationMessage::Down => {
                         ctx.link().send_message(MenuItemMsg::OpenMenu(true));
-                        ctx.props().navigation_message_received.emit(true);
+                        ctx.props().navigation_message_received.emit(Consumed);
                         return html! {};
                     }
                     NavigationMessage::Left => {
                         ctx.link().send_message(MenuItemMsg::SelectPrevious);
-                        ctx.props().navigation_message_received.emit(true);
+                        ctx.props().navigation_message_received.emit(Consumed);
                         return html! {};
                     }
                     NavigationMessage::Right => {
                         ctx.link().send_message(MenuItemMsg::SelectNext);
-                        ctx.props().navigation_message_received.emit(true);
+                        ctx.props().navigation_message_received.emit(Consumed);
                         return html! {};
                     }
                     NavigationMessage::Close | NavigationMessage::Up => {
                         ctx.link().send_message(MenuItemMsg::CloseMenu);
-                        ctx.props().navigation_message_received.emit(true);
+                        ctx.props().navigation_message_received.emit(Consumed);
                         return html! {};
                     }
                     _ => {}
@@ -243,17 +260,17 @@ impl Component for MenuItemComponent {
                 match ctx.props().navigation_message {
                     NavigationMessage::LeftRoot => {
                         ctx.link().send_message(MenuItemMsg::SelectPrevious);
-                        ctx.props().navigation_message_received.emit(true);
+                        ctx.props().navigation_message_received.emit(Consumed);
                         return html! {};
                     }
                     NavigationMessage::RightRoot => {
                         ctx.link().send_message(MenuItemMsg::SelectNext);
-                        ctx.props().navigation_message_received.emit(true);
+                        ctx.props().navigation_message_received.emit(Consumed);
                         return html! {};
                     }
                     NavigationMessage::Close => {
                         ctx.link().send_message(MenuItemMsg::CloseMenu);
-                        ctx.props().navigation_message_received.emit(true);
+                        ctx.props().navigation_message_received.emit(Consumed);
                         return html! {};
                     }
                     _ => {}
@@ -262,11 +279,11 @@ impl Component for MenuItemComponent {
             if ctx.props().navigation_message == NavigationMessage::CloseRoot {
                 if ctx.props().opened_menu.is_empty() {
                     // If no menu oppened, able to catch this event
-                    ctx.props().navigation_message_received.emit(true);
+                    ctx.props().navigation_message_received.emit(Consumed);
                 } else if self.is_opened(ctx) {
                     // Closing menu from menubar.rs
                     ctx.link().send_message(MenuItemMsg::CloseMenu);
-                    ctx.props().navigation_message_received.emit(true);
+                    ctx.props().navigation_message_received.emit(Consumed);
                     return html! {};
                 }
             }
@@ -277,18 +294,18 @@ impl Component for MenuItemComponent {
                 match ctx.props().navigation_message {
                     NavigationMessage::Up => {
                         ctx.link().send_message(MenuItemMsg::SelectPrevious);
-                        ctx.props().navigation_message_received.emit(true);
+                        ctx.props().navigation_message_received.emit(Consumed);
                         return html! {};
                     }
                     NavigationMessage::Down => {
                         ctx.link().send_message(MenuItemMsg::SelectNext);
-                        ctx.props().navigation_message_received.emit(true);
+                        ctx.props().navigation_message_received.emit(Consumed);
                         return html! {};
                     }
                     NavigationMessage::Right => {
                         if self.is_menu {
                             ctx.link().send_message(MenuItemMsg::OpenMenu(true));
-                            ctx.props().navigation_message_received.emit(true);
+                            ctx.props().navigation_message_received.emit(Consumed);
                             return html! {};
                         } else {
                             ctx.props().send_navigation_message.emit(NavigationMessage::RightRoot);
@@ -303,7 +320,7 @@ impl Component for MenuItemComponent {
                         } else {
                             ctx.link().send_message(MenuItemMsg::FireItem);
                         }
-                        ctx.props().navigation_message_received.emit(true);
+                        ctx.props().navigation_message_received.emit(Consumed);
                         return html! {};
                     }
                     _ => {}
@@ -315,16 +332,50 @@ impl Component for MenuItemComponent {
                     NavigationMessage::Left => {
                         if ctx.props().opened_menu == ctx.props().item.id {
                             ctx.link().send_message(MenuItemMsg::CloseMenu);
-                            ctx.props().navigation_message_received.emit(true);
+                            ctx.props().navigation_message_received.emit(Consumed);
                             return html! {};
                         }
                     }
                     NavigationMessage::Close => {
                         ctx.link().send_message(MenuItemMsg::CloseMenu);
-                        ctx.props().navigation_message_received.emit(true);
+                        ctx.props().navigation_message_received.emit(Consumed);
                         return html! {};
                     }
                     _ => {}
+                }
+            }
+        }
+
+        if self.is_menu {
+            if let NavigationMessage::Alt(key) = ctx.props().navigation_message {
+                // Opened and no children opened menu
+                // Tere is only one menu at a time that can be opened with no children opened
+                if self.is_opened(ctx) && !self.has_opened_children() {
+                    let mut consumed = false;
+                    self.alt_shortcuts.iter().for_each(|(ks, id)| {
+                        if *ks == key {
+                            let items = ctx.props().item.items.clone().unwrap_or_default();
+                            let item_opt = items.iter().find(|item| item.id == *id);
+
+                            if let Some(item) = item_opt {
+                                ctx.link().send_message(MenuItemMsg::UpdateChildrenSelectedItem(id.clone()));
+                                consumed = true;
+                                if item.items.is_some() {
+                                    // If the target item is a menu -> open it
+                                    ctx.link().send_message(MenuItemMsg::UpdateChildrenOpenedMenu(id.clone()));
+                                    ctx.props().navigation_message_received.emit(NavigationMessageResult::Consumed);
+                                } else {
+                                    // If the target item is a simple item -> fire it
+                                    invoke(format!("menu_{}", item.id).as_str(), JsValue::default());
+                                    ctx.link().send_message(MenuItemMsg::CloseMenu);
+                                    ctx.props().navigation_message_received.emit(NavigationMessageResult::ConsumedAndClose);
+                                }
+                            }
+                        }
+                    });
+                    if !consumed {
+                        ctx.props().navigation_message_received.emit(NavigationMessageResult::Ignored);
+                    }
                 }
             }
         }

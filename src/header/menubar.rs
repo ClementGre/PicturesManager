@@ -1,9 +1,11 @@
+use std::sync::Barrier;
+
+use crate::utils::logger::tr;
 use gloo::events::EventListener;
 use unidecode::unidecode;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::HtmlElement;
 use yew::prelude::*;
-use crate::utils::logger::tr;
 
 use crate::{
     header::menu::{get_menus, MenuItem},
@@ -23,8 +25,8 @@ fn register_shortcuts(items: &Vec<MenuItem>, shortcuts: &mut Vec<(KeyStroke, Str
     });
 }
 
-pub fn extract_key_from_text(s: &str) -> String {
-    return unidecode(s.to_lowercase().as_str())[..1].to_string();
+pub fn extract_key_from_text(s: &str) -> char {
+    return unidecode(s.to_lowercase().as_str()).chars().next().unwrap_or(' ');
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -36,10 +38,17 @@ pub enum NavigationMessage {
     Right,
     Fire,
     Close,
-    LeftRoot, // Called when Left is not possible on children item
+    LeftRoot,  // Called when Left is not possible on children item
     RightRoot, // Called when Right is not possible on children item
     CloseRoot, // Called to close root menu properly (meaning closing submenus too)
     Alt(char),
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum NavigationMessageResult {
+    Ignored,
+    Consumed,
+    ConsumedAndClose, // Requests menu to be closed
 }
 
 #[function_component]
@@ -58,7 +67,6 @@ pub fn MenuBar() -> Html {
         }
     });
 
-
     let is_open = use_state_eq(|| false);
     let selected_item = use_state_eq(|| String::new());
     let opened_menu = use_state_eq(|| String::new());
@@ -73,17 +81,28 @@ pub fn MenuBar() -> Html {
     let navigation_message_received = {
         let is_alt_mode = is_alt_mode.clone();
         let is_alt_consumed = is_alt_consumed.clone();
+        let alt_down = alt_down.clone();
+        let selected_item = selected_item.clone();
+        let bar_ref = bar_ref.clone();
         let navigation_message = navigation_message.clone();
-        Callback::from(move |consumed: bool| {
+        Callback::from(move |result: NavigationMessageResult| {
+            let mut new_message = NavigationMessage::None;
             if let NavigationMessage::Alt(_) = *navigation_message {
-                if !consumed {
-                    is_alt_consumed.set(false);
-                } else {
+                if result != NavigationMessageResult::Ignored {
                     is_alt_mode.set(true);
-                    is_alt_consumed.set(true);
+                    if *alt_down {
+                        is_alt_consumed.set(true);
+                    }
+
+                    if result == NavigationMessageResult::ConsumedAndClose {
+                        bar_ref.cast::<HtmlElement>().unwrap().blur().unwrap();
+                        is_alt_mode.set(false);
+                        selected_item.set(String::new());
+                        new_message = NavigationMessage::CloseRoot; // Will automatically close menu bar
+                    }
                 }
             }
-            navigation_message.set(NavigationMessage::None);
+            navigation_message.set(new_message);
         })
     };
     let send_navigation_message = {
@@ -105,12 +124,15 @@ pub fn MenuBar() -> Html {
             let listener = EventListener::new(&document, "keydown", move |e| {
                 let e = e.dyn_ref::<web_sys::KeyboardEvent>().unwrap();
 
+                // Keyboard shortcuts
                 shortcuts.clone().iter().for_each(|(ks, id)| {
                     if ks.matches(&e) {
                         invoke(format!("menu_{}", id).as_str(), JsValue::default());
+                        return;
                     }
                 });
 
+                // Alt pressed
                 if e.key() == "Alt" {
                     // Alt pressed alone
                     if *alt_down {
@@ -218,58 +240,76 @@ pub fn MenuBar() -> Html {
         let is_open = is_open.clone();
         let selected_item = selected_item.clone();
         let opened_menu = opened_menu.clone();
+        let alt_down = alt_down.clone();
         let is_alt_mode = is_alt_mode.clone();
         let is_alt_consumed = is_alt_consumed.clone();
-        let alt_down = alt_down.clone();
         let navigation_message = navigation_message.clone();
         let bar_ref = bar_ref.clone();
         Callback::from(move |e: KeyboardEvent| {
             let mut found_target = false;
-            if *alt_down {
-                alt_shortcuts.clone().iter().for_each(|(ks, id)| {
-                    if *ks == extract_key_from_text(e.key().as_str()) {
-                        is_open.set(true);
-                        selected_item.set(id.clone());
-                        opened_menu.set(id.clone());
-                        found_target = true;
-                    }
-                });
 
-                if !found_target {
-                    is_alt_consumed.set(false);
-                } else {
-                    is_alt_mode.set(true);
-                    is_alt_consumed.set(true);
+            match e.key().as_str() {
+                "Escape" => {
+                    if !*is_open {
+                        bar_ref.cast::<HtmlElement>().unwrap().blur().unwrap();
+                    } else {
+                        navigation_message.set(NavigationMessage::Close);
+                    }
                 }
-            } else {
-                match e.key().as_str() {
-                    "Escape" => {
-                        if !*is_open {
-                            bar_ref.cast::<HtmlElement>().unwrap().blur().unwrap();
-                        }else{
-                            navigation_message.set(NavigationMessage::Close);
+                "Enter" | " " => {
+                    if !*is_open {
+                        is_open.set(true)
+                    }
+                    navigation_message.set(NavigationMessage::Fire);
+                }
+                "ArrowUp" => {
+                    navigation_message.set(NavigationMessage::Up);
+                }
+                "ArrowDown" => {
+                    if !*is_open {
+                        is_open.set(true)
+                    }
+                    navigation_message.set(NavigationMessage::Down);
+                }
+                "ArrowLeft" => {
+                    if !*is_open {
+                        is_open.set(true)
+                    }
+                    navigation_message.set(NavigationMessage::Left);
+                }
+                "ArrowRight" => {
+                    if !*is_open {
+                        is_open.set(true)
+                    }
+                    navigation_message.set(NavigationMessage::Right);
+                }
+                _ => {
+                    if e.key().as_str() != "Alt" {
+                        let key = extract_key_from_text(e.key().as_str());
+
+                        // Alt shortcuts for root menus navigation:
+                        if !*is_open || opened_menu.is_empty() {
+                            alt_shortcuts.clone().iter().for_each(|(ks, id)| {
+                                if *ks == key {
+                                    is_open.set(true);
+                                    selected_item.set(id.clone());
+                                    opened_menu.set(id.clone());
+                                    found_target = true;
+                                }
+                            });
+                        }
+
+                        if !found_target {
+                            navigation_message.set(NavigationMessage::Alt(key));
+                            // The back event will always be called and will change is_alt_consumed from navigation_message_callback
+                        } else {
+                            is_alt_mode.set(true);
+                            if *alt_down {
+                                is_alt_consumed.set(true);
+                            }
+                            return;
                         }
                     }
-                    "Enter" | " " => {
-                        if !*is_open { is_open.set(true) }
-                        navigation_message.set(NavigationMessage::Fire);
-                    }
-                    "ArrowUp" => {
-                        navigation_message.set(NavigationMessage::Up);
-                    }
-                    "ArrowDown" => {
-                        if !*is_open { is_open.set(true) }
-                        navigation_message.set(NavigationMessage::Down);
-                    }
-                    "ArrowLeft" => {
-                        if !*is_open { is_open.set(true) }
-                        navigation_message.set(NavigationMessage::Left);
-                    }
-                    "ArrowRight" => {
-                        if !*is_open { is_open.set(true) }
-                        navigation_message.set(NavigationMessage::Right);
-                    }
-                    _ => {}
                 }
             }
         })
@@ -282,10 +322,11 @@ pub fn MenuBar() -> Html {
         let opened_menu = opened_menu.clone();
         let navigation_message = navigation_message.clone();
         Callback::from(move |_: FocusEvent| {
-            if *opened_at_click_time == None { // Oppened by keyboard tab navigation
+            if *opened_at_click_time == None {
+                // Oppened by keyboard tab navigation
                 if selected_item.is_empty() {
                     selected_item.set(menus.clone()[0].id.clone());
-                    if !opened_menu.is_empty(){
+                    if !opened_menu.is_empty() {
                         navigation_message.set(NavigationMessage::CloseRoot); // Will automatically close menu bar
                     }
                 } else {
@@ -317,7 +358,8 @@ pub fn MenuBar() -> Html {
         let opened_menu = opened_menu.clone();
         let is_open = is_open.clone();
         Callback::from(move |id: String| {
-            if id.is_empty() { // Automatically close the menu bar when the last menu is closed
+            if id.is_empty() {
+                // Automatically close the menu bar when the last menu is closed
                 is_open.set(false);
             }
             opened_menu.set(id);
