@@ -425,7 +425,7 @@ impl Component for MenuItemComponent {
                     <MenuTextComponent text={ctx.props().item.name.clone().unwrap()} />
                     {
                         if !is_root {
-                            html! { <div class="menu-arrow"><div></div></div> }
+                            html! { <div class="menu-arrow"><div></div><div></div></div> }
                         } else {
                             html! {}
                         }

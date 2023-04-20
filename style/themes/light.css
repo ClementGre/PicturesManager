@@ -1,0 +1,67 @@
+/**************************************/
+/*************** HEADER ***************/
+/**************************************/
+
+header.th-light {
+    color: white;
+    background-color: rgb(55, 56, 58);
+}
+
+/* Menu Alt shortcut underline */
+header.th-light .windows-menu.alt-mode .menu p span {
+    text-decoration-color: rgb(175, 175, 175);
+}
+
+/* Menus background */
+header.th-light .windows-menu .menu>.children-box>.children {
+    background-color: rgba(55, 56, 58, 0.99);
+}
+
+
+/* Selected/opened menu */
+header.th-light .windows-menu.opened>.menu.opened,
+header.th-light .windows-menu .menu.selected,
+header.th-light .windows-menu .item.selected {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Menu Separator */
+header.th-light .windows-menu .menu-item.separator hr {
+    background-color: gray;
+}
+
+/* SubMenus arrrow */
+header.th-light .windows-menu .menu-arrow>div {
+    background-color: white;
+}
+
+/* BUTTONS */
+
+
+
+/* WINDOWS BUTTONS */
+
+header.th-light .windows-buttons>div:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+header.th-light .windows-buttons>div.close:hover {
+    background-color: rgba(180, 25, 23);
+}
+
+header.th-light .windows-buttons>div>div {
+    background-color: white;
+}
+header.th-light .windows-buttons>div.maximize>div {
+    background-color: transparent;
+    border-color: white;
+}
+
+/**************************************/
+/************* SIDE PANES *************/
+/**************************************/
+
+
+
+/**************************************/
+/************* MAIN PANE **************/
+/**************************************/

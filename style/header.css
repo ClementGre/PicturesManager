@@ -8,8 +8,6 @@ header * {
 
 header {
     height: 40px;
-    color: white;
-    background-color: rgb(55, 56, 58);
     overflow: visible;
     display: flex;
     flex-direction: row;
@@ -54,6 +52,7 @@ header .windows-menu {
     padding: 0;
     align-items: stretch;
     outline: none;
+    font-weight: 300;
 }
 
 header .windows-menu .menu {
@@ -71,7 +70,6 @@ header .windows-menu.alt-mode .menu p span{
     pointer-events: none;
     white-space: nowrap;
     text-decoration: underline;
-    text-decoration-color: rgb(175, 175, 175);
     text-underline-offset: 2px;
 }
 
@@ -102,7 +100,6 @@ header .windows-menu .menu>.children-box>.children {
     flex-direction: column;
     max-height: 100%;
     border-radius: 0 0 5px 5px;
-    background-color: rgba(55, 56, 58, 0.99);
     /* -webkit-backdrop-filter: blur(5px);
     backdrop-filter: blur(5px); */
     pointer-events: all;
@@ -129,16 +126,9 @@ header .windows-menu .menu .menu-item {
     outline: none;
 }
 
-header .windows-menu.opened > .menu.opened,
-header .windows-menu .menu.selected,
-header .windows-menu .item.selected {
-    background-color: rgba(0, 0, 0, 0.2);
-}
-
 header .windows-menu .menu-item.separator hr {
     width: 100%;
     height: 1px;
-    background-color: gray;
     border: none;
     margin: 5px 0;
 }
@@ -150,16 +140,18 @@ header .windows-menu .menu-arrow {
 
 header .windows-menu .menu-arrow>div {
     width: 10px;
-    height: 10px;
+    height: 2px;
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translateX(-50%) translateY(-50%) rotate(45deg);
-    background-color: transparent;
-    border: none;
-    border-top: 2px solid white;
-    border-right: 2px solid white;
-    border-radius: 2px;
+    border-radius: 1px;
+    transform-origin: center right;
+}
+header .windows-menu .menu-arrow>div:first-child {
+    transform: translateX(-50%) translateY(calc(-50% + 0.354px)) rotate(45deg);
+}
+header .windows-menu .menu-arrow>div:last-child {
+    transform: translateX(-50%) translateY(calc(-50% - 0.354px)) rotate(-45deg);
 }
 
 /* BUTTONS */
@@ -179,14 +171,6 @@ header .windows-buttons>div {
     transition: all 0.2s ease-in-out;
 }
 
-header .windows-buttons>div:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-}
-
-header .windows-buttons>div.close:hover {
-    background-color: rgba(180, 25, 23);
-}
-
 header .windows-buttons>div>div {
     position: absolute;
     top: 50%;
@@ -204,7 +188,8 @@ header .windows-buttons>div.minimize>div {
 
 header .windows-buttons>div.maximize>div {
     background-color: transparent;
-    border: 1px solid white;
+    border-style: solid;
+    border-width: 1px;
 }
 
 header .windows-buttons>div.close>div.first {

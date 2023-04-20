@@ -1,5 +1,6 @@
 use std::{fs::create_dir_all, fs::File, io::{BufWriter, BufReader}, sync::{Mutex, MutexGuard}};
 
+use pm_common::data_structs::Theme;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle};
 
@@ -18,14 +19,6 @@ pub struct AppData {
 pub struct Settings {
     theme: Theme,
     language: Option<String>,
-}
-
-#[derive(Deserialize, Serialize, Default)]
-pub enum Theme {
-    LIGHT,
-    DARK,
-    #[default]
-    SYSTEM,
 }
 
 impl AppDataState {

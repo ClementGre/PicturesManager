@@ -14,6 +14,7 @@ use std::fs::read;
 use utils::translator::TranslatorState;
 mod utils;
 use utils::logger::{get_logger_plugin, log_from_front};
+use utils::settings::{get_theme};
 mod app_data;
 mod gallery;
 
@@ -159,7 +160,8 @@ fn main() {
             window_maximize,
             window_close,
             get_language,
-            menu_quit
+            menu_quit,
+            get_theme
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -1,11 +1,11 @@
 use crate::{invoke_async};
 use crate::utils::logger::*;
-use once_cell::sync::OnceCell;
+use pm_common::data_structs::Theme;
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::to_value;
 use wasm_bindgen::JsValue;
-use wasm_bindgen_futures::spawn_local;
 use web_sys::window;
+use yew::platform::spawn_local;
 use yew::prelude::*;
 use yew::suspense::use_future;
 
@@ -14,13 +14,11 @@ use crate::leftbar::leftbar::LeftBar;
 use crate::mainpane::mainpane::MainPane;
 use crate::rightbar::rightbar::RightBar;
 
-
-pub static MACOS: OnceCell<bool> = OnceCell::new();
-
 #[derive(Clone, Debug, PartialEq)]
 pub struct Context {
     pub macos: bool,
     pub windows: bool,
+    pub theme: Theme,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -34,10 +32,11 @@ pub fn App() -> HtmlResult {
     let lang = use_future(|| async { invoke_async("get_language", JsValue::default()).await.as_string().unwrap() })?;
     info(lang.as_str());
 
-    //let os = *use_future(|| async { invoke_async("get_os", JsValue::default()).await.as_f64().unwrap() as u16 })?;
+    let theme = use_future(|| async { serde_wasm_bindgen::from_value::<Theme>(invoke_async("get_theme", JsValue::default()).await).unwrap_or(Theme::SYSTEM) })?;
     let os = window().unwrap().navigator().app_version().unwrap();
-    let _ = MACOS.set(os.contains("Mac")).unwrap();
-    let context = use_state(|| Context { macos: os.contains("Mac"), windows: os.contains("Win") });
+
+
+    let context = use_state(|| Context { macos: os.contains("Mac"), windows: os.contains("Win"), theme: *theme });
 
     /*let greet_input_ref = use_node_ref();
 
@@ -115,7 +114,7 @@ pub fn App() -> HtmlResult {
             <ContextProvider<Context> context={(*context).clone()}>
                 <Header/>
                 <button type="button" onclick={event}>{"Greet"}</button>
-                <main>
+                <main class="light">
                     <LeftBar/>
                     <MainPane/>
                     <RightBar/>

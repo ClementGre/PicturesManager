@@ -1,3 +1,7 @@
+:root {
+    --system-ui: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
 html, body{
     height: 100%;
     width: 100%;
@@ -8,7 +12,7 @@ body{
     display: flex;
     flex-flow: column;
     align-items: stretch;
-    font-family: 'Open Sans';
+    font-family: var(--system-ui);
     font-weight: 400;
     font-size: 11pt;
 }

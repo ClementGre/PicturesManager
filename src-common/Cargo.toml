@@ -8,6 +8,9 @@ repository = "https://github.com/ClementGre/PicturesManager"
 edition = "2021"
 rust-version = "1.57"
 
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+
 [lib]
 name = "pm_common"
 path = "src/lib.rs"
