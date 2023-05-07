@@ -18,14 +18,15 @@
         "open": true
       },
       "window": {
-          "startDragging": true,
-          "maximize": true,
-          "unmaximize": true
+          "all": true
       },
       "dialog": {
         "all": true
       },
       "http": {
+        "all": true
+      },
+      "os": {
         "all": true
       }
     },

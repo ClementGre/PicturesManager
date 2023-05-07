@@ -1,60 +1,25 @@
-#![cfg_attr(
-    all(not(debug_assertions), target_os = "windows"),
-    windows_subsystem = "windows"
-)]
+#![cfg_attr(all(not(debug_assertions), target_os = "windows"), windows_subsystem = "windows")]
 
 use app_data::{AppData, AppDataState};
 use gallery::windows_galleries::WindowsGalleriesState;
-use tauri::{http::ResponseBuilder, Manager, Window};
+use tauri::{http::ResponseBuilder, Manager};
 mod header;
 use header::window::{window_close, window_maximize, window_minimize};
-use log::{info, trace};
+use log::info;
 use std::env;
 use std::fs::read;
 use utils::translator::TranslatorState;
 mod utils;
+use utils::commands::{get_theme_or_os, greet, is_system_theme};
 use utils::logger::{get_logger_plugin, log_from_front};
-use utils::settings::{get_theme};
 mod app_data;
 mod gallery;
 
+use header::menubar::menu_quit;
 #[cfg(target_os = "macos")]
 use header::menubar::setup_menubar;
-use header::menubar::menu_quit;
 
 use crate::utils::translator::{get_language, Translator};
-
-#[tauri::command]
-fn greet(
-    window: Window,
-    _: tauri::AppHandle,
-    app_data: tauri::State<AppDataState>,
-    galleries: tauri::State<WindowsGalleriesState>,
-    _: tauri::State<TranslatorState>,
-    name: &str,
-) -> String {
-    trace!("FROM TRACE !!! {:?}", env::var("CARGO_CFG_TARGET_OS"));
-
-    format!(
-        "Hello, {}!  window_label = {}  settings_language = {}  gallery_path = {}",
-        name,
-        window.label(),
-        app_data
-            .data()
-            .get_settings()
-            .get_language()
-            .clone()
-            .unwrap_or(String::from("Os defined")),
-        galleries
-            .get_galleries()
-            .iter()
-            .find(|gallery| gallery.get_label() == window.label())
-            .unwrap()
-            .get_path()
-    )
-}
-
-
 
 fn main() {
     #[allow(unused_mut)]
@@ -63,9 +28,7 @@ fn main() {
         *data.data() = AppData::load(&app.app_handle());
 
         let translator = app.state::<TranslatorState>();
-        *translator.translator.lock().unwrap() = Some(Translator::new(
-            data.data().get_settings().get_language().clone(),
-        ));
+        *translator.translator.lock().unwrap() = Some(Translator::new(data.data().get_settings().get_language().clone()));
 
         // let mut errors = vec![];
         // let bundle = translator.translator.lock().unwrap();
@@ -74,10 +37,7 @@ fn main() {
 
         let galleries = app.state::<WindowsGalleriesState>();
 
-        galleries.open_from_path(
-            &mut app.app_handle(),
-            String::from("/Users/clement/Downloads/Gallery"),
-        );
+        galleries.open_from_path(&mut app.app_handle(), String::from("/Users/clement/Downloads/Gallery"));
 
         Ok(())
     });
@@ -97,12 +57,8 @@ fn main() {
                 galleries.on_close(event.window().label().into());
 
                 if event.window().app_handle().windows().len() == 0 {
-                    info!("🚩No more windows, exiting");
-                    event
-                        .window()
-                        .app_handle()
-                        .state::<AppDataState>()
-                        .save(&event.window().app_handle());
+                    info!("🚩 No more windows, exiting");
+                    event.window().app_handle().state::<AppDataState>().save(&event.window().app_handle());
                 }
             }
             _ => {}
@@ -116,7 +72,7 @@ fn main() {
             }
         })
         .register_uri_scheme_protocol("reqimg", move |_, request| {
-            info!("🚩Request: {:?}", request);
+            info!("🚩 Request: {:?}", request);
 
             let res_not_img = ResponseBuilder::new().status(404).body(Vec::new());
             if request.method() != "GET" {
@@ -154,14 +110,15 @@ fn main() {
                 .build(),
         )
         .invoke_handler(tauri::generate_handler![
-            greet,
             log_from_front,
             window_minimize,
             window_maximize,
             window_close,
             get_language,
             menu_quit,
-            get_theme
+            greet,
+            get_theme_or_os,
+            is_system_theme
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

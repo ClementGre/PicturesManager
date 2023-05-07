@@ -1,7 +1,6 @@
 use serde::{Serialize, Deserialize};
-use serde_wasm_bindgen::to_value;
-
-use crate::invoke;
+use tauri_sys::tauri::invoke;
+use wasm_bindgen_futures::spawn_local;
 
 #[repr(usize)]
 #[derive(Debug, Hash, Serialize, Deserialize)]
@@ -40,5 +39,8 @@ pub fn tr(msg: &str){
 }
 
 pub fn log(msg: &str, level: Level){
-    invoke("log_from_front", to_value(&LoggingArgs{message: &*msg, level}).unwrap());
+    let message = msg.to_owned();
+    spawn_local(async move {
+        invoke::<_, ()>("log_from_front", &LoggingArgs{message: message.as_str(), level}).await.unwrap();
+    });
 }

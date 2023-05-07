@@ -2,7 +2,6 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 use yew::suspense::Suspense;
 use yew::{function_component, html, Html};
-
 use crate::app::App;
 
 mod app;

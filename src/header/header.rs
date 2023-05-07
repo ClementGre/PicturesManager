@@ -1,19 +1,16 @@
 use crate::header::menubar::MenuBar;
 use crate::{app::Context, invoke};
-use pm_common::data_structs::Theme;
 use wasm_bindgen::JsValue;
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    pub children: Children, // the field name `children` is important!
+    pub class: Option<String>,
 }
 
 #[function_component]
-pub fn Header() -> Html {
+pub fn Header(props: &Props) -> Html {
     let macos = use_context::<Context>().unwrap().macos;
-    let is_light_theme = use_context::<Context>().unwrap().theme != Theme::DARK;
-    let theme = use_context::<Context>().unwrap().theme;
 
     let on_minimize = Callback::from(move |_: MouseEvent| {
         invoke("window_minimize", JsValue::default());
@@ -29,7 +26,7 @@ pub fn Header() -> Html {
 
     html! {
         <>
-            <header data-tauri-drag-region="true" class={classes!(if is_light_theme {Some("th-light")} else {None})}>
+            <header data-tauri-drag-region="true" class={classes!(props.class.clone())}>
                 {
                     if macos && false {
                         html! {
@@ -39,7 +36,6 @@ pub fn Header() -> Html {
                         html! {
                             <>
                                 <div class="macos-spacer" data-tauri-drag-region="true"/>
-                                {format!("theme: {:?}", theme)}
                                 <div class="windows-icon" data-tauri-drag-region="true">
                                     <img src="public/yew.png" alt="app icon" data-tauri-drag-region="true" />
                                 </div>

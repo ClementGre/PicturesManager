@@ -461,7 +461,7 @@ impl Component for MenuItemComponent {
                 </div>
             }
         } else if let Some(name) = ctx.props().item.name.clone() {
-            let onclick = ctx.link().callback(|_: MouseEvent| MenuItemMsg::FireItem);
+            let onmouseup = ctx.link().callback(|_: MouseEvent| MenuItemMsg::FireItem);
 
             html! {
                 <div key={ctx.props().item.id.clone()} ref={self.item_ref.clone()}
@@ -469,7 +469,7 @@ impl Component for MenuItemComponent {
                         "menu-item", "item",
                         if *ctx.props().selected_item == ctx.props().item.id {Some("selected")} else {None}
                     )}
-                    {onclick} {onmouseenter} {onmouseleave}>
+                    {onmouseup} {onmouseenter} {onmouseleave}>
 
                     <MenuTextComponent text={name} />
 
