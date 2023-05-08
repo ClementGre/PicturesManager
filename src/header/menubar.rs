@@ -1,6 +1,3 @@
-use std::sync::Barrier;
-
-use crate::utils::logger::tr;
 use gloo::events::EventListener;
 use unidecode::unidecode;
 use wasm_bindgen::{JsCast, JsValue};

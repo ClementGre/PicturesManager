@@ -39,7 +39,16 @@ header.th-light .windows-menu .menu-arrow>div {
 
 /***** BUTTONS *****/
 
-
+header .buttons .button {
+    color: black;
+    background-color: transparent;
+}
+header .buttons .button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+header .buttons .button svg {
+    color: rgb(60, 60, 60);
+}
 
 /***** WINDOWS BUTTONS *****/
 

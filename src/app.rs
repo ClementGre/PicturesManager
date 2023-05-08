@@ -72,7 +72,7 @@ pub fn App() -> HtmlResult {
         <>
             <ContextProvider<Context> context={(*context).clone()}>
                 <Header class={if *theme == Theme::LIGHT { "th-light" } else { "th-dark" }}/>
-                <button type="button" onclick={greet}>{"Greet"}</button>
+                <button type="button" onclick={greet} style="display: none;">{"Greet"}</button>
                 <main class="light">
                     <LeftBar/>
                     <MainPane/>

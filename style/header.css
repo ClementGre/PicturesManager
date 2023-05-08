@@ -24,6 +24,11 @@ header .macos-spacer {
 header .spacer {
     flex-shrink: 1;
     flex-grow: 2;
+    width: 30px;
+}
+header .fixed-spacer {
+    flex-shrink: 1;
+    width: 30px;
 }
 
 /* WINDOWS ICON */
@@ -155,6 +160,19 @@ header .windows-menu .menu-arrow>div:last-child {
 }
 
 /* BUTTONS */
+
+
+header .buttons .button {
+    height: 32px;
+    width: 32px;
+    margin: 4px;
+    padding: 6px;
+    border-radius: 6px;
+}
+header .buttons .button svg {
+    width: 20px;
+    height: 20px;
+}
 
 /* WINDOWS BUTTONS */
 

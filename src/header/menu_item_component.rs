@@ -7,8 +7,7 @@ use web_sys::{Element, MouseEvent};
 use yew::{classes, html, AttrValue, Callback, Component, Context, Html, NodeRef, Properties};
 
 use crate::{
-    invoke,
-    utils::logger::{info, tr},
+    invoke
 };
 
 use super::menubar::NavigationMessageResult;
