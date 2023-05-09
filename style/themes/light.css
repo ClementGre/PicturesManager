@@ -5,6 +5,7 @@
 header.th-light {
     color: black;
     background-color: white;
+    --header-background-color: white;
 }
 
 /***** MENU BAR *****/
@@ -39,14 +40,20 @@ header.th-light .windows-menu .menu-arrow>div {
 
 /***** BUTTONS *****/
 
-header .buttons .button {
+header.th-light .buttons .button {
     color: black;
     background-color: transparent;
 }
-header .buttons .button:hover {
+header.th-light .buttons .button:hover {
     background-color: rgba(0, 0, 0, 0.1);
 }
-header .buttons .button svg {
+header.th-light .buttons .button svg {
+    color: rgb(60, 60, 60);
+}
+
+/***** TITLE *****/
+
+header.th-light .title p {
     color: rgb(60, 60, 60);
 }
 

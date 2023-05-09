@@ -22,12 +22,13 @@ header .macos-spacer {
 }
 
 header .spacer {
-    flex-shrink: 1;
+    flex-shrink: 1000000;
     flex-grow: 2;
     width: 30px;
 }
+
 header .fixed-spacer {
-    flex-shrink: 1;
+    flex-shrink: 1000000;
     width: 30px;
 }
 
@@ -70,7 +71,8 @@ header .windows-menu .menu p {
     pointer-events: none;
     white-space: nowrap;
 }
-header .windows-menu.alt-mode .menu p span{
+
+header .windows-menu.alt-mode .menu p span {
     line-height: 40px;
     pointer-events: none;
     white-space: nowrap;
@@ -152,15 +154,47 @@ header .windows-menu .menu-arrow>div {
     border-radius: 1px;
     transform-origin: center right;
 }
+
 header .windows-menu .menu-arrow>div:first-child {
     transform: translateX(-50%) translateY(calc(-50% + 0.354px)) rotate(45deg);
 }
+
 header .windows-menu .menu-arrow>div:last-child {
     transform: translateX(-50%) translateY(calc(-50% - 0.354px)) rotate(-45deg);
 }
 
 /* BUTTONS */
 
+header .buttons {
+    flex-shrink: 1;
+    min-width: 0;
+    padding: 0 4px;
+    overflow: scroll;
+    display: flex;
+    scrollbar-width: none;
+    overscroll-behavior-x: none;
+
+    background:
+        /* Prevents the visibility of the shadow when too close to an end*/
+        linear-gradient(90deg, var(--header-background-color), var(--header-background-color)) left,
+        linear-gradient(90deg, var(--header-background-color), var(--header-background-color)) right,
+        linear-gradient(90deg, var(--header-background-color), transparent) left 7px top 50%,
+        linear-gradient(90deg, transparent, var(--header-background-color)) right 7px top 50%,
+        /* The shadow */
+        radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, .2), rgba(0, 0, 0, 0)),
+        radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, .2), rgba(0, 0, 0, 0)) right 1px bottom 50%;
+    background-repeat: no-repeat;
+    background-color: var(--header-background-color);
+    background-size:
+        7px 100%, 7px 100%,
+        7px 100%, 7px 100%,
+        7px 100%, 7px 100% ;
+
+    background-attachment: local, local, local, local, scroll, scroll;
+}
+header .buttons::-webkit-scrollbar {
+    display: none;
+}
 
 header .buttons .button {
     height: 32px;
@@ -169,9 +203,39 @@ header .buttons .button {
     padding: 6px;
     border-radius: 6px;
 }
+
 header .buttons .button svg {
     width: 20px;
     height: 20px;
+}
+
+header .buttons::after {
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+/* TITLE */
+
+header .title {
+    min-width: 0;
+    flex-shrink: 1000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+header .title p {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+header .title p.title {
+    font-weight: 600;
+    font-size: 13px;
+}
+header .title p.path {
+    font-weight: 300;
+    font-size: 11px;
 }
 
 /* WINDOWS BUTTONS */
