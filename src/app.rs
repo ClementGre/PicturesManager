@@ -8,6 +8,7 @@ use tauri_sys::event::listen;
 use tauri_sys::os::{self, OsKind};
 use tauri_sys::tauri::invoke;
 use tauri_sys::window;
+use unic_langid::LanguageIdentifier;
 use yew::platform::spawn_local;
 use yew::prelude::*;
 use yew::suspense::use_future;
@@ -16,6 +17,7 @@ use crate::header::header::Header;
 use crate::leftbar::leftbar::LeftBar;
 use crate::mainpane::mainpane::MainPane;
 use crate::rightbar::rightbar::RightBar;
+use crate::utils::translator::Translator;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Context {
@@ -24,8 +26,8 @@ pub struct Context {
 }
 
 #[derive(Serialize, Deserialize)]
-struct GreetArgs<'a> {
-    name: &'a str,
+pub struct GreetArgs<'a> {
+    pub name: &'a str,
 }
 
 #[function_component]
@@ -54,6 +56,8 @@ pub fn App() -> HtmlResult {
             });
         })
     };
+
+    let translator = Translator::new("fr-FR".parse().expect("Invalid language identifier"));
 
     /* OS theme sync */
     spawn_local({

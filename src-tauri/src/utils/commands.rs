@@ -2,6 +2,7 @@ use std::env;
 
 use super::translator::TranslatorState;
 use crate::{app_data::AppDataState, gallery::windows_galleries::WindowsGalleriesState};
+use fluent::{FluentArgs, FluentValue};
 use log::trace;
 use pm_common::data_structs::Theme;
 use tauri::Window;
@@ -30,13 +31,16 @@ pub fn greet(
     _: tauri::AppHandle,
     app_data: tauri::State<AppDataState>,
     galleries: tauri::State<WindowsGalleriesState>,
-    _: tauri::State<TranslatorState>,
+    translator: tauri::State<TranslatorState>,
     name: &str,
 ) -> String {
     trace!("FROM TRACE !!! {:?}", env::var("CARGO_CFG_TARGET_OS"));
 
+    let mut args = FluentArgs::new();
+    args.set("name", FluentValue::from("John"));
+
     format!(
-        "Hello, {}!  window_label = {}  settings_language = {}  gallery_path = {}",
+        "Hello, {}!  window_label = {}  settings_language = {}  gallery_path = {}, message = {}",
         name,
         window.label(),
         app_data
@@ -50,6 +54,7 @@ pub fn greet(
             .iter()
             .find(|gallery| gallery.get_label() == window.label())
             .unwrap()
-            .get_path()
+            .get_path(),
+        translator.tra("test", &args)
     )
 }

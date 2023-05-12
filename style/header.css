@@ -173,7 +173,7 @@ header .buttons {
     display: flex;
     scrollbar-width: none;
     overscroll-behavior-x: none;
-
+    /* Scroll shadow */
     background:
         /* Prevents the visibility of the shadow when too close to an end*/
         linear-gradient(90deg, var(--header-background-color), var(--header-background-color)) left,
@@ -188,29 +188,30 @@ header .buttons {
     background-size:
         7px 100%, 7px 100%,
         7px 100%, 7px 100%,
-        7px 100%, 7px 100% ;
+        7px 100%, 7px 100%;
 
     background-attachment: local, local, local, local, scroll, scroll;
 }
+
 header .buttons::-webkit-scrollbar {
     display: none;
 }
 
-header .buttons .button {
+header .buttons button {
     height: 32px;
     width: 32px;
     margin: 4px;
     padding: 6px;
     border-radius: 6px;
+
+    border: none;
+    outline: inherit;
+    cursor: default;
 }
 
-header .buttons .button svg {
+header .buttons button svg {
     width: 20px;
     height: 20px;
-}
-
-header .buttons::after {
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 /* TITLE */
@@ -229,10 +230,12 @@ header .title p {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 header .title p.title {
     font-weight: 600;
     font-size: 13px;
 }
+
 header .title p.path {
     font-weight: 300;
     font-size: 11px;

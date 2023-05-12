@@ -1,6 +1,11 @@
+use crate::app::GreetArgs;
 use crate::header::menubar::MenuBar;
+use crate::invoke_async;
+use crate::utils::logger::info;
 use crate::{app::Context, invoke};
+use serde_wasm_bindgen::to_value;
 use wasm_bindgen::JsValue;
+use yew::platform::spawn_local;
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
@@ -23,6 +28,13 @@ pub fn Header(props: &Props) -> Html {
 
     let on_close = Callback::from(move |_: MouseEvent| {
         invoke("window_close", JsValue::default());
+    });
+
+    let on_greet = Callback::from(move |_: MouseEvent| {
+        spawn_local(async {
+            let new_msg = invoke_async("greet", to_value(&GreetArgs { name: &*"test" }).unwrap()).await;
+            info(new_msg.as_string().unwrap().as_str());
+        });
     });
 
     html! {
@@ -57,50 +69,47 @@ pub fn Header(props: &Props) -> Html {
 
                 <div class="buttons" data-tauri-drag-region="true">
                     {
-                        // Some buttons are only available on Macos because on Windows, the menu bar is more accessible
+                        // Some buttons are only available on Macos, they are duplicates from the menubar
                         if macos {
                             html! {
                                 <>
-                                    <div class="button" tabindex="0" role="button" aria-labelledby="Star">
-                                        <i class="fa-regular fa-star"></i>
-                                    </div>
-                                    <div class="button" tabindex="0" role="button" aria-labelledby="Star">
+                                    <button aria-labelledby="Star">
                                         <i class="fa-solid fa-sidebar"></i>
-                                    </div>
-                                    <div class="button" tabindex="0" role="button" aria-labelledby="Star">
+                                    </button>
+                                    <button aria-labelledby="Star">
                                         <i class="fa-brands fa-twitter"></i>
-                                    </div>
-                                    <div class="button" tabindex="0" role="button" aria-labelledby="Star">
+                                    </button>
+                                    <button aria-labelledby="Star">
                                         <i class="fa-brands fa-twitter"></i>
-                                    </div>
-                                    <div class="button" tabindex="0" role="button" aria-labelledby="Star">
+                                    </button>
+                                    <button aria-labelledby="Star">
                                         <i class="fa-brands fa-twitter"></i>
-                                    </div>
-                                    <div class="button" tabindex="0" role="button" aria-labelledby="Star">
+                                    </button>
+                                    <button aria-labelledby="Star">
                                         <i class="fa-brands fa-twitter"></i>
-                                    </div>
+                                    </button>
                                 </>
                             }
                         }else{ html!() }
                     }
-                    <div class="button" tabindex="0" role="button" aria-labelledby="Star">
+                    <button onclick={on_greet} tabindex="0" aria-labelledby="Star">
                         <i class="fa-regular fa-star"></i>
-                    </div>
-                    <div class="button" tabindex="0" role="button" aria-labelledby="Star">
+                    </button>
+                    <button aria-labelledby="Star">
                         <i class="fa-solid fa-sidebar"></i>
-                    </div>
-                    <div class="button" tabindex="0" role="button" aria-labelledby="Star">
+                    </button>
+                    <button aria-labelledby="Star">
                         <i class="fa-brands fa-twitter"></i>
-                    </div>
-                    <div class="button" tabindex="0" role="button" aria-labelledby="Star">
+                    </button>
+                    <button aria-labelledby="Star">
                         <i class="fa-brands fa-twitter"></i>
-                    </div>
-                    <div class="button" tabindex="0" role="button" aria-labelledby="Star">
+                    </button>
+                    <button aria-labelledby="Star">
                         <i class="fa-brands fa-twitter"></i>
-                    </div>
-                    <div class="button" tabindex="0" role="button" aria-labelledby="Star">
+                    </button>
+                    <button aria-labelledby="Star">
                         <i class="fa-brands fa-twitter"></i>
-                    </div>
+                    </button>
                 </div>
 
                 {
@@ -114,13 +123,13 @@ pub fn Header(props: &Props) -> Html {
                                 </div>
                                 <div class="spacer" data-tauri-drag-region="true"/>
                                 <div class="windows-buttons" data-tauri-drag-region="true">
-                                    <div class="minimize" onclick={on_minimize} tabindex="0" role="button" aria-labelledby="Minimize window">
+                                    <div class="minimize" onclick={on_minimize} role="button" aria-labelledby="Minimize window">
                                         <div></div>
                                     </div>
-                                    <div class="maximize" onclick={on_maximize} tabindex="0" role="button" aria-labelledby="Maximize window">
+                                    <div class="maximize" onclick={on_maximize} role="button" aria-labelledby="Maximize window">
                                         <div></div>
                                     </div>
-                                    <div class="close" onclick={on_close} tabindex="0" role="button" aria-labelledby="Close window">
+                                    <div class="close" onclick={on_close} role="button" aria-labelledby="Close window">
                                         <div class="first"></div>
                                         <div class="second"></div>
                                     </div>

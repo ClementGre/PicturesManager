@@ -4,22 +4,27 @@ use fluent_fallback::{Bundles, Localization};
 use fluent_resmgr::ResourceManager;
 use unic_langid::{langid, LanguageIdentifier};
 
-struct Translator {
+pub struct Translator {
     lang: LanguageIdentifier,
     bundles: Rc<Bundles<ResourceManager>>,
 }
 
 impl Translator {
-    fn load_bundles(&mut self) {
-
+    pub fn new(lang: LanguageIdentifier) -> Self {
         let res_mgr = ResourceManager::new("../translations/{locale}/{res_id}".to_string());
 
-        Localization::with_env(
+        let localization = Localization::with_env(
             vec!["front.ftl".into()],
             true,
             vec![langid!("fr-FR")],
             res_mgr,
-        ).bundles();
+        );
+        let bundles = localization.bundles();
+
+        Self {
+            lang,
+            bundles: bundles.clone(),
+        }
     }
 
     fn get_available_locales() -> io::Result<Vec<LanguageIdentifier>> {

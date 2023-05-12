@@ -1,2 +1,2 @@
-test = Good day sir!!
+test = Good day {$name}!!
 hello = Hello !

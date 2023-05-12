@@ -1,0 +1,1 @@
+hello = Bien le bonjour !

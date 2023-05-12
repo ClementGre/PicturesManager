@@ -6,7 +6,6 @@ use tauri::{http::ResponseBuilder, Manager};
 mod header;
 use header::window::{window_close, window_maximize, window_minimize};
 use log::info;
-use std::env;
 use std::fs::read;
 use utils::translator::TranslatorState;
 mod utils;
@@ -28,7 +27,7 @@ fn main() {
         *data.data() = AppData::load(&app.app_handle());
 
         let translator = app.state::<TranslatorState>();
-        *translator.translator.lock().unwrap() = Some(Translator::new(data.data().get_settings().get_language().clone()));
+        *translator.translator.lock().unwrap() = Some(Translator::new(&app, data.data().get_settings().get_language().clone()));
 
         // let mut errors = vec![];
         // let bundle = translator.translator.lock().unwrap();

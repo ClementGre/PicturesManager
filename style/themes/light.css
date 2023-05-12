@@ -40,14 +40,14 @@ header.th-light .windows-menu .menu-arrow>div {
 
 /***** BUTTONS *****/
 
-header.th-light .buttons .button {
+header.th-light .buttons button {
     color: black;
     background-color: transparent;
 }
-header.th-light .buttons .button:hover {
+header.th-light .buttons button:hover, header.th-light .buttons button:focus{
     background-color: rgba(0, 0, 0, 0.1);
 }
-header.th-light .buttons .button svg {
+header.th-light .buttons button svg {
     color: rgb(60, 60, 60);
 }
 
