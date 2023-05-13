@@ -1,5 +1,5 @@
 #[cfg(target_os = "macos")]
-use super::macos::{ToolbarThickness, WindowExt};
+use super::macos::{ToolbarThickness, WindowMacosExt};
 use tauri::{AppHandle, Window, Manager};
 use tauri_plugin_window_state::{WindowExt, StateFlags, AppHandleExt};
 use urlencoding::encode;
