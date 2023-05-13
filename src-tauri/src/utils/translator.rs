@@ -1,11 +1,10 @@
 use std::{
-    env,
     fs::{self},
     io,
-    sync::{Mutex, MutexGuard}, ops::Deref,
+    sync::{Mutex, MutexGuard},
 };
 
-use fluent::{bundle::{FluentBundle, self}, FluentResource, FluentArgs};
+use fluent::{bundle::{FluentBundle}, FluentResource, FluentArgs};
 use fluent_langneg::{negotiate_languages, NegotiationStrategy};
 use log::warn;
 use sys_locale::get_locale;

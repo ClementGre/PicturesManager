@@ -1,14 +1,13 @@
 use gloo::events::EventListener;
 use unidecode::unidecode;
-use wasm_bindgen::{JsCast, JsValue};
+use wasm_bindgen::{JsCast};
 use web_sys::HtmlElement;
 use yew::prelude::*;
 
 use crate::{
     header::menu::{get_menus, MenuItem},
     header::menu_item_component::MenuItemComponent,
-    invoke,
-    utils::{keystroke::KeyStroke, logger::info},
+    utils::{keystroke::KeyStroke, logger::info, utils::cmd},
 };
 
 fn register_shortcuts(items: &Vec<MenuItem>, shortcuts: &mut Vec<(KeyStroke, String)>) {
@@ -124,7 +123,7 @@ pub fn MenuBar() -> Html {
                 // Keyboard shortcuts
                 shortcuts.clone().iter().for_each(|(ks, id)| {
                     if ks.matches(&e) {
-                        invoke(format!("menu_{}", id).as_str(), JsValue::default());
+                        cmd(format!("menu_{}", id).as_str());
                         return;
                     }
                 });

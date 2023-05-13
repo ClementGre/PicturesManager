@@ -1,14 +1,11 @@
-use crate::invoke_async;
 use crate::utils::logger::*;
+use crate::utils::utils::{cmd_async, cmd_async_get};
 use futures::stream::StreamExt;
 use pm_common::data_structs::Theme;
 use serde::{Deserialize, Serialize};
-use serde_wasm_bindgen::to_value;
 use tauri_sys::event::listen;
 use tauri_sys::os::{self, OsKind};
-use tauri_sys::tauri::invoke;
 use tauri_sys::window;
-use unic_langid::LanguageIdentifier;
 use yew::platform::spawn_local;
 use yew::prelude::*;
 use yew::suspense::use_future;
@@ -32,10 +29,10 @@ pub struct GreetArgs<'a> {
 
 #[function_component]
 pub fn App() -> HtmlResult {
-    let lang = use_future(|| async { invoke::<(), String>("get_language", &()).await.unwrap() })?;
+    let lang = use_future(|| async { cmd_async_get::<String>("get_language").await })?;
     tr((*lang).as_str());
 
-    let theme = use_future(|| async { invoke("get_theme_or_os", &()).await.unwrap_or(Theme::LIGHT) })?;
+    let theme = use_future(|| async { cmd_async_get::<Theme>("get_theme_or_os").await })?;
     let theme = use_state(|| *theme);
     let os = use_future(|| async { os::kind().await.unwrap_or(OsKind::Linux) })?;
 
@@ -47,16 +44,6 @@ pub fn App() -> HtmlResult {
         })
     };
 
-    /* Greet example command */
-    let greet = {
-        Callback::from(move |_| {
-            spawn_local(async {
-                let new_msg = invoke_async("greet", to_value(&GreetArgs { name: &*"test" }).unwrap()).await;
-                info(new_msg.as_string().unwrap().as_str());
-            });
-        })
-    };
-
     let translator = Translator::new("fr-FR".parse().expect("Invalid language identifier"));
 
     /* OS theme sync */
@@ -65,7 +52,7 @@ pub fn App() -> HtmlResult {
         async move {
             let mut events = listen::<tauri_sys::window::Theme>("tauri://theme-changed").await.unwrap();
             while let Some(e) = events.next().await {
-                if invoke::<(), bool>("is_system_theme", &()).await.unwrap() {
+                if cmd_async::<(), bool>("is_system_theme", &()).await {
                     theme.set(if e.payload == window::Theme::Light { Theme::LIGHT } else { Theme::DARK });
                 }
             }
@@ -76,7 +63,6 @@ pub fn App() -> HtmlResult {
         <>
             <ContextProvider<Context> context={(*context).clone()}>
                 <Header class={if *theme == Theme::LIGHT { "th-light" } else { "th-dark" }}/>
-                <button type="button" onclick={greet} style="display: none;">{"Greet"}</button>
                 <main class="light">
                     <LeftBar/>
                     <MainPane/>

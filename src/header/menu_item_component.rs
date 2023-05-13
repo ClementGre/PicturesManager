@@ -1,14 +1,10 @@
 use crate::header::menubar::extract_key_from_text;
+use crate::utils::utils::cmd;
 use gloo_timers::callback::Timeout;
 use wasm_bindgen::JsCast;
-use wasm_bindgen::JsValue;
 use web_sys::HtmlElement;
 use web_sys::{Element, MouseEvent};
 use yew::{classes, html, AttrValue, Callback, Component, Context, Html, NodeRef, Properties};
-
-use crate::{
-    invoke
-};
 
 use super::menubar::NavigationMessageResult;
 use super::menubar::NavigationMessageResult::Consumed;
@@ -87,7 +83,7 @@ impl Component for MenuItemComponent {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             MenuItemMsg::FireItem => {
-                invoke(format!("menu_{}", ctx.props().item.id).as_str(), JsValue::default());
+                cmd(format!("menu_{}", ctx.props().item.id).as_str());
                 return true;
             }
             MenuItemMsg::UpdatePosition(x, y) => {
@@ -365,7 +361,7 @@ impl Component for MenuItemComponent {
                                     ctx.props().navigation_message_received.emit(NavigationMessageResult::Consumed);
                                 } else {
                                     // If the target item is a simple item -> fire it
-                                    invoke(format!("menu_{}", item.id).as_str(), JsValue::default());
+                                    cmd(format!("menu_{}", item.id).as_str());
                                     ctx.link().send_message(MenuItemMsg::CloseMenu);
                                     ctx.props().navigation_message_received.emit(NavigationMessageResult::ConsumedAndClose);
                                 }

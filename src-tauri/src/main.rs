@@ -2,10 +2,11 @@
 
 use app_data::{AppData, AppDataState};
 use gallery::windows_galleries::WindowsGalleriesState;
+use header::window::{close_window, save_windows_states};
 use tauri::{http::ResponseBuilder, Manager};
 mod header;
-use header::window::{window_close, window_maximize, window_minimize};
 use log::info;
+use tauri_plugin_window_state::{StateFlags};
 use std::fs::read;
 use utils::translator::TranslatorState;
 mod utils;
@@ -14,7 +15,7 @@ use utils::logger::{get_logger_plugin, log_from_front};
 mod app_data;
 mod gallery;
 
-use header::menubar::menu_quit;
+use header::menubar::{menu_quit, menu_close_window};
 #[cfg(target_os = "macos")]
 use header::menubar::setup_menubar;
 
@@ -49,14 +50,20 @@ fn main() {
     builder
         .on_window_event(|event| match event.event() {
             tauri::WindowEvent::Focused(_) => {}
+            tauri::WindowEvent::CloseRequested { api, .. } => {
+                save_windows_states(&event.window().app_handle());
+            }
             tauri::WindowEvent::Destroyed => {
                 let app_handle = event.window().app_handle();
 
                 let galleries = app_handle.state::<WindowsGalleriesState>();
                 galleries.on_close(event.window().label().into());
 
+                
+
                 if event.window().app_handle().windows().len() == 0 {
                     info!("🚩 No more windows, exiting");
+                    
                     event.window().app_handle().state::<AppDataState>().save(&event.window().app_handle());
                 }
             }
@@ -105,19 +112,18 @@ fn main() {
         .plugin(
             tauri_plugin_window_state::Builder::default()
                 .with_denylist(&vec!["settings"])
-                //.with_state_flags(tauri_plugin_window_state::StateFlags::VISIBLE)
+                .with_state_flags(StateFlags::SIZE & StateFlags::POSITION & StateFlags::MAXIMIZED & StateFlags::FULLSCREEN)
                 .build(),
         )
         .invoke_handler(tauri::generate_handler![
             log_from_front,
-            window_minimize,
-            window_maximize,
-            window_close,
             get_language,
             menu_quit,
+            menu_close_window,
             greet,
             get_theme_or_os,
-            is_system_theme
+            is_system_theme,
+            close_window
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

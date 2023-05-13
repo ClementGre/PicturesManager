@@ -1,7 +1,10 @@
 #[cfg(target_os = "macos")]
 use tauri::AboutMetadata;
+use tauri::{Window, AppHandle};
 #[cfg(target_os = "macos")]
 use tauri::{CustomMenuItem, Menu, MenuItem, Submenu};
+
+use super::window::{quit_app, close_window};
 
 #[cfg(target_os = "macos")]
 pub fn setup_menubar(app_name: String) -> Menu {
@@ -68,6 +71,10 @@ pub fn setup_menubar(app_name: String) -> Menu {
 
 
 #[tauri::command]
-pub fn menu_quit(app: tauri::AppHandle) {
-    app.exit(0);
+pub fn menu_quit(app: AppHandle) {
+    quit_app(&app);
+}
+#[tauri::command]
+pub fn menu_close_window(window: Window, app: AppHandle) {
+    close_window(window, app);
 }

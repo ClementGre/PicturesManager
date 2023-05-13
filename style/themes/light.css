@@ -4,8 +4,8 @@
 
 header.th-light {
     color: black;
-    background-color: white;
     --header-background-color: white;
+    background-color: var(--header-background-color);
 }
 
 /***** MENU BAR *****/
@@ -64,7 +64,7 @@ header.th-light .windows-buttons>div:hover {
 }
 
 header.th-light .windows-buttons>div.close:hover {
-    background-color: rgba(180, 25, 23);
+    background-color: rgb(212, 52, 41);
 }
 
 header.th-light .windows-buttons>div>div {

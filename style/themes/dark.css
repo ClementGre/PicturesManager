@@ -4,8 +4,8 @@
 
 header.th-dark {
     color: white;
-    background-color: rgb(55, 56, 58);
     --header-background-color: rgb(55, 56, 58);
+    background-color: var(--header-background-color);
 }
 
 /***** MENU BAR *****/
@@ -25,7 +25,7 @@ header.th-dark .windows-menu .menu>.children-box>.children {
 header.th-dark .windows-menu.opened>.menu.opened,
 header.th-dark .windows-menu .menu.selected,
 header.th-dark .windows-menu .item.selected {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Menu Separator */
@@ -56,7 +56,7 @@ header.th-dark .buttons button svg {
 /***** TITLE *****/
 
 header.th-dark .title p {
-    color: rgb(230, 230, 230);
+    color: #e6e6e6;
 }
 
 
@@ -64,11 +64,11 @@ header.th-dark .title p {
 /***** WINDOWS BUTTONS *****/
 
 header.th-dark .windows-buttons>div:hover {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 header.th-dark .windows-buttons>div.close:hover {
-    background-color: rgba(180, 25, 23);
+    background-color: #d43429;
 }
 
 header.th-dark .windows-buttons>div>div {

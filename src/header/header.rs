@@ -1,10 +1,9 @@
 use crate::app::GreetArgs;
 use crate::header::menubar::MenuBar;
-use crate::invoke_async;
 use crate::utils::logger::info;
-use crate::{app::Context, invoke};
-use serde_wasm_bindgen::to_value;
-use wasm_bindgen::JsValue;
+use crate::app::Context;
+use crate::utils::utils::{cmd, cmd_async};
+use tauri_sys::window::current_window;
 use yew::platform::spawn_local;
 use yew::prelude::*;
 
@@ -15,25 +14,28 @@ pub struct Props {
 
 #[function_component]
 pub fn Header(props: &Props) -> Html {
-    let mut macos = use_context::<Context>().unwrap().macos;
-    macos = false;
+    let macos = use_context::<Context>().unwrap().macos;
 
     let on_minimize = Callback::from(move |_: MouseEvent| {
-        invoke("window_minimize", JsValue::default());
+        spawn_local(async {
+             current_window().minimize().await.expect("failed to minimize window");
+        });
     });
 
     let on_maximize = Callback::from(move |_: MouseEvent| {
-        invoke("window_maximize", JsValue::default());
+        spawn_local(async {
+            current_window().toggle_maximize().await.expect("failed to minimize window");
+        });
     });
 
     let on_close = Callback::from(move |_: MouseEvent| {
-        invoke("window_close", JsValue::default());
+        cmd("menu_close_window");
     });
 
     let on_greet = Callback::from(move |_: MouseEvent| {
         spawn_local(async {
-            let new_msg = invoke_async("greet", to_value(&GreetArgs { name: &*"test" }).unwrap()).await;
-            info(new_msg.as_string().unwrap().as_str());
+            let new_msg = cmd_async::<_, String>("greet", &GreetArgs { name: &*"test" }).await;
+            info(new_msg.as_str());
         });
     });
 

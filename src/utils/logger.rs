@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
-use tauri_sys::tauri::invoke;
-use wasm_bindgen_futures::spawn_local;
+
+use super::utils::cmd_arg;
 
 #[repr(usize)]
 #[derive(Debug, Hash, Serialize, Deserialize)]
@@ -40,7 +40,5 @@ pub fn tr(msg: &str){
 
 pub fn log(msg: &str, level: Level){
     let message = msg.to_owned();
-    spawn_local(async move {
-        invoke::<_, ()>("log_from_front", &LoggingArgs{message: message.as_str(), level}).await.unwrap();
-    });
+    cmd_arg("log_from_front", &LoggingArgs{message: message.as_str(), level});
 }
