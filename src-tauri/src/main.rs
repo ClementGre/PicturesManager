@@ -10,7 +10,8 @@ use tauri_plugin_window_state::{StateFlags};
 use std::fs::read;
 use utils::translator::TranslatorState;
 mod utils;
-use utils::commands::{get_theme_or_os, greet, is_system_theme};
+use utils::commands::{greet};
+use crate::app_data::get_settings;
 use utils::logger::{get_logger_plugin, log_from_front};
 mod app_data;
 mod gallery;
@@ -28,7 +29,7 @@ fn main() {
         *data.data() = AppData::load(&app.app_handle());
 
         let translator = app.state::<TranslatorState>();
-        *translator.translator.lock().unwrap() = Some(Translator::new(&app, data.data().get_settings().get_language().clone()));
+        *translator.translator.lock().unwrap() = Some(Translator::new(&app, data.data().settings.language.clone()));
 
         // let mut errors = vec![];
         // let bundle = translator.translator.lock().unwrap();
@@ -118,12 +119,12 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             log_from_front,
             get_language,
+            greet,
+            // Data
+            get_settings,
+            // Menus
             menu_quit,
             menu_close_window,
-            greet,
-            get_theme_or_os,
-            is_system_theme,
-            close_window
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

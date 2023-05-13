@@ -4,7 +4,6 @@ use tauri::{AppHandle, Window, Manager};
 use tauri_plugin_window_state::{WindowExt, StateFlags, AppHandleExt};
 use urlencoding::encode;
 
-#[tauri::command]
 pub fn close_window(window: Window, app: AppHandle) {
     save_windows_states(&app);
     let _ = window.close();

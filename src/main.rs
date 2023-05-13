@@ -1,7 +1,6 @@
 use yew::suspense::Suspense;
 use yew::{function_component, html, Html};
 use crate::app::App;
-
 mod app;
 mod header;
 mod leftbar;
@@ -32,8 +31,7 @@ fn main() {
 pub fn AppLoader() -> Html {
     wasm_logger::init(wasm_logger::Config::default());
 
-    let fallback = html! {};
-
+    let fallback = html! {"Loading..."};
     html! {
         <>
             <Suspense {fallback}>

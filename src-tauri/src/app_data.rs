@@ -1,6 +1,6 @@
 use std::{fs::create_dir_all, fs::File, io::{BufWriter, BufReader}, sync::{Mutex, MutexGuard}};
 
-use pm_common::data_structs::Theme;
+use pm_common::app_data::Settings;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle};
 
@@ -11,14 +11,8 @@ pub struct AppDataState {
 
 #[derive(Deserialize, Serialize, Default)]
 pub struct AppData {
-    settings: Settings,
-    last_gallery: Option<String>
-}
-
-#[derive(Deserialize, Serialize, Default)]
-pub struct Settings {
-    theme: Theme,
-    language: Option<String>,
+    pub settings: Settings,
+    pub last_gallery: Option<String>
 }
 
 impl AppDataState {
@@ -50,25 +44,9 @@ impl AppData {
             AppData::default()
         }
     }
-    pub fn get_settings(&self) -> &Settings {
-        &self.settings
-    }
 }
-impl Settings {
-    #[allow(dead_code)]
-    pub fn get_theme(&self) -> &Theme {
-        &self.theme
-    }
-    #[allow(dead_code)]
-    pub fn set_theme(&mut self, theme: Theme) {
-        self.theme = theme;
-    }
-    #[allow(dead_code)]
-    pub fn get_language(&self) -> &Option<String> {
-        &self.language
-    }
-    #[allow(dead_code)]
-    pub fn set_language(&mut self, language: Option<String>) {
-        self.language = language;
-    }
+
+#[tauri::command]
+pub fn get_settings(app_data: tauri::State<AppDataState>) -> Settings {
+    app_data.data().settings.clone()
 }
