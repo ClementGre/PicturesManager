@@ -1,0 +1,1 @@
+hello = Have a good day !

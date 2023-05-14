@@ -2321,7 +2321,6 @@ version = "0.0.0"
 dependencies = [
  "cocoa",
  "fluent",
- "fluent-fallback",
  "fluent-langneg",
  "fluent-resmgr",
  "intl-memoizer",
@@ -2349,13 +2348,14 @@ name = "pictures_manager_ui"
 version = "0.0.0"
 dependencies = [
  "fluent",
- "fluent-fallback",
+ "fluent-langneg",
  "fluent-resmgr",
  "futures",
  "gloo",
  "gloo-console",
  "gloo-timers",
  "gloo-utils",
+ "intl-memoizer",
  "js-sys",
  "log",
  "once_cell",

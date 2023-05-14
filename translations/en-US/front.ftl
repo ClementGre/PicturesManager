@@ -1,1 +1,1 @@
-test = Bien le bonjour monsieur !!
+test = Hi, you're on the front !

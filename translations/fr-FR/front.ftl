@@ -1,2 +1,1 @@
-test = Bien le bonjour monsieur !!
-hello = Bonjour !
+test = Bien le bonjour monsieur {$name}, vous avez spécifié le nombre {$nombre} !!

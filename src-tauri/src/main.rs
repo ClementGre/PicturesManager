@@ -2,7 +2,7 @@
 
 use app_data::{AppData, AppDataState};
 use gallery::windows_galleries::WindowsGalleriesState;
-use header::window::{close_window, save_windows_states};
+use header::window::{save_windows_states};
 use tauri::{http::ResponseBuilder, Manager};
 mod header;
 use log::info;
@@ -20,7 +20,7 @@ use header::menubar::{menu_quit, menu_close_window};
 #[cfg(target_os = "macos")]
 use header::menubar::setup_menubar;
 
-use crate::utils::translator::{get_language, Translator};
+use crate::utils::translator::{get_available_locales, get_system_locale, get_translation_file, Translator};
 
 fn main() {
     #[allow(unused_mut)]
@@ -51,7 +51,7 @@ fn main() {
     builder
         .on_window_event(|event| match event.event() {
             tauri::WindowEvent::Focused(_) => {}
-            tauri::WindowEvent::CloseRequested { api, .. } => {
+            tauri::WindowEvent::CloseRequested { /* api, */ .. } => {
                 save_windows_states(&event.window().app_handle());
             }
             tauri::WindowEvent::Destroyed => {
@@ -118,7 +118,9 @@ fn main() {
         )
         .invoke_handler(tauri::generate_handler![
             log_from_front,
-            get_language,
+            get_available_locales,
+            get_system_locale,
+            get_translation_file,
             greet,
             // Data
             get_settings,

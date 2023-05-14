@@ -1,8 +1,8 @@
-use crate::app::GreetArgs;
 use crate::header::menubar::MenuBar;
 use crate::utils::logger::info;
 use crate::app::Context;
 use crate::utils::utils::{cmd, cmd_async};
+use serde::{Serialize, Deserialize};
 use tauri_sys::window::current_window;
 use yew::platform::spawn_local;
 use yew::prelude::*;
@@ -10,6 +10,11 @@ use yew::prelude::*;
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub class: Option<String>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct GreetArgs<'a> {
+    pub name: &'a str,
 }
 
 #[function_component]

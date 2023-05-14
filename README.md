@@ -15,6 +15,12 @@ Developed with [Tauri](https://tauri.app) (web app) with a Rust backend and a Ru
 - Exif tools: fix exif data, add exif to images that do not have exif data.
 - This app is not only a utility app. It also aims to have complete viewing features.
 
+# Main frameworks and libraries
+
+- [Tauri](https://github.com/tauri-apps/tauri) framework for building desktop web apps based on a rust backend.
+- [Yew](https://github.com/yewstack/yew) WebAssembly framework for building client web apps.
+- [Fuent](https://github.com/projectfluent/fluent-rs) Fluent Project translations file format support.
+
 # Build
 
 ### Dev

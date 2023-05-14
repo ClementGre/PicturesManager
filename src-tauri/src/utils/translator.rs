@@ -1,13 +1,12 @@
 use std::{
-    fs::{self},
-    io,
+    fs,
     sync::{Mutex, MutexGuard},
 };
 
-use fluent::{bundle::{FluentBundle}, FluentResource, FluentArgs};
+use fluent::{bundle::FluentBundle, FluentArgs, FluentResource};
 use fluent_langneg::{negotiate_languages, NegotiationStrategy};
 use log::warn;
-use sys_locale::get_locale;
+use tauri::{AppHandle, PathResolver};
 use unic_langid::{langid, LanguageIdentifier};
 
 #[derive(Default)]
@@ -35,7 +34,7 @@ impl TranslatorState {
                 warn!("Error while formatting pattern: {:?}", errors);
             }
             result.to_string()
-        }else{
+        } else {
             String::from("No translation found")
         }
     }
@@ -45,26 +44,21 @@ impl TranslatorState {
 }
 
 pub struct Translator {
-    lang: Vec<LanguageIdentifier>,
+    // locales: Vec<LanguageIdentifier>,
     bundles: Vec<TrBundle>,
 }
-
 type TrBundle = FluentBundle<FluentResource, intl_memoizer::concurrent::IntlLangMemoizer>;
 
 impl Translator {
     pub fn new(app: &tauri::App, app_language: Option<String>) -> Self {
-        // let res_mgr = ResourceManager::new("../translations/{locale}/{res_id}".to_string());
-        // let bundles = Localization::with_env(vec!["back.ftl".into(), "common.ftl".into()], true, locales.clone(), res_mgr)
-        //     .bundles()
-        //     .to_owned();
-
-        let requested: Vec<LanguageIdentifier> = if app_language.is_some() {
-            vec![app_language.unwrap_or("en-US".into()).parse().unwrap()]
-        } else {
-            vec![get_locale().unwrap_or("en-US".into()).parse().unwrap()]
-        };
-
-        let available = Self::get_available_locales(app).unwrap();
+        let requested: Vec<LanguageIdentifier> = vec![app_language
+            .unwrap_or(sys_locale::get_locale().unwrap_or("en-US".into()))
+            .parse()
+            .unwrap()];
+        let available = get_available_locales_strings(app.path_resolver())
+            .iter()
+            .map(|s| s.parse().expect("unable to parse locale directory name"))
+            .collect::<Vec<LanguageIdentifier>>();
 
         let locales: Vec<LanguageIdentifier> = negotiate_languages(&requested, &available, Some(&langid!("en-US")), NegotiationStrategy::Filtering)
             .into_iter()
@@ -81,10 +75,10 @@ impl Translator {
             })
             .collect::<Vec<TrBundle>>();
 
-        Self { lang: locales, bundles }
+        Self { /* locales, */ bundles }
     }
 
-    pub fn get_bundle_for_key(&self, key: &str) -> Option<&TrBundle>{
+    pub fn get_bundle_for_key(&self, key: &str) -> Option<&TrBundle> {
         self.bundles.iter().find(|bundle| bundle.has_message(&key))
     }
 
@@ -92,39 +86,51 @@ impl Translator {
         let resource_path = app
             .path_resolver()
             .resolve_resource(format!("../translations/{}/{}.ftl", locale, res_id))
-            .expect("Failed to resolve language resource");
+            .expect("failed to resolve language resource");
 
         bundle
             .add_resource(
-                FluentResource::try_new(fs::read_to_string(&resource_path).expect("Failed to load translation file"))
-                    .expect("Failed to parse translation file"),
+                FluentResource::try_new(fs::read_to_string(&resource_path).expect("failed to load translation file"))
+                    .expect("failed to parse translation file"),
             )
             .unwrap();
-    }
-
-    fn get_available_locales(app: &tauri::App) -> io::Result<Vec<LanguageIdentifier>> {
-        let path = app
-            .path_resolver()
-            .resolve_resource("../translations/")
-            .expect("Failed to resolve translations directory");
-
-        let res_dir = fs::read_dir(path)?;
-
-        let loc = res_dir
-            .into_iter()
-            .filter_map(|entry| entry.ok())
-            .filter(|entry| entry.path().is_dir())
-            .filter_map(|dir| {
-                let file_name = dir.file_name();
-                let name = file_name.to_str()?;
-                Some(name.parse().expect("Parsing failed."))
-            })
-            .collect();
-        Ok(loc)
     }
 }
 
 #[tauri::command]
-pub fn get_language(state: tauri::State<TranslatorState>) -> String {
-    state.translator.lock().unwrap().as_ref().unwrap().lang[0].to_string()
+pub fn get_available_locales(app: AppHandle) -> Vec<String> {
+    get_available_locales_strings(app.path_resolver())
+}
+#[tauri::command]
+pub fn get_system_locale() -> Option<String> {
+    sys_locale::get_locale()
+}
+
+#[tauri::command]
+pub fn get_translation_file(app: AppHandle, locale: &str, resid: &str) -> String {
+    let path = app
+        .path_resolver()
+        .resolve_resource(format!("../translations/{}/{}.ftl", locale, resid))
+        .expect("failed to resolve language resource");
+
+    fs::read_to_string(path).expect("failed to load translation file in command get_translation_file")
+}
+
+fn get_available_locales_strings(path_resolver: PathResolver) -> Vec<String> {
+    let path = path_resolver
+        .resolve_resource("../translations/")
+        .expect("Failed to resolve translations directory");
+
+    let res_dir = fs::read_dir(path).expect("failed to read translations directory");
+
+    res_dir
+        .into_iter()
+        .filter_map(|entry| entry.ok())
+        .filter(|entry| entry.path().is_dir())
+        .filter_map(|dir| {
+            let file_name = dir.file_name();
+            let file_name = file_name.to_str()?;
+            Some(file_name.to_string())
+        })
+        .collect()
 }
