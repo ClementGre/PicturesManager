@@ -7,12 +7,12 @@ pub enum ToolbarThickness {
     Thin,
 }
 
-pub trait WindowExt {
+pub trait WindowMacosExt {
     #[cfg(target_os = "macos")]
     fn set_transparent_titlebar(&self, thickness: ToolbarThickness);
 }
 
-impl<R: Runtime> WindowExt for Window<R> {
+impl<R: Runtime> WindowMacosExt for Window<R> {
     #[cfg(target_os = "macos")]
     fn set_transparent_titlebar(&self, thickness: ToolbarThickness) {
         use cocoa::appkit::{NSWindow, NSWindowTitleVisibility};
