@@ -1,11 +1,14 @@
+use crate::app::Context;
 use crate::header::menubar::MenuBar;
 use crate::utils::logger::info;
-use crate::app::Context;
 use crate::utils::utils::{cmd, cmd_async};
-use serde::{Serialize, Deserialize};
+use pm_common::app_data::{Settings, Theme};
+use serde::{Deserialize, Serialize};
 use tauri_sys::window::current_window;
 use yew::platform::spawn_local;
 use yew::prelude::*;
+use yew_icons::{Icon, IconId};
+use yewdux::prelude::use_store;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -23,7 +26,7 @@ pub fn Header(props: &Props) -> Html {
 
     let on_minimize = Callback::from(move |_: MouseEvent| {
         spawn_local(async {
-             current_window().minimize().await.expect("failed to minimize window");
+            current_window().minimize().await.expect("failed to minimize window");
         });
     });
 
@@ -42,6 +45,23 @@ pub fn Header(props: &Props) -> Html {
             let new_msg = cmd_async::<_, String>("greet", &GreetArgs { name: &*"test" }).await;
             info(new_msg.as_str());
         });
+    });
+
+    let (settings, settings_dispatch) = use_store::<Settings>();
+    let switch_language = settings_dispatch.reduce_mut_callback(|settings| {
+        if settings.language == Some("fr".to_string()) {
+            settings.language = Some("en".to_string())
+        } else {
+            settings.language = Some("fr".to_string())
+        }
+    });
+    let theme_light = settings_dispatch.reduce_mut_callback(|settings| settings.theme = Theme::Light);
+    let theme_dark = settings_dispatch.reduce_mut_callback(|settings| settings.theme = Theme::Dark);
+
+    let (_, context_dispatch) = use_store::<Context>();
+    let change_os = context_dispatch.reduce_mut_callback(|context| {
+        context.macos = !context.macos;
+        context.windows = !context.windows;
     });
 
     html! {
@@ -81,42 +101,49 @@ pub fn Header(props: &Props) -> Html {
                             html! {
                                 <>
                                     <button aria-labelledby="Star">
-                                        <i class="fa-solid fa-sidebar"></i>
+                                        <Icon icon_id={IconId::FontAwesomeSolidStar} />
                                     </button>
                                     <button aria-labelledby="Star">
-                                        <i class="fa-brands fa-twitter"></i>
+                                        <Icon icon_id={IconId::FontAwesomeSolidStar} />
                                     </button>
                                     <button aria-labelledby="Star">
-                                        <i class="fa-brands fa-twitter"></i>
+                                        <Icon icon_id={IconId::FontAwesomeSolidStar} />
                                     </button>
                                     <button aria-labelledby="Star">
-                                        <i class="fa-brands fa-twitter"></i>
+                                        <Icon icon_id={IconId::FontAwesomeSolidStar} />
                                     </button>
                                     <button aria-labelledby="Star">
-                                        <i class="fa-brands fa-twitter"></i>
+                                        <Icon icon_id={IconId::FontAwesomeSolidStar} />
                                     </button>
                                 </>
                             }
                         }else{ html!() }
                     }
-                    <button onclick={on_greet} tabindex="0" aria-labelledby="Star">
-                        <i class="fa-regular fa-star"></i>
+                    <button onclick={theme_light} aria-labelledby="Light Theme">
+                        <Icon icon_id={IconId::FontAwesomeSolidSun} />
                     </button>
-                    <button aria-labelledby="Star">
-                        <i class="fa-solid fa-sidebar"></i>
+                    <button onclick={theme_dark} aria-labelledby="Dark Theme">
+                        <Icon icon_id={IconId::FontAwesomeSolidMoon} />
                     </button>
-                    <button aria-labelledby="Star">
-                        <i class="fa-brands fa-twitter"></i>
+                    <button onclick={switch_language} aria-labelledby="Switch Language">
+                        {
+                            if settings.language == Some("fr".to_string()) {
+                                html! { <Icon icon_id={IconId::FontAwesomeSolidEarthEurope} /> }
+                            } else {
+                                html! { <Icon icon_id={IconId::FontAwesomeSolidEarthAmericas} /> }
+                            }
+                        }
                     </button>
-                    <button aria-labelledby="Star">
-                        <i class="fa-brands fa-twitter"></i>
+                    <button onclick={on_greet} aria-labelledby="Greet">
+                        <Icon icon_id={IconId::FontAwesomeSolidMessage} />
                     </button>
-                    <button aria-labelledby="Star">
-                        <i class="fa-brands fa-twitter"></i>
+                    <button onclick={change_os} aria-labelledby="Change Os">
+                        <Icon icon_id={IconId::BootstrapWindows} />
                     </button>
-                    <button aria-labelledby="Star">
-                        <i class="fa-brands fa-twitter"></i>
+                    <button>
+                        <Icon icon_id={IconId::FontAwesomeSolidStar} />
                     </button>
+
                 </div>
 
                 {

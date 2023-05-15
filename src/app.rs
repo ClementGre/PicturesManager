@@ -6,15 +6,16 @@ use crate::utils::translator::Translator;
 use crate::utils::utils::cmd_async_get;
 use futures::stream::StreamExt;
 use pm_common::app_data::{Settings, Theme};
-use std::rc::Rc;
 use tauri_sys::event::listen;
 use tauri_sys::os::{self, OsKind};
 use tauri_sys::window::{self, current_window};
 use yew::platform::spawn_local;
 use yew::prelude::*;
 use yew::suspense::{use_future, use_future_with_deps};
+use yewdux::prelude::use_store;
+use yewdux::store::Store;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Store)]
 pub struct Context {
     pub macos: bool,
     pub windows: bool,
@@ -23,12 +24,37 @@ pub struct Context {
 
 #[function_component]
 pub fn App() -> HtmlResult {
-    // OS
-    let os = use_future(|| async { os::kind().await.unwrap_or(OsKind::Linux) })?;
-
-    // Settings got with use_future saved in state
+    /******************************/
+    /********** Settings **********/
+    /******************************/
+    let (settings, settings_dispatch) = use_store::<Settings>();
     let settings_future = use_future(|| async { cmd_async_get::<Settings>("get_settings").await })?;
-    let settings = use_state(|| settings_future.clone());
+    {
+        let settings_dispatch = settings_dispatch.clone();
+        use_effect_with_deps(
+            move |_| {
+                // Initial setup
+                settings_dispatch.set(settings_future.clone());
+            },
+            (),
+        );
+    }
+
+    /******************************/
+    /**** Context: Os & Theme *****/
+    /******************************/
+    let (context, context_dispatch) = use_store::<Context>();
+    // OS
+    let _ = {
+        let context_dispatch = context_dispatch.clone();
+        use_future(|| async move {
+            let os = os::kind().await.unwrap_or(OsKind::Linux);
+            context_dispatch.reduce_mut(|context| {
+                context.macos = os == OsKind::Darwin;
+                context.windows = os == OsKind::WindowsNT;
+            });
+        })?
+    };
 
     // OS theme got with use_future and might be updated with event listener
     let os_theme_future = use_future(|| async { current_window().theme().await.unwrap() })?;
@@ -42,90 +68,55 @@ pub fn App() -> HtmlResult {
             }
         }
     });
-
-    // Theme memo calculated based on settings and os_theme
-    let theme = {
+    {
         let settings = settings.clone();
-        let os_theme = os_theme.clone();
-        use_memo(
+        use_effect_with_deps(
             move |(settings, os_theme)| {
-                if settings.theme == Theme::System {
-                    if **os_theme == window::Theme::Light {
-                        Theme::Light
+                context_dispatch.reduce_mut(|context| {
+                    context.theme = if settings.theme == Theme::System {
+                        if **os_theme == window::Theme::Light {
+                            Theme::Light
+                        } else {
+                            Theme::Dark
+                        }
                     } else {
-                        Theme::Dark
+                        settings.theme
                     }
-                } else {
-                    settings.theme
-                }
+                })
             },
             (settings, os_theme),
-        )
-    };
+        );
+    }
 
-    // Language and translations
+    /******************************/
+    /********* Translator *********/
+    /******************************/
+    let (_, translator_dispach) = use_store::<Translator>();
     let language = {
         let settings = settings.clone();
         use_memo(move |settings| settings.language.clone(), settings)
     };
-    let translator = {
+    let _ = {
         let language = language.clone();
+        // Acts as an async callback that updates with language change
         use_future_with_deps(
             |language| async move {
                 let translator = Translator::new((**language).clone()).await;
-                translator
+                translator_dispach.set(translator);
             },
             language.clone(),
         )?
     };
 
-    // Context définition
-    let context = {
-        let os = os.clone();
-        let theme = theme.clone();
-        use_memo(
-            |(os, theme)| Context {
-                macos: *os == OsKind::Darwin,
-                windows: *os == OsKind::WindowsNT,
-                theme: *theme.clone(),
-            },
-            (os, theme),
-        )
-    };
-
-    // Change language tests
-    let change_language_fr = {
-        let settings = settings.clone();
-        Callback::from(move |_| {
-            let mut new_settings = (*settings).clone();
-            new_settings.language = Some("fr".to_string());
-            settings.set(new_settings);
-        })
-    };
-    let change_language_en = {
-        let settings = settings.clone();
-        Callback::from(move |_| {
-            let mut new_settings = (*settings).clone();
-            new_settings.language = Some("en".to_string());
-            settings.set(new_settings);
-        })
-    };
-
     Ok(html! {
         <>
              <ContextProvider<Context> context={(*context).clone()}>
-                <ContextProvider<Settings> context={(*settings).clone()}>
-                    <ContextProvider<Translator> context={(*translator).clone()}>
-                        <Header class={if *theme == Theme::Light { "th-light" } else { "th-dark" }}/>
-                        <main class="light">
-                            <LeftBar/>
-                            <MainPane/>
-                            <RightBar/>
-                            <button onclick={change_language_fr}>{"FR"}</button>
-                            <button onclick={change_language_en}>{"EN"}</button>
-                        </main>
-                    </ContextProvider<Translator>>
-                </ContextProvider<Settings>>
+                    <Header class={if context.theme == Theme::Light { "th-light" } else { "th-dark" }}/>
+                    <main class="light">
+                        <LeftBar/>
+                        <MainPane/>
+                        <RightBar/>
+                    </main>
              </ContextProvider<Context>>
         </>
     })

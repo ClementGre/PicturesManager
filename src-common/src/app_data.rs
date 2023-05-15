@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
+use yewdux::store::Store;
 
-#[derive(Deserialize, Serialize, Default, Clone, Debug, PartialEq)]
+#[derive(Deserialize, Serialize, Default, Clone, Debug, PartialEq, Store)]
 pub struct Settings {
     pub theme: Theme,
     pub language: Option<String>,
