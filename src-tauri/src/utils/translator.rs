@@ -9,6 +9,8 @@ use log::warn;
 use tauri::{AppHandle, PathResolver};
 use unic_langid::{langid, LanguageIdentifier};
 
+const RES_IDS: [&str;2] = ["back", "common"];
+
 #[derive(Default)]
 pub struct TranslatorState {
     pub translator: Mutex<Option<Translator>>,
@@ -69,8 +71,9 @@ impl Translator {
             .iter()
             .map(|locale| {
                 let mut bundle = FluentBundle::new_concurrent(vec![locale.clone()]);
-                Self::load_ressource_to_bundle(app, &mut bundle, locale, "back");
-                Self::load_ressource_to_bundle(app, &mut bundle, locale, "common");
+                for res_id in RES_IDS {
+                    Self::load_ressource_to_bundle(app, &mut bundle, locale, res_id);
+                }
                 bundle
             })
             .collect::<Vec<TrBundle>>();

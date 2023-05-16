@@ -3,11 +3,12 @@ use unidecode::unidecode;
 use wasm_bindgen::{JsCast};
 use web_sys::HtmlElement;
 use yew::prelude::*;
+use yewdux::prelude::use_store;
 
 use crate::{
     header::menu::{get_menus, MenuItem},
     header::menu_item_component::MenuItemComponent,
-    utils::{keystroke::KeyStroke, logger::info, utils::cmd},
+    utils::{keystroke::KeyStroke, logger::info, utils::cmd, translator::Translator},
 };
 
 fn register_shortcuts(items: &Vec<MenuItem>, shortcuts: &mut Vec<(KeyStroke, String)>) {
@@ -49,7 +50,8 @@ pub enum NavigationMessageResult {
 
 #[function_component]
 pub fn MenuBar() -> Html {
-    let menus = get_menus();
+    let (t, _) = use_store::<Translator>();
+    let menus = get_menus(&t);
 
     let mut shortcuts = vec![];
     register_shortcuts(&menus, &mut shortcuts);

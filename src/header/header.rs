@@ -163,10 +163,10 @@ pub fn Header(props: &Props) -> Html {
                             }
                         }else{ html!() }
                     }
-                    <button onclick={theme_light} aria-labelledby="Light Theme">
+                    <button onclick={theme_light} title="Light Theme">
                         <Icon icon_id={IconId::FontAwesomeSolidSun} />
                     </button>
-                    <button onclick={theme_dark} aria-labelledby="Dark Theme">
+                    <button onclick={theme_dark} title="Dark Theme">
                         <Icon icon_id={IconId::FontAwesomeSolidMoon} />
                     </button>
                     <button onclick={theme_os} aria-labelledby="Os Theme">

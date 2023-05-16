@@ -7,6 +7,9 @@ use yewdux::store::Store;
 
 use super::utils::{cmd_async, cmd_async_get};
 
+const RES_IDS: [&str;2] = ["header", "common"];
+
+
 #[derive(Store)]
 pub struct Translator {
     locales: Vec<LanguageIdentifier>,
@@ -49,8 +52,9 @@ impl Translator {
         let mut bundles = vec![];
         for locale in &locales {
             let mut bundle = FluentBundle::new_concurrent(vec![locale.clone()]);
-            Self::load_ressource_to_bundle(&mut bundle, locale, "front").await;
-            Self::load_ressource_to_bundle(&mut bundle, locale, "common").await;
+            for res_id in RES_IDS {
+                Self::load_ressource_to_bundle(&mut bundle, locale, res_id).await;
+            }
             bundles.push(bundle);
         }
         Self {
