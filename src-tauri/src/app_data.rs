@@ -2,7 +2,7 @@ use std::{fs::create_dir_all, fs::File, io::{BufWriter, BufReader}, sync::{Mutex
 
 use pm_common::app_data::Settings;
 use serde::{Deserialize, Serialize};
-use tauri::{AppHandle};
+use tauri::{AppHandle, Manager};
 
 #[derive(Default)]
 pub struct AppDataState {
@@ -49,4 +49,11 @@ impl AppData {
 #[tauri::command]
 pub fn get_settings(app_data: tauri::State<AppDataState>) -> Settings {
     app_data.data().settings.clone()
+}
+
+#[tauri::command]
+pub fn set_settings(app: AppHandle, app_data: tauri::State<AppDataState>, settings: Settings) {
+    app_data.data().settings = settings.clone();
+    app_data.save(&app);
+    app.emit_all("settings-changed", settings).unwrap();
 }

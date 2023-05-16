@@ -1,7 +1,7 @@
 use crate::app::Context;
 use crate::header::menubar::MenuBar;
 use crate::utils::logger::info;
-use crate::utils::utils::{cmd, cmd_async};
+use crate::utils::utils::{cmd, cmd_async, cmd_arg};
 use pm_common::app_data::{Settings, Theme};
 use serde::{Deserialize, Serialize};
 use tauri_sys::window::current_window;
@@ -17,13 +17,19 @@ pub struct Props {
 
 #[derive(Serialize, Deserialize)]
 pub struct GreetArgs<'a> {
-    pub name: &'a str,
+    pub name: &'a str
 }
+#[derive(Serialize, Deserialize)]
+pub struct SetSettingsArgs {
+    pub settings: Settings
+}
+
 
 #[function_component]
 pub fn Header(props: &Props) -> Html {
-    let macos = use_context::<Context>().unwrap().macos;
 
+    let (context, _) = use_store::<Context>();
+    
     let on_minimize = Callback::from(move |_: MouseEvent| {
         spawn_local(async {
             current_window().minimize().await.expect("failed to minimize window");
@@ -32,7 +38,7 @@ pub fn Header(props: &Props) -> Html {
 
     let on_maximize = Callback::from(move |_: MouseEvent| {
         spawn_local(async {
-            current_window().toggle_maximize().await.expect("failed to minimize window");
+            current_window().toggle_maximize().await.expect("failed to toggle maximize window");
         });
     });
 
@@ -47,6 +53,8 @@ pub fn Header(props: &Props) -> Html {
         });
     });
 
+    // Settings actions
+
     let (settings, settings_dispatch) = use_store::<Settings>();
     let switch_language = settings_dispatch.reduce_mut_callback(|settings| {
         if settings.language == Some("fr".to_string()) {
@@ -55,20 +63,56 @@ pub fn Header(props: &Props) -> Html {
             settings.language = Some("fr".to_string())
         }
     });
-    let theme_light = settings_dispatch.reduce_mut_callback(|settings| settings.theme = Theme::Light);
-    let theme_dark = settings_dispatch.reduce_mut_callback(|settings| settings.theme = Theme::Dark);
+    let theme_light = {
+        let settings = settings.clone();
+        Callback::from(move |_| {
+            let mut settings = (*settings).clone();
+            settings.theme = Theme::Light;
+            cmd_arg("set_settings", &SetSettingsArgs{settings});
+        })
+    };
+    let theme_dark = {
+        let settings = settings.clone();
+        Callback::from(move |_| {
+            let mut settings = (*settings).clone();
+            settings.theme = Theme::Dark;
+            cmd_arg("set_settings", &SetSettingsArgs{settings});
+        })
+    };
+    let theme_os = {
+        let settings = settings.clone();
+        Callback::from(move |_| {
+            let mut settings = (*settings).clone();
+            settings.theme = Theme::System;
+            cmd_arg("set_settings", &SetSettingsArgs{settings});
+        })
+    };
 
-    let (_, context_dispatch) = use_store::<Context>();
-    let change_os = context_dispatch.reduce_mut_callback(|context| {
-        context.macos = !context.macos;
-        context.windows = !context.windows;
-    });
+    let toggle_force_win_header = {
+        let settings = settings.clone();
+        Callback::from(move |_| {
+            let mut settings = (*settings).clone();
+            settings.force_win_header = !settings.force_win_header;
+            cmd_arg("set_settings", &SetSettingsArgs{settings});
+        })
+    };
+
+    // Context
+
+    let macos_header = {
+        let context = context.clone();
+        let settings = settings.clone();
+        use_memo(|(context, settings)| {
+            context.macos && !settings.force_win_header
+        }, (context, settings))
+    };
+
 
     html! {
         <>
             <header data-tauri-drag-region="true" class={classes!(props.class.clone())}>
                 {
-                    if macos {
+                    if *macos_header {
                         html! {
                             <>
                                 <div class="macos-spacer" data-tauri-drag-region="true"/>
@@ -91,13 +135,13 @@ pub fn Header(props: &Props) -> Html {
                     }
                 }
                 // Macos buttons are right aligned, but windows buttons are left aligned
-                <div class={ if macos {"spacer"} else { "fixed-spacer" }} data-tauri-drag-region="true"/>
+                <div class={ if *macos_header {"spacer"} else { "fixed-spacer" }} data-tauri-drag-region="true"/>
 
 
                 <div class="buttons" data-tauri-drag-region="true">
                     {
                         // Some buttons are only available on Macos, they are duplicates from the menubar
-                        if macos {
+                        if *macos_header {
                             html! {
                                 <>
                                     <button aria-labelledby="Star">
@@ -125,6 +169,9 @@ pub fn Header(props: &Props) -> Html {
                     <button onclick={theme_dark} aria-labelledby="Dark Theme">
                         <Icon icon_id={IconId::FontAwesomeSolidMoon} />
                     </button>
+                    <button onclick={theme_os} aria-labelledby="Os Theme">
+                        <Icon icon_id={IconId::BootstrapHouseGearFill} />
+                    </button>
                     <button onclick={switch_language} aria-labelledby="Switch Language">
                         {
                             if settings.language == Some("fr".to_string()) {
@@ -137,9 +184,17 @@ pub fn Header(props: &Props) -> Html {
                     <button onclick={on_greet} aria-labelledby="Greet">
                         <Icon icon_id={IconId::FontAwesomeSolidMessage} />
                     </button>
-                    <button onclick={change_os} aria-labelledby="Change Os">
-                        <Icon icon_id={IconId::BootstrapWindows} />
-                    </button>
+                    {
+                        if context.macos {
+                            html! {
+                                <button onclick={toggle_force_win_header} aria-labelledby="Change Os">
+                                    <Icon icon_id={IconId::BootstrapWindows} />
+                                </button>
+                            }
+                        } else {
+                            html!()
+                        }
+                    }
                     <button>
                         <Icon icon_id={IconId::FontAwesomeSolidStar} />
                     </button>
@@ -147,7 +202,7 @@ pub fn Header(props: &Props) -> Html {
                 </div>
 
                 {
-                     if !macos {
+                     if !*macos_header {
                         html! {
                             <>
                                 <div class="fixed-spacer" data-tauri-drag-region="true"/>

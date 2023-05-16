@@ -11,7 +11,7 @@ use std::fs::read;
 use utils::translator::TranslatorState;
 mod utils;
 use utils::commands::{greet};
-use crate::app_data::get_settings;
+use crate::app_data::{get_settings, set_settings};
 use utils::logger::{get_logger_plugin, log_from_front};
 mod app_data;
 mod gallery;
@@ -30,11 +30,6 @@ fn main() {
 
         let translator = app.state::<TranslatorState>();
         *translator.translator.lock().unwrap() = Some(Translator::new(&app, data.data().settings.language.clone()));
-
-        // let mut errors = vec![];
-        // let bundle = translator.translator.lock().unwrap();
-        // let bundle = &bundle.as_ref().unwrap().bundles;
-        // info!("Test translation: {}", bundle.format_pattern(bundle.get_message("test").unwrap().value().unwrap(), None, &mut errors));
 
         let galleries = app.state::<WindowsGalleriesState>();
 
@@ -124,6 +119,7 @@ fn main() {
             greet,
             // Data
             get_settings,
+            set_settings,
             // Menus
             menu_quit,
             menu_close_window,

@@ -51,8 +51,16 @@ yew_icons = { version = "0.7", features = [
     "FontAwesomeSolidEarthAmericas",
     "FontAwesomeSolidStar",
     "FontAwesomeSolidMessage",
-    "BootstrapWindows"
+    "BootstrapWindows",
+    "BootstrapHouseGearFill"
 ] }
 
 [workspace]
 members = ["src-tauri"]
+
+[profile.release]
+lto = "fat"
+compiler-units = 1
+# opt-level = "z"
+# panic = "abort"
+# strip = "debuginfo"

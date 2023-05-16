@@ -2,6 +2,7 @@ use crate::header::header::Header;
 use crate::leftbar::leftbar::LeftBar;
 use crate::mainpane::mainpane::MainPane;
 use crate::rightbar::rightbar::RightBar;
+use crate::utils::logger::info;
 use crate::utils::translator::Translator;
 use crate::utils::utils::cmd_async_get;
 use futures::stream::StreamExt;
@@ -39,6 +40,16 @@ pub fn App() -> HtmlResult {
             (),
         );
     }
+    spawn_local({
+        let settings_dispatch = settings_dispatch.clone();
+        async move {
+            let mut events = listen::<Settings>("settings-changed").await.unwrap();
+            while let Some(e) = events.next().await {
+                settings_dispatch.set(e.payload);
+                info("Settings changed")
+            }
+        }
+    });
 
     /******************************/
     /**** Context: Os & Theme *****/
@@ -110,14 +121,12 @@ pub fn App() -> HtmlResult {
 
     Ok(html! {
         <>
-             <ContextProvider<Context> context={(*context).clone()}>
-                    <Header class={if context.theme == Theme::Light { "th-light" } else { "th-dark" }}/>
-                    <main class="light">
-                        <LeftBar/>
-                        <MainPane/>
-                        <RightBar/>
-                    </main>
-             </ContextProvider<Context>>
+            <Header class={if context.theme == Theme::Light { "th-light" } else { "th-dark" }}/>
+            <main class="light">
+                <LeftBar/>
+                <MainPane/>
+                <RightBar/>
+            </main>
         </>
     })
 }
