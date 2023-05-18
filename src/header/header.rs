@@ -147,16 +147,16 @@ pub fn Header(props: &Props) -> Html {
                                     <button aria-labelledby="Star">
                                         <Icon icon_id={IconId::FontAwesomeSolidStar} />
                                     </button>
-                                    <button aria-labelledby="Star">
+                                    <button title="Star">
                                         <Icon icon_id={IconId::FontAwesomeSolidStar} />
                                     </button>
-                                    <button aria-labelledby="Star">
+                                    <button title="Star">
                                         <Icon icon_id={IconId::FontAwesomeSolidStar} />
                                     </button>
-                                    <button aria-labelledby="Star">
+                                    <button title="Star">
                                         <Icon icon_id={IconId::FontAwesomeSolidStar} />
                                     </button>
-                                    <button aria-labelledby="Star">
+                                    <button title="Star">
                                         <Icon icon_id={IconId::FontAwesomeSolidStar} />
                                     </button>
                                 </>
@@ -169,10 +169,10 @@ pub fn Header(props: &Props) -> Html {
                     <button onclick={theme_dark} title="Dark Theme">
                         <Icon icon_id={IconId::FontAwesomeSolidMoon} />
                     </button>
-                    <button onclick={theme_os} aria-labelledby="Os Theme">
+                    <button onclick={theme_os} title="Os Theme">
                         <Icon icon_id={IconId::BootstrapHouseGearFill} />
                     </button>
-                    <button onclick={switch_language} aria-labelledby="Switch Language">
+                    <button onclick={switch_language} title="Switch Language">
                         {
                             if settings.language == Some("fr".to_string()) {
                                 html! { <Icon icon_id={IconId::FontAwesomeSolidEarthEurope} /> }
@@ -181,13 +181,13 @@ pub fn Header(props: &Props) -> Html {
                             }
                         }
                     </button>
-                    <button onclick={on_greet} aria-labelledby="Greet">
+                    <button onclick={on_greet} title="Greet">
                         <Icon icon_id={IconId::FontAwesomeSolidMessage} />
                     </button>
                     {
                         if context.macos {
                             html! {
-                                <button onclick={toggle_force_win_header} aria-labelledby="Change Os">
+                                <button onclick={toggle_force_win_header} title="Change Os">
                                     <Icon icon_id={IconId::BootstrapWindows} />
                                 </button>
                             }

@@ -10,6 +10,7 @@ pub struct AppDataState {
 }
 
 #[derive(Deserialize, Serialize, Default)]
+#[serde(default)]
 pub struct AppData {
     pub settings: Settings,
     pub last_gallery: Option<String>

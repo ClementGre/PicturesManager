@@ -6,7 +6,6 @@ use fluent::{FluentArgs, FluentValue};
 use log::trace;
 use tauri::Window;
 
-
 #[tauri::command]
 pub fn greet(
     window: Window,
@@ -29,9 +28,8 @@ pub fn greet(
         galleries
             .get_galleries()
             .iter()
-            .find(|gallery| gallery.get_label() == window.label())
-            .unwrap()
-            .get_path(),
+            .find(|gallery| gallery.window_label == window.label())
+            .unwrap().path,
         translator.tra("test", &args)
     )
 }

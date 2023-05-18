@@ -1,36 +1,31 @@
-use std::{collections::HashMap, fs::{File, create_dir_all}, io::{BufReader, BufWriter}, path::PathBuf};
-
+use super::{
+    gallery_cache::{PathsCache, PictureCache},
+    gallery_clusters::{DatesClusters, LocationClusters},
+    gallery_tags::TagGroup,
+};
 use serde::{Deserialize, Serialize};
-
-use super::gallery_cache::{PictureCache, PathsCache, LocationCache};
+use std::{
+    collections::HashMap,
+    fs::{create_dir_all, File},
+    io::{BufReader, BufWriter},
+    path::PathBuf,
+};
 
 #[derive(Debug, Serialize, Deserialize, Default)]
+#[serde(default)]
 pub struct Gallery {
-    settings: GallerySettings,
-    tag_groups: HashMap<String, TagGroup>,
-    cache: HashMap<String, PictureCache>,
-    cache_dates: Vec<String>,
-    cache_paths: PathsCache,
-    cache_location: Vec<LocationCache>
+    pub settings: GallerySettings,
+    pub tag_groups: HashMap<String, TagGroup>,
+    pub datas_cache: HashMap<String, PictureCache>,
+    pub paths_cache: PathsCache,
+    pub dates_cache: Vec<String>,
+    pub dates_clusters: Vec<DatesClusters>,
+    pub location_clusters: Vec<LocationClusters>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct GallerySettings {
-    test: String
-}
-
-#[derive(Debug, Serialize, Deserialize, Default)]
-pub struct TagGroup {
-    pub name: String,
-    pub multiple: bool,
-    pub tags: HashMap<String, Tag>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Default)]
-pub struct Tag {
-    pub name: String,
-    pub color: String,
-    pub pictures: Vec<String>,
+    test: String,
 }
 
 impl Gallery {
@@ -41,7 +36,7 @@ impl Gallery {
             let file = File::open(&file).expect("Unable to open gallery file");
             let reader = BufReader::new(file);
             serde_json::from_reader(reader).expect("Unable to parse gallery file")
-        }else {
+        } else {
             Gallery::default()
         }
     }

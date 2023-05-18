@@ -2,7 +2,7 @@
 
 use app_data::{AppData, AppDataState};
 use gallery::windows_galleries::WindowsGalleriesState;
-use header::window::{save_windows_states};
+use header::window::save_windows_states;
 use tauri::{http::ResponseBuilder, Manager};
 mod header;
 use log::info;
@@ -10,19 +10,23 @@ use tauri_plugin_window_state::{StateFlags};
 use std::fs::read;
 use utils::translator::TranslatorState;
 mod utils;
-use utils::commands::{greet};
+use utils::commands::greet;
 use crate::app_data::{get_settings, set_settings};
 use utils::logger::{get_logger_plugin, log_from_front};
 mod app_data;
 mod gallery;
-
 use header::menubar::{menu_quit, menu_close_window};
+
 #[cfg(target_os = "macos")]
 use header::menubar::setup_menubar;
 
 use crate::utils::translator::{get_available_locales, get_system_locale, get_translation_file, Translator};
+use crate::gallery::gallery_cache::update_gallery_cache;
 
 fn main() {
+
+    rexiv2::register_xmp_namespace("PicturesManagerClementGre", "PicturesManagerClementGre");
+
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default().setup(|app| {
         let data = app.state::<AppDataState>();
@@ -33,7 +37,7 @@ fn main() {
 
         let galleries = app.state::<WindowsGalleriesState>();
 
-        galleries.open_from_path(&mut app.app_handle(), String::from("/Users/clement/Downloads/Gallery"));
+        galleries.open_from_path(&mut app.app_handle(), String::from("/Users/clement/Pictures/Gallery"));
 
         Ok(())
     });
@@ -123,6 +127,8 @@ fn main() {
             // Menus
             menu_quit,
             menu_close_window,
+            // Gallery
+            update_gallery_cache,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
