@@ -16,15 +16,33 @@ use yew::suspense::{use_future, use_future_with_deps};
 use yewdux::prelude::use_store;
 use yewdux::store::Store;
 
-#[derive(Clone, Debug, Default, PartialEq, Store)]
-pub struct Context {
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct StaticContext {
     pub macos: bool,
     pub windows: bool,
+    pub window_label: String,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Store)]
+pub struct Context {
     pub theme: Theme,
 }
 
 #[function_component]
 pub fn App() -> HtmlResult {
+    /******************************/
+    /******* StaticContext ********/
+    /******************************/
+    let os = use_future(|| async { os::kind().await.unwrap_or(OsKind::Linux) })?;
+    
+    let static_context = use_memo(|_| {
+        StaticContext{
+            macos: *os == OsKind::Darwin,
+            windows: *os == OsKind::WindowsNT,
+            window_label: current_window().label(),
+        }
+    }, ());
+
     /******************************/
     /********** Settings **********/
     /******************************/
@@ -52,22 +70,11 @@ pub fn App() -> HtmlResult {
     });
 
     /******************************/
-    /**** Context: Os & Theme *****/
+    /********** Context ***********/
     /******************************/
     let (context, context_dispatch) = use_store::<Context>();
-    // OS
-    let _ = {
-        let context_dispatch = context_dispatch.clone();
-        use_future(|| async move {
-            let os = os::kind().await.unwrap_or(OsKind::Linux);
-            context_dispatch.reduce_mut(|context| {
-                context.macos = os == OsKind::Darwin;
-                context.windows = os == OsKind::WindowsNT;
-            });
-        })?
-    };
 
-    // OS theme got with use_future and might be updated with event listener
+    // OS theme got with use_future and updated with event listener
     let os_theme_future = use_future(|| async { current_window().theme().await.unwrap() })?;
     let os_theme = use_state(|| os_theme_future.clone());
     spawn_local({
@@ -79,6 +86,7 @@ pub fn App() -> HtmlResult {
             }
         }
     });
+    // Context theme updated with settings and os_theme
     {
         let settings = settings.clone();
         use_effect_with_deps(
@@ -121,12 +129,14 @@ pub fn App() -> HtmlResult {
 
     Ok(html! {
         <>
-            <Header class={if context.theme == Theme::Light { "th-light" } else { "th-dark" }}/>
-            <main class="light">
-                <LeftBar/>
-                <MainPane/>
-                <RightBar/>
-            </main>
+            <ContextProvider<StaticContext> context={(*static_context).clone()}>
+                <Header class={if context.theme == Theme::Light { "th-light" } else { "th-dark" }}/>
+                <main class="light">
+                    <LeftBar/>
+                    <MainPane/>
+                    <RightBar/>
+                </main>
+            </ContextProvider<StaticContext>>
         </>
     })
 }

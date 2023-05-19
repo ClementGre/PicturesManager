@@ -6,12 +6,14 @@ use header::window::save_windows_states;
 use tauri::{http::ResponseBuilder, Manager};
 mod header;
 use log::info;
-use tauri_plugin_window_state::{StateFlags};
+use tauri_plugin_window_state::StateFlags;
+use url::Url;
 use std::fs::read;
 use utils::translator::TranslatorState;
 mod utils;
 use utils::commands::greet;
 use crate::app_data::{get_settings, set_settings};
+use crate::gallery::windows_galleries::WindowGallery;
 use utils::logger::{get_logger_plugin, log_from_front};
 mod app_data;
 mod gallery;
@@ -21,11 +23,11 @@ use header::menubar::{menu_quit, menu_close_window};
 use header::menubar::setup_menubar;
 
 use crate::utils::translator::{get_available_locales, get_system_locale, get_translation_file, Translator};
-use crate::gallery::gallery_cache::update_gallery_cache;
+use crate::gallery::gallery_cache::{update_gallery_cache, get_gallery_datas_cache, get_gallery_paths_cache};
 
 fn main() {
 
-    rexiv2::register_xmp_namespace("PicturesManagerClementGre", "PicturesManagerClementGre");
+    rexiv2::register_xmp_namespace("PicturesManagerClementGre", "PicturesManagerClementGre").unwrap();
 
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default().setup(|app| {
@@ -77,33 +79,38 @@ fn main() {
                 _ => {}
             }
         })
-        .register_uri_scheme_protocol("reqimg", move |_, request| {
-            info!("🚩 Request: {:?}", request);
+        .register_uri_scheme_protocol("reqimg", move |app, request| {
 
-            let res_not_img = ResponseBuilder::new().status(404).body(Vec::new());
-            if request.method() != "GET" {
-                return res_not_img;
-            }
-            let uri = request.uri();
-            let start_pos = match uri.find("?path=") {
-                Some(_pos) => _pos + 6,
-                None => return res_not_img,
-            };
-            let end_pos = match uri.find("&") {
-                Some(_pos) => _pos,
-                None => return res_not_img,
-            };
-            let path: String = uri[start_pos..end_pos].to_string();
-            info!("🚩Request: {}", path);
+            let res_not_found = ResponseBuilder::new().status(404).body(Vec::new());
+            
+            let url = Url::parse(request.uri()).unwrap();
 
-            let local_img = if let Ok(data) = read(path) {
-                tauri::http::ResponseBuilder::new()
-                    .mimetype(format!("image/{}", &"png").as_str())
-                    .body(data)
+            let label = url.query_pairs().find(|(key, _)| key == "window").unwrap().1.to_string();
+            let window = app.get_window(&label).expect("window not found");
+
+            let galleries_state = app.state::<WindowsGalleriesState>();
+            let galleries = galleries_state.get_galleries();
+            let gallery = WindowGallery::get(&galleries, &window);
+
+            if let Some(url::Host::Domain(action)) = url.host() {
+                match action {
+                    "id" => {
+                        let id = url.query_pairs().find(|(key, _)| key == "id").unwrap().1.to_string();
+
+                        let path = gallery.gallery.datas_cache.get(&id).expect("No cache available for this image id").path.clone();
+                        if let Ok(data) = read(gallery.path.clone() + "/" + &path) {
+                            tauri::http::ResponseBuilder::new()
+                                .mimetype(format!("image/{}", &"png").as_str())
+                                .body(data)
+                        } else {
+                            res_not_found
+                        }
+                    }
+                    _ => res_not_found
+                }
             } else {
-                res_not_img
-            };
-            local_img
+                res_not_found
+            }
         })
         .manage(TranslatorState::default())
         .manage(AppDataState::default())
@@ -129,12 +136,9 @@ fn main() {
             menu_close_window,
             // Gallery
             update_gallery_cache,
+            get_gallery_datas_cache,
+            get_gallery_paths_cache,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-
-// fn is_img_extension(extension: &str) -> bool {
-//   let ex: [&str; 6] = ["png", "jpg", "jpeg", "gif", "bmp", "webp"];
-//   ex.iter().any(|e| *e == extension.to_lowercase())
-// }

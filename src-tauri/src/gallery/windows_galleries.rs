@@ -1,6 +1,6 @@
 use std::sync::{Mutex, MutexGuard};
 
-use tauri::AppHandle;
+use tauri::{AppHandle, Window};
 
 use crate::header::window::new_window;
 
@@ -39,7 +39,7 @@ impl WindowsGalleriesState {
         self.galleries.lock().unwrap().push(WindowGallery {
             window_label: label.clone(),
             path: path.clone(),
-            gallery: Gallery::load(path.clone()),
+            gallery: Gallery::load(&path),
         });
 
         new_window(app_handle, label, path);
@@ -50,10 +50,24 @@ impl WindowsGalleriesState {
             if gallery.window_label != label {
                 true
             } else {
-                gallery.gallery.save(gallery.path.clone());
+                gallery.gallery.save(&gallery.path);
                 false
             }
         });
     }
 }
 
+impl WindowGallery {
+    pub fn get<'a>(galleries: &'a MutexGuard<'_, Vec<WindowGallery>>, window: &Window) -> &'a WindowGallery {
+        galleries
+            .iter()
+            .find(|gallery| gallery.window_label == window.label())
+            .expect("Can't find a matching gallery to the current window")
+    }
+    pub fn get_mut<'a>(galleries: &'a mut MutexGuard<'_, Vec<WindowGallery>>, window: &Window) -> &'a mut WindowGallery {
+        galleries
+            .iter_mut()
+            .find(|gallery| gallery.window_label == window.label())
+            .expect("Can't find a matching gallery to the current window")
+    }
+}

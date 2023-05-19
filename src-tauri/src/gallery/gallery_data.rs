@@ -1,7 +1,7 @@
 use super::{
     gallery_cache::{PathsCache, PictureCache},
     gallery_clusters::{DatesClusters, LocationClusters},
-    gallery_tags::TagGroup,
+    gallery_tags::TagGroup
 };
 use serde::{Deserialize, Serialize};
 use std::{
@@ -29,7 +29,7 @@ pub struct GallerySettings {
 }
 
 impl Gallery {
-    pub fn load(path: String) -> Gallery {
+    pub fn load(path: &String) -> Gallery {
         let file = PathBuf::from(path).join("pictures_manager.json");
 
         if file.exists() {
@@ -40,7 +40,7 @@ impl Gallery {
             Gallery::default()
         }
     }
-    pub fn save(&self, path: String) {
+    pub fn save(&self, path: &String) {
         let dir = PathBuf::from(path);
         let file = dir.join("pictures_manager.json");
 
@@ -48,6 +48,6 @@ impl Gallery {
 
         let file = File::create(&file).expect("Unable to create gallery file");
         let writter = BufWriter::new(file);
-        serde_json::to_writer(writter, &self).unwrap();
+        serde_json::to_writer_pretty(writter, &self).unwrap();
     }
 }

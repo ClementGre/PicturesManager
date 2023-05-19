@@ -26,7 +26,7 @@ impl AppDataState {
 
         let file = File::create(&file).expect("Unable to create settings file");
         let writer = BufWriter::new(file);
-        serde_json::to_writer(writer, &(*self.data.lock().unwrap())).unwrap();
+        serde_json::to_writer_pretty(writer, &(*self.data.lock().unwrap())).unwrap();
     }
     pub fn data(&self) -> MutexGuard<'_, AppData> {
         self.data.lock().unwrap()

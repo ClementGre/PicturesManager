@@ -11,6 +11,7 @@ rust-version = "1.57"
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 yewdux = "0.9"
+num-rational = "0.4.1"
 
 [lib]
 name = "pm_common"

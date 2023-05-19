@@ -1,10 +1,11 @@
-use serde::{Deserialize, Serialize};
 use std::{
     ffi::OsString,
     path::PathBuf,
     sync::atomic::{AtomicU64, Ordering},
     time::{SystemTime, UNIX_EPOCH},
 };
+
+use pm_common::gallery_cache::{Orientation, Ratio};
 
 use crate::gallery::gallery_cache::PictureCache;
 
@@ -44,6 +45,7 @@ impl ExifFile {
                 }
 
                 let date = meta.get_tag_string("Exif.Image.DateTime").ok();
+
 
                 let mut location_lat = None;
                 let mut location_long = None;
@@ -112,22 +114,11 @@ impl ExifFile {
     }
 }
 
-#[derive(Clone, Copy, Default, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
-pub enum Orientation {
-    #[default]
-    Unspecified,
-    Normal,
-    HorizontalFlip,
-    Rotate180,
-    VerticalFlip,
-    Rotate90HorizontalFlip,
-    Rotate90,
-    Rotate90VerticalFlip,
-    Rotate270,
+trait FromRexiv2<T> {
+    fn from_revix2(r: T) -> Self;
 }
-
-impl Orientation {
-    pub fn from_revix2(orientation: rexiv2::Orientation) -> Self {
+impl FromRexiv2<rexiv2::Orientation> for Orientation {
+    fn from_revix2(orientation: rexiv2::Orientation) -> Self {
         match orientation {
             rexiv2::Orientation::Normal => Orientation::Normal,
             rexiv2::Orientation::HorizontalFlip => Orientation::HorizontalFlip,
@@ -138,22 +129,6 @@ impl Orientation {
             rexiv2::Orientation::Rotate90VerticalFlip => Orientation::Rotate90VerticalFlip,
             rexiv2::Orientation::Rotate270 => Orientation::Rotate270,
             _ => Orientation::Unspecified,
-        }
-    }
-}
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
-pub struct Ratio {
-    /// Numerator.
-    pub numer: i32,
-    /// Denominator.
-    pub denom: i32,
-}
-impl Ratio {
-    pub fn from_num_rational(ratio: num_rational::Ratio<i32>) -> Self {
-        Self {
-            numer: *ratio.numer(),
-            denom: *ratio.denom(),
         }
     }
 }

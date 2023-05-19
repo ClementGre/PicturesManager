@@ -1,5 +1,6 @@
-use crate::utils::exif_utils::{ExifFile, Orientation, Ratio};
-use log::warn;
+use crate::utils::{exif_utils::ExifFile, images::is_supported_img};
+use log::{info, warn};
+use pm_common::gallery_cache::{Orientation, Ratio};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
@@ -8,9 +9,9 @@ use std::{
 };
 use tauri::Window;
 
-use super::{windows_galleries::{WindowsGalleriesState, WindowGallery}, gallery_data::Gallery};
+use super::windows_galleries::{WindowGallery, WindowsGalleriesState};
 
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct PictureCache {
     pub path: String,
 
@@ -27,7 +28,7 @@ pub struct PictureCache {
     pub f_number: Option<f64>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct PathsCache {
     pub dir_name: String,
     pub children: Vec<PathsCache>,
@@ -35,19 +36,38 @@ pub struct PathsCache {
 }
 
 #[tauri::command]
-pub fn update_gallery_cache(window: Window, galleries_state: tauri::State<WindowsGalleriesState>) {
-    let mut galleries = galleries_state.galleries.lock().unwrap();
+pub fn update_gallery_cache(window: Window, galleries_state: tauri::State<WindowsGalleriesState>) -> (HashMap<String, PictureCache>, PathsCache) {
+    let mut galleries = galleries_state.get_galleries();
+    let gallery = WindowGallery::get_mut(&mut galleries, &window);
 
-    let mut gallery = galleries
-        .iter()
-        .find(|gallery| gallery.window_label == window.label())
-        .expect("Unable to find gallery in galleries list.");
+    let start = std::time::Instant::now();
 
     let gallery_path = Path::new(&gallery.path);
     let mut datas_cache = HashMap::new();
     let paths_cache = read_dir_recursive(PathBuf::from(&gallery.path), &mut datas_cache, gallery_path);
 
-    // TODO: Update gallery data
+    let elapsed = start.elapsed();
+    info!("Gallery cache updated {} pictures in {}ms", datas_cache.len(), elapsed.as_millis());
+
+    gallery.gallery.datas_cache = datas_cache.clone();
+    gallery.gallery.paths_cache = paths_cache.clone();
+    gallery.gallery.save(&gallery.path);
+
+    (datas_cache, paths_cache)
+}
+#[tauri::command]
+pub fn get_gallery_datas_cache(window: Window, galleries_state: tauri::State<WindowsGalleriesState>) -> HashMap<String, PictureCache> {
+    let galleries = galleries_state.get_galleries();
+    let gallery = WindowGallery::get(&galleries, &window);
+
+    gallery.gallery.datas_cache.clone()
+}
+#[tauri::command]
+pub fn get_gallery_paths_cache(window: Window, galleries_state: tauri::State<WindowsGalleriesState>) -> PathsCache {
+    let galleries = galleries_state.get_galleries();
+    let gallery = WindowGallery::get(&galleries, &window);
+
+    gallery.gallery.paths_cache.clone()
 }
 
 pub fn read_dir_recursive(path: PathBuf, datas_cache: &mut HashMap<String, PictureCache>, gallery_path: &Path) -> PathsCache {
@@ -59,22 +79,21 @@ pub fn read_dir_recursive(path: PathBuf, datas_cache: &mut HashMap<String, Pictu
         let path = path.unwrap().path();
         if path.is_dir() {
             paths_cache.children.push(read_dir_recursive(path, datas_cache, gallery_path));
-        } else {
-            paths_cache.pictures.push(String::from(path.to_str().unwrap()));
+        } else if is_supported_img(path.clone()) {
+            let stripped_path = path
+                .strip_prefix(gallery_path)
+                .expect("Can't strip image path prefix")
+                .to_str()
+                .expect("Non UTF-8 path")
+                .to_string();
 
             if let Some(exif_file) = ExifFile::new(path.clone()) {
-                let stripped_path = path
-                    .strip_prefix(gallery_path)
-                    .expect("Can't strip image path prefix")
-                    .to_str()
-                    .unwrap()
-                    .to_string();
                 datas_cache.insert(exif_file.uid.clone(), exif_file.to_picture_cache(stripped_path));
+                paths_cache.pictures.push(exif_file.uid.clone());
             } else {
                 warn!("File {:?} does not support EXIF of XMP data.", path);
             }
         }
     }
-
     paths_cache
 }

@@ -1,4 +1,4 @@
-use crate::app::Context;
+use crate::app::{Context, StaticContext};
 use crate::header::menubar::MenuBar;
 use crate::utils::logger::info;
 use crate::utils::utils::{cmd, cmd_async, cmd_arg};
@@ -28,6 +28,7 @@ pub struct SetSettingsArgs {
 #[function_component]
 pub fn Header(props: &Props) -> Html {
 
+    let static_ctx = use_context::<StaticContext>().unwrap();
     let (context, _) = use_store::<Context>();
     
     let on_minimize = Callback::from(move |_: MouseEvent| {
@@ -100,11 +101,11 @@ pub fn Header(props: &Props) -> Html {
     // Context
 
     let macos_header = {
-        let context = context.clone();
+        let static_ctx = static_ctx.clone();
         let settings = settings.clone();
-        use_memo(|(context, settings)| {
-            context.macos && !settings.force_win_header
-        }, (context, settings))
+        use_memo(|settings| {
+            static_ctx.macos && !settings.force_win_header
+        }, settings)
     };
 
 
@@ -185,7 +186,7 @@ pub fn Header(props: &Props) -> Html {
                         <Icon icon_id={IconId::FontAwesomeSolidMessage} />
                     </button>
                     {
-                        if context.macos {
+                        if static_ctx.macos {
                             html! {
                                 <button onclick={toggle_force_win_header} title="Change Os">
                                     <Icon icon_id={IconId::BootstrapWindows} />
