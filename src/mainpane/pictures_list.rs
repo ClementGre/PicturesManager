@@ -2,10 +2,10 @@ use std::collections::HashMap;
 
 use pm_common::gallery_cache::{PathsCache, PictureCache};
 use wasm_bindgen_futures::spawn_local;
-use yew::{function_component, html, Callback, Children, Html, Properties, use_context, suspense::use_future};
-use yewdux::{store::Store, prelude::use_store};
+use yew::{function_component, html, suspense::use_future, use_context, Callback, Children, Html, Properties};
+use yewdux::{prelude::use_store, store::Store};
 
-use crate::{utils::utils::cmd_async_get, app::StaticContext};
+use crate::{app::StaticContext, utils::utils::cmd_async_get};
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -20,7 +20,6 @@ pub struct CacheContext {
 
 #[function_component]
 pub fn PicturesList() -> Html {
-
     let static_ctx = use_context::<StaticContext>().unwrap();
     let (cache, cache_dispatch) = use_store::<CacheContext>();
 
@@ -38,25 +37,24 @@ pub fn PicturesList() -> Html {
         let cache_dispatch = cache_dispatch.clone();
         spawn_local(async move {
             let (datas_cache, paths_cache) = cmd_async_get::<(HashMap<String, PictureCache>, PathsCache)>("update_gallery_cache").await;
-            cache_dispatch.set(CacheContext {
-                datas_cache,
-                paths_cache,
-            });
+            cache_dispatch.set(CacheContext { datas_cache, paths_cache });
         });
     });
 
     html! {
-        <div class="pictures-list">
+        <>
             <button onclick={update_data}>{"Update"}</button>
-            {
-                cache.datas_cache.iter().map(|(id, _)| {
-                    html! {
-                        <div class="picture">
-                            <img src={format!("reqimg://id/?id={}&window={}", id, static_ctx.window_label)} alt=""/>
-                        </div>
-                    }
-                }).collect::<Html>()
-            }
-        </div>
+            <ul class="pictures-list">
+                {
+                    cache.datas_cache.iter().map(|(id, _)| {
+                        html! {
+                            <li style={format!("background-image: url(reqimg://id/?id={}&window={})", id, static_ctx.window_label)}>
+                                <img src={format!("reqimg://id/?id={}&window={}", id, static_ctx.window_label)} alt=""/>
+                            </li>
+                        }
+                    }).collect::<Html>()
+                }
+            </ul>
+        </>
     }
 }

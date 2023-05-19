@@ -26,6 +26,7 @@ pub struct StaticContext {
 #[derive(Clone, Debug, Default, PartialEq, Store)]
 pub struct Context {
     pub theme: Theme,
+    pub left_tab: u16
 }
 
 #[function_component]

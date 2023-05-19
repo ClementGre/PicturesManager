@@ -1,20 +1,28 @@
 .mainpane{
     flex-shrink: 1;
-    background-color: antiquewhite;
+    background-color: rgb(237, 237, 237);
 }
-.mainpane .pictures-list {
+.mainpane ul.pictures-list {
+    list-style: none;
+    padding: 0;
     margin: 20px;
     display: flex;
-    flex-direction: row;
     flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 5px;
+    align-content: stretch;
+    gap: 10px;
 }
-.mainpane .pictures-list .picture {
-    max-height: 100px;
-}
-.mainpane .pictures-list .picture img{
+.mainpane ul.pictures-list li {
+    flex-grow: 1;
+    height: 140px;
     border-radius: 5px;
-    max-width: 100%;
+
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+.mainpane ul.pictures-list li img{
     max-height: 100%;
+    max-width: 100%;
+    object-fit: cover;
+    opacity: 0;
 }

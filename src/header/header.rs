@@ -1,4 +1,4 @@
-use crate::app::{Context, StaticContext};
+use crate::app::StaticContext;
 use crate::header::menubar::MenuBar;
 use crate::utils::logger::info;
 use crate::utils::utils::{cmd, cmd_async, cmd_arg};
@@ -29,7 +29,6 @@ pub struct SetSettingsArgs {
 pub fn Header(props: &Props) -> Html {
 
     let static_ctx = use_context::<StaticContext>().unwrap();
-    let (context, _) = use_store::<Context>();
     
     let on_minimize = Callback::from(move |_: MouseEvent| {
         spawn_local(async {
