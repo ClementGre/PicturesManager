@@ -2,12 +2,15 @@
 
 use app_data::{AppData, AppDataState};
 use gallery::windows_galleries::WindowsGalleriesState;
+use header::macos::WindowMacosExt;
 use header::window::save_windows_states;
+use tauri::WindowEvent;
 use tauri::{http::ResponseBuilder, Manager};
 mod header;
 use log::info;
 use tauri_plugin_window_state::StateFlags;
 use url::Url;
+use utils::images_utils::gen_thumbnail;
 use std::fs::read;
 use utils::translator::TranslatorState;
 mod utils;
@@ -69,6 +72,14 @@ fn main() {
                     event.window().app_handle().state::<AppDataState>().save(&event.window().app_handle());
                 }
             }
+            tauri::WindowEvent::Resized(_) => {
+                #[cfg(target_os = "macos")]
+                event.window().position_traffic_lights();
+            }
+            tauri::WindowEvent::ThemeChanged(_) => {
+                #[cfg(target_os = "macos")]
+                event.window().position_traffic_lights();
+            }
             _ => {}
         })
         .on_menu_event(|event| {
@@ -97,14 +108,16 @@ fn main() {
                     "id" => {
                         let id = url.query_pairs().find(|(key, _)| key == "id").unwrap().1.to_string();
 
-                        let path = gallery.gallery.datas_cache.get(&id).expect("No cache available for this image id").path.clone();
-                        if let Ok(data) = read(gallery.path.clone() + "/" + &path) {
-                            tauri::http::ResponseBuilder::new()
-                                .mimetype(format!("image/{}", &"png").as_str())
-                                .body(data)
-                        } else {
-                            res_not_found
-                        }
+                        let path = format!("{}/{}", gallery.path.clone(), gallery.gallery.datas_cache.get(&id).expect("No cache available for this image id").path.clone());
+                        let data = gen_thumbnail(path.as_str(), 280);
+                        
+                        info!("🖼️ Sending image {}", path);
+
+                        info!("🖼️ Sending data {:?}", data.len());
+
+                        tauri::http::ResponseBuilder::new()
+                            .mimetype("image/png")
+                            .body(data)
                     }
                     _ => res_not_found
                 }

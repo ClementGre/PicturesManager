@@ -18,7 +18,7 @@ header {
 
 header .macos-spacer {
     flex-shrink: 0;
-    width: 78px;
+    width: 80px;
 }
 
 header .spacer {

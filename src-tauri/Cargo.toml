@@ -33,6 +33,10 @@ rustc-hash = "1.1.0"
 pm-common = {path = "../src-common"}
 rexiv2 = "0.10"
 num-rational = "0.4.1"
+objc = "0.2.7"
+image = "0.24.6"
+fast_image_resize = "2.7.3"
+thumbnailer = "0.4.0"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 cocoa = "0.24.1"

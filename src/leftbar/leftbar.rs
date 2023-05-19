@@ -1,5 +1,5 @@
 use yew::{function_component, html, Children, Html, Properties};
-use yewdux::prelude::{use_store, use_selector};
+use yewdux::prelude::use_selector;
 
 use crate::app::Context;
 

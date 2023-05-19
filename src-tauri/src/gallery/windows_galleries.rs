@@ -42,7 +42,7 @@ impl WindowsGalleriesState {
             gallery: Gallery::load(&path),
         });
 
-        new_window(app_handle, label, path);
+        new_window(app_handle, label);
     }
     // Called when a gallery window is closed
     pub fn on_close(&self, label: String) {

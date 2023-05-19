@@ -1,4 +1,4 @@
-use crate::utils::{exif_utils::ExifFile, images::is_supported_img};
+use crate::utils::{exif_utils::ExifFile, images_utils::is_supported_img};
 use log::{info, warn};
 use pm_common::gallery_cache::{Orientation, Ratio};
 use serde::{Deserialize, Serialize};

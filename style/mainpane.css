@@ -22,7 +22,7 @@
 }
 .mainpane ul.pictures-list li img{
     max-height: 100%;
-    max-width: 100%;
+    max-width: 50%;
     object-fit: cover;
     opacity: 0;
 }

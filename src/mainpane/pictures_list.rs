@@ -1,11 +1,10 @@
 use std::collections::HashMap;
-
 use pm_common::gallery_cache::{PathsCache, PictureCache};
 use wasm_bindgen_futures::spawn_local;
 use yew::{function_component, html, suspense::use_future, use_context, Callback, Children, Html, Properties};
 use yewdux::{prelude::use_store, store::Store};
 
-use crate::{app::StaticContext, utils::utils::cmd_async_get};
+use crate::{app::StaticContext, utils::{utils::cmd_async_get, logger::info}};
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -40,16 +39,23 @@ pub fn PicturesList() -> Html {
             cache_dispatch.set(CacheContext { datas_cache, paths_cache });
         });
     });
-
+    let mut count = 0;
+    info("rendering pictures list");
     html! {
         <>
             <button onclick={update_data}>{"Update"}</button>
             <ul class="pictures-list">
                 {
+
                     cache.datas_cache.iter().map(|(id, _)| {
+                        count += 1;
+                        if count > 1 {
+                            return html! {
+
+                            }
+                        }
                         html! {
-                            <li style={format!("background-image: url(reqimg://id/?id={}&window={})", id, static_ctx.window_label)}>
-                                <img src={format!("reqimg://id/?id={}&window={}", id, static_ctx.window_label)} alt=""/>
+                            <li style={format!("background-image: url(reqimg://id/?id={}&window={}); min-width: 100px;", id, static_ctx.window_label)}>
                             </li>
                         }
                     }).collect::<Html>()

@@ -1,8 +1,7 @@
 #[cfg(target_os = "macos")]
-use super::macos::{ToolbarThickness, WindowMacosExt};
+use super::macos::WindowMacosExt;
 use tauri::{AppHandle, Window, Manager};
 use tauri_plugin_window_state::{WindowExt, StateFlags, AppHandleExt};
-use urlencoding::encode;
 
 pub fn close_window(window: Window, app: AppHandle) {
     save_windows_states(&app);
@@ -19,11 +18,11 @@ pub fn save_windows_states(app: &AppHandle) {
     let _ = app.save_window_state(StateFlags::SIZE | StateFlags::POSITION | StateFlags::MAXIMIZED | StateFlags::FULLSCREEN);
 }
 
-pub fn new_window(app: &AppHandle, label: String, gallery_path: String) {
+pub fn new_window(app: &AppHandle, label: String) {
     let window_builder = tauri::WindowBuilder::new(
         app,
         label,
-        tauri::WindowUrl::App(format!("index.html?p={}", encode(&gallery_path.as_str())).into()),
+        tauri::WindowUrl::App(format!("index.html").into()),
     )
     .min_inner_size(500.0, 300.0)
     .inner_size(800.0, 500.0)
@@ -38,7 +37,7 @@ pub fn new_window(app: &AppHandle, label: String, gallery_path: String) {
             .build()
             .unwrap();
 
-        window.set_transparent_titlebar(ToolbarThickness::Thick);
+        window.set_transparent_titlebar();
     }
     #[cfg(not(target_os = "macos"))]
     {
