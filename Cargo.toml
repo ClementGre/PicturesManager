@@ -22,6 +22,8 @@ web-sys = { version = "0.3.61", features = [
     "Element",
     "DomRect",
     "MediaQueryList",
+    "Url",
+    "Blob"
 ] }
 yew = { version = "0.20.0", features = ["csr"] }
 gloo = "0.8.0"
@@ -54,6 +56,7 @@ yew_icons = { version = "0.7", features = [
     "BootstrapWindows",
     "BootstrapHouseGearFill"
 ] }
+base64 = "0.21.0"
 
 [workspace]
 members = ["src-tauri"]

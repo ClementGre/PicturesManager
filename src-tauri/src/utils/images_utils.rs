@@ -3,30 +3,32 @@ use image::codecs::png::PngEncoder;
 use image::io::Reader as ImageReader;
 use image::{ColorType, ImageEncoder};
 use log::info;
-use std::io::{BufWriter, Cursor};
+use std::fs::{create_dir_all, read, write};
+use std::io::BufWriter;
 use std::num::NonZeroU32;
 use std::{ffi::OsStr, path::PathBuf};
+use tauri::{AppHandle, Window};
 
-pub fn gen_thumbnail(path: &str, target_height: u32) -> Vec<u8> {
+use crate::gallery::windows_galleries::{WindowGallery, WindowsGalleriesState};
+use crate::header::window;
+
+pub async fn get_thumbnail(gallery_path: String, image_path: String, id: String, target_height: u32) -> Option<Vec<u8>> {
+    let thumb_path = PathBuf::from(&gallery_path).join(".thumbnails").join(format!("{}.png", &id));
+    if let Ok(data) = read(thumb_path.clone()) {
+        return Some(data);
+    }
     let start = std::time::Instant::now();
 
-    let img = ImageReader::open(path).unwrap().decode().unwrap();
+    let img_path: PathBuf = PathBuf::from(&gallery_path).join(&image_path);
+    let img = ImageReader::open(img_path).ok()?.decode().ok()?;
 
-
-    info!("Loading DynamicImage: {:?}", start.elapsed());
-    let start = std::time::Instant::now();
-
-    let width = NonZeroU32::new(img.width()).unwrap();
-    let height = NonZeroU32::new(img.height()).unwrap();
-    let src_image = fr::Image::from_vec_u8(width, height, img.to_rgba8().into_raw(), fr::PixelType::U8x4).unwrap();
-
-    
-    info!("Getting Image buffer: {:?}", start.elapsed());
-    let start = std::time::Instant::now();
+    let width = NonZeroU32::new(img.width())?;
+    let height = NonZeroU32::new(img.height())?;
+    let src_image = fr::Image::from_vec_u8(width, height, img.to_rgba8().into_raw(), fr::PixelType::U8x4).ok()?;
 
     // Create container for data of destination image
-    let dst_width = NonZeroU32::new(target_height * img.width() / img.height()).unwrap();
-    let dst_height = NonZeroU32::new(target_height).unwrap();
+    let dst_width = NonZeroU32::new(target_height * img.width() / img.height())?;
+    let dst_height = NonZeroU32::new(target_height)?;
     let mut dst_image = fr::Image::new(dst_width, dst_height, src_image.pixel_type());
 
     // Get mutable view of destination image data
@@ -34,23 +36,35 @@ pub fn gen_thumbnail(path: &str, target_height: u32) -> Vec<u8> {
 
     // Resize source image
     let mut resizer = fr::Resizer::new(fr::ResizeAlg::Convolution(fr::FilterType::Box));
-    resizer.resize(&src_image.view(), &mut dst_view).unwrap();
-
-
-    info!("Resizing: {:?}", start.elapsed());
-    let start = std::time::Instant::now();
-
+    resizer.resize(&src_image.view(), &mut dst_view).ok()?;
 
     // Write destination image as PNG-file
     let mut result_buf = BufWriter::new(Vec::new());
     PngEncoder::new(&mut result_buf)
         .write_image(dst_image.buffer(), dst_width.get(), dst_height.get(), ColorType::Rgba8)
-        .unwrap();
+        .ok()?;
 
+    let inner = result_buf.into_inner().ok()?;
+    create_dir_all(thumb_path.parent()?).expect("Unable to create gallery directory.");
+    write(thumb_path, &inner).ok()?;
 
-    info!("Encoding png: {:?}", start.elapsed());
+    info!("Generating thumbnail took {:?}", start.elapsed());
+    Some(inner)
+}
 
-    result_buf.into_inner().unwrap().to_vec()
+#[tauri::command]
+pub async fn get_image_thumbnail(app: AppHandle, window: Window, galleries_state: tauri::State<'_, WindowsGalleriesState>, id: String) -> Result<Vec<u8>, ()> {
+
+    let path;
+    let gallery_path;
+    {
+        let galleries = galleries_state.get_galleries();
+        let gallery = WindowGallery::get(&galleries, &window);
+        path = gallery.gallery.datas_cache.get(&id).unwrap().path.clone();
+        gallery_path = gallery.path.clone();
+    }
+
+    Ok(get_thumbnail(gallery_path, path, id, 280).await.unwrap())
 }
 
 const SUPPORTED_EXTENSIONS: [&str; 6] = ["png", "jpg", "jpeg", "gif", "bmp", "webp"];

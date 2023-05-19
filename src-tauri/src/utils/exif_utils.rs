@@ -14,16 +14,6 @@ pub struct ExifFile {
     meta: rexiv2::Metadata,
     pub uid: String,
     pub uuid_generated: bool,
-    pub date: Option<String>,
-    pub location_lat: Option<f64>,
-    pub location_long: Option<f64>,
-    pub location_alt: Option<f64>,
-    pub camera: Option<String>,
-    pub orientation: Orientation,
-    pub focal_length: Option<f64>,
-    pub exposure_time: Option<Ratio>,
-    pub iso_speed: Option<i32>,
-    pub f_number: Option<f64>,
 }
 
 impl ExifFile {
@@ -44,40 +34,11 @@ impl ExifFile {
                     uuid_generated = true;
                 }
 
-                let date = meta.get_tag_string("Exif.Image.DateTime").ok();
-
-
-                let mut location_lat = None;
-                let mut location_long = None;
-                let mut location_alt = None;
-                if let Some(gps_info) = meta.get_gps_info() {
-                    location_lat = Some(gps_info.latitude);
-                    location_long = Some(gps_info.longitude);
-                    location_alt = Some(gps_info.altitude);
-                }
-
-                let camera = meta.get_tag_string("Exif.Image.Model").ok();
-                let orientation = Orientation::from_revix2(meta.get_orientation());
-                let focal_length = meta.get_focal_length();
-                let exposure_time = meta.get_exposure_time().map(|et| Ratio::from_num_rational(et));
-                let iso_speed = meta.get_iso_speed();
-                let f_number = meta.get_fnumber();
-
                 Some(Self {
                     path,
                     meta,
                     uid,
                     uuid_generated,
-                    date,
-                    location_lat,
-                    location_long,
-                    location_alt,
-                    camera,
-                    orientation,
-                    focal_length,
-                    exposure_time,
-                    iso_speed,
-                    f_number,
                 })
             } else {
                 None
@@ -86,30 +47,50 @@ impl ExifFile {
             None
         }
     }
-    pub fn set_uid(&mut self, uid: String) {
-        self.uid = uid.clone();
-        self.meta
-            .set_tag_string("Xmp.PicturesManagerClementGre.uid", uid.as_str())
-            .expect("Unable to set UID");
+    pub fn get_date(&self) -> Option<String> {
+        self.meta.get_tag_string("Exif.Photo.DateTimeOriginal").ok()
     }
-    pub fn save(&self) {
-        self.meta.save_to_file(self.path.clone()).expect("Unable to save metadata");
+    pub fn get_location(&self) -> Option<(f64, f64, f64)> {
+        if let Some(gps_info) = self.meta.get_gps_info() {
+            Some((gps_info.latitude, gps_info.longitude, gps_info.altitude))
+        } else {
+            None
+        }
+    }
+    pub fn get_camera(&self) -> Option<String> {
+        self.meta.get_tag_string("Exif.Image.Model").ok()
+    }
+    pub fn get_orientation(&self) -> Orientation {
+        Orientation::from_revix2(self.meta.get_orientation())
+    }
+    
+    pub fn get_focal_length(&self) -> Option<f64> {
+        self.meta.get_focal_length()
+    }
+    pub fn get_exposure_time(&self) -> Option<Ratio> {
+        self.meta
+            .get_exposure_time()
+            .map(|et| Ratio::from_num_rational(et))
+    }
+    pub fn get_iso_speed(&self) -> Option<i32> {
+        self.meta.get_iso_speed()
+    }
+    pub fn get_f_number(&self) -> Option<f64> {
+        self.meta.get_fnumber()
     }
 
     pub fn to_picture_cache(&self, path: String) -> PictureCache {
         PictureCache {
             path,
             uuid_generated: self.uuid_generated,
-            date: self.date.clone(),
-            location_lat: self.location_lat,
-            location_long: self.location_long,
-            location_alt: self.location_alt,
-            camera: self.camera.clone(),
-            orientation: self.orientation,
-            focal_length: self.focal_length,
-            exposure_time: self.exposure_time,
-            iso_speed: self.iso_speed,
-            f_number: self.f_number,
+            date: self.get_date(),
+            location: self.get_location(),
+            camera: self.get_camera(),
+            orientation: self.get_orientation(),
+            focal_length: self.get_focal_length(),
+            exposure_time: self.get_exposure_time(),
+            iso_speed: self.get_iso_speed(),
+            f_number: self.get_f_number(),
         }
     }
 }

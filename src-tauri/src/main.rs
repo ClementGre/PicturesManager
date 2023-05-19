@@ -4,14 +4,12 @@ use app_data::{AppData, AppDataState};
 use gallery::windows_galleries::WindowsGalleriesState;
 use header::macos::WindowMacosExt;
 use header::window::save_windows_states;
-use tauri::WindowEvent;
 use tauri::{http::ResponseBuilder, Manager};
 mod header;
 use log::info;
 use tauri_plugin_window_state::StateFlags;
 use url::Url;
-use utils::images_utils::gen_thumbnail;
-use std::fs::read;
+use utils::images_utils::{get_thumbnail, get_image_thumbnail};
 use utils::translator::TranslatorState;
 mod utils;
 use utils::commands::greet;
@@ -90,41 +88,6 @@ fn main() {
                 _ => {}
             }
         })
-        .register_uri_scheme_protocol("reqimg", move |app, request| {
-
-            let res_not_found = ResponseBuilder::new().status(404).body(Vec::new());
-            
-            let url = Url::parse(request.uri()).unwrap();
-
-            let label = url.query_pairs().find(|(key, _)| key == "window").unwrap().1.to_string();
-            let window = app.get_window(&label).expect("window not found");
-
-            let galleries_state = app.state::<WindowsGalleriesState>();
-            let galleries = galleries_state.get_galleries();
-            let gallery = WindowGallery::get(&galleries, &window);
-
-            if let Some(url::Host::Domain(action)) = url.host() {
-                match action {
-                    "id" => {
-                        let id = url.query_pairs().find(|(key, _)| key == "id").unwrap().1.to_string();
-
-                        let path = format!("{}/{}", gallery.path.clone(), gallery.gallery.datas_cache.get(&id).expect("No cache available for this image id").path.clone());
-                        let data = gen_thumbnail(path.as_str(), 280);
-                        
-                        info!("🖼️ Sending image {}", path);
-
-                        info!("🖼️ Sending data {:?}", data.len());
-
-                        tauri::http::ResponseBuilder::new()
-                            .mimetype("image/png")
-                            .body(data)
-                    }
-                    _ => res_not_found
-                }
-            } else {
-                res_not_found
-            }
-        })
         .manage(TranslatorState::default())
         .manage(AppDataState::default())
         .manage(WindowsGalleriesState::default())
@@ -151,6 +114,7 @@ fn main() {
             update_gallery_cache,
             get_gallery_datas_cache,
             get_gallery_paths_cache,
+            get_image_thumbnail
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

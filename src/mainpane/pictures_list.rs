@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 use pm_common::gallery_cache::{PathsCache, PictureCache};
 use wasm_bindgen_futures::spawn_local;
-use yew::{function_component, html, suspense::use_future, use_context, Callback, Children, Html, Properties};
+use yew::{function_component, html, suspense::{use_future}, Callback, Children, Html, Properties};
 use yewdux::{prelude::use_store, store::Store};
-
-use crate::{app::StaticContext, utils::{utils::cmd_async_get, logger::info}};
+use yew::suspense::Suspense;
+use crate::{utils::{utils::cmd_async_get}, mainpane::picture_thumb::PictureThumb};
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -19,9 +19,8 @@ pub struct CacheContext {
 
 #[function_component]
 pub fn PicturesList() -> Html {
-    let static_ctx = use_context::<StaticContext>().unwrap();
     let (cache, cache_dispatch) = use_store::<CacheContext>();
-
+    
     let _ = {
         let cache_dispatch = cache_dispatch.clone();
         use_future(|| async move {
@@ -39,8 +38,13 @@ pub fn PicturesList() -> Html {
             cache_dispatch.set(CacheContext { datas_cache, paths_cache });
         });
     });
+
+    let fallback = html! {
+        <li class="loading">
+        </li>
+    };
+
     let mut count = 0;
-    info("rendering pictures list");
     html! {
         <>
             <button onclick={update_data}>{"Update"}</button>
@@ -49,14 +53,15 @@ pub fn PicturesList() -> Html {
 
                     cache.datas_cache.iter().map(|(id, _)| {
                         count += 1;
-                        if count > 1 {
+                        if count > 50 {
                             return html! {
 
                             }
                         }
                         html! {
-                            <li style={format!("background-image: url(reqimg://id/?id={}&window={}); min-width: 100px;", id, static_ctx.window_label)}>
-                            </li>
+                            <Suspense fallback={fallback.clone()} key={id.clone()}>
+                                <PictureThumb id={id.clone()} />
+                            </Suspense>
                         }
                     }).collect::<Html>()
                 }

@@ -17,9 +17,7 @@ pub struct PictureCache {
 
     pub uuid_generated: bool,
     pub date: Option<String>,
-    pub location_lat: Option<f64>,
-    pub location_long: Option<f64>,
-    pub location_alt: Option<f64>,
+    pub location: Option<(f64, f64, f64)>,
     pub camera: Option<String>,
     pub orientation: Orientation,
     pub focal_length: Option<f64>,

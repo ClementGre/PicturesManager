@@ -14,6 +14,7 @@
 .mainpane ul.pictures-list li {
     flex-grow: 1;
     height: 140px;
+    min-width: 100px;
     border-radius: 5px;
 
     background-repeat: no-repeat;

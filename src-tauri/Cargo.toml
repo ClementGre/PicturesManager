@@ -9,13 +9,13 @@ edition = "2021"
 rust-version = "1.57"
 
 [build-dependencies]
-tauri-build = {version = "1.2", features = [] }
+tauri-build = { version = "1.2", features = [] }
 
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 serde-wasm-bindgen = "0.4.5"
-tauri = {version = "1.2.4", features = ["dialog-all", "http-all", "os-all", "shell-open", "window-all"] }
+tauri = { version = "1.2.4", features = ["dialog-all", "http-all", "os-all", "shell-open", "window-all"] }
 tauri-utils = "1.2.1"
 tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 tauri-plugin-log = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "dev", features = ["colored"] }
@@ -24,19 +24,18 @@ time = "0.3.20"
 fluent = "0.16.0"
 fluent-resmgr = "0.0.6"
 fluent-langneg = "0.13.0"
-unic-langid = { version="0.9.1", features = ["macros"] }
+unic-langid = { version = "0.9.1", features = ["macros"] }
 sys-locale = "0.2.4"
 url = "2.3.1"
 urlencoding = "2.1.2"
 intl-memoizer = "0.5.1"
 rustc-hash = "1.1.0"
-pm-common = {path = "../src-common"}
+pm-common = { path = "../src-common" }
 rexiv2 = "0.10"
 num-rational = "0.4.1"
 objc = "0.2.7"
 image = "0.24.6"
 fast_image_resize = "2.7.3"
-thumbnailer = "0.4.0"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 cocoa = "0.24.1"
@@ -47,7 +46,7 @@ window-shadows = "0.2.1"
 [features]
 # by default Tauri runs in production mode
 # when `tauri dev` runs it is executed with `cargo run --no-default-features` if `devPath` is an URL
-default = [ "custom-protocol" ]
+default = ["custom-protocol"]
 # this feature is used used for production builds where `devPath` points to the filesystem
 # DO NOT remove this
-custom-protocol = [ "tauri/custom-protocol" ]
+custom-protocol = ["tauri/custom-protocol"]
