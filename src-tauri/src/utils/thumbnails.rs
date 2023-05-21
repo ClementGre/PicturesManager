@@ -3,24 +3,48 @@ use image::codecs::png::PngEncoder;
 use image::io::Reader as ImageReader;
 use image::{ColorType, ImageEncoder};
 use log::info;
+use pm_common::gallery_cache::Orientation;
 use std::fs::{create_dir_all, read, write};
 use std::io::BufWriter;
 use std::num::NonZeroU32;
 use std::{ffi::OsStr, path::PathBuf};
-use tauri::{AppHandle, Window};
+use tauri::Window;
 
 use crate::gallery::windows_galleries::{WindowGallery, WindowsGalleriesState};
-use crate::header::window;
 
-pub async fn get_thumbnail(gallery_path: String, image_path: String, id: String, target_height: u32) -> Option<Vec<u8>> {
+use super::exif_utils::ExifFile;
+
+pub fn get_existing_thumbnail(gallery_path: &str, id: &str) -> Option<Vec<u8>> {
     let thumb_path = PathBuf::from(&gallery_path).join(".thumbnails").join(format!("{}.png", &id));
     if let Ok(data) = read(thumb_path.clone()) {
         return Some(data);
     }
+    None
+}
+
+pub async fn gen_thumbnail(gallery_path: String, image_path: String, id: String, target_height: u32) -> Option<()> {
+    // Check if thumbnail already exists
+    let thumb_path = PathBuf::from(&gallery_path).join(".thumbnails").join(format!("{}.png", &id));
+    if thumb_path.exists() {
+        return Some(());
+    }
     let start = std::time::Instant::now();
 
     let img_path: PathBuf = PathBuf::from(&gallery_path).join(&image_path);
-    let img = ImageReader::open(img_path).ok()?.decode().ok()?;
+    let img = ImageReader::open(img_path.clone()).ok()?.decode().ok()?;
+    let exif = ExifFile::new(img_path)?;
+
+    // Rotate image if needed
+    let img = match exif.get_orientation() {
+        Orientation::Rotate90 => img.rotate90(),
+        Orientation::Rotate180 => img.rotate180(),
+        Orientation::Rotate270 => img.rotate270(),
+        Orientation::Rotate90HorizontalFlip => img.rotate90().fliph(),
+        Orientation::Rotate90VerticalFlip => img.rotate90().flipv(),
+        Orientation::HorizontalFlip => img.fliph(),
+        Orientation::VerticalFlip => img.flipv(),
+        _ => img,
+    };
 
     let width = NonZeroU32::new(img.width())?;
     let height = NonZeroU32::new(img.height())?;
@@ -44,17 +68,16 @@ pub async fn get_thumbnail(gallery_path: String, image_path: String, id: String,
         .write_image(dst_image.buffer(), dst_width.get(), dst_height.get(), ColorType::Rgba8)
         .ok()?;
 
-    let inner = result_buf.into_inner().ok()?;
     create_dir_all(thumb_path.parent()?).expect("Unable to create gallery directory.");
-    write(thumb_path, &inner).ok()?;
+    write(thumb_path, result_buf.into_inner().ok()?).ok()?;
 
     info!("Generating thumbnail took {:?}", start.elapsed());
-    Some(inner)
+
+    Some(())
 }
 
 #[tauri::command]
-pub async fn get_image_thumbnail(app: AppHandle, window: Window, galleries_state: tauri::State<'_, WindowsGalleriesState>, id: String) -> Result<Vec<u8>, ()> {
-
+pub async fn gen_image_thumbnail(window: Window, galleries_state: tauri::State<'_, WindowsGalleriesState>, id: String) -> Result<bool, ()> {
     let path;
     let gallery_path;
     {
@@ -64,7 +87,24 @@ pub async fn get_image_thumbnail(app: AppHandle, window: Window, galleries_state
         gallery_path = gallery.path.clone();
     }
 
-    Ok(get_thumbnail(gallery_path, path, id, 280).await.unwrap())
+    Ok(gen_thumbnail(gallery_path, path, id, 280).await.is_some())
+}
+
+#[tauri::command]
+pub fn get_image_dimensions(window: Window, galleries_state: tauri::State<'_, WindowsGalleriesState>, id: String) -> Option<(i32, i32)> {
+    let galleries = galleries_state.get_galleries();
+    let gallery = WindowGallery::get(&galleries, &window);
+
+    let path = PathBuf::from(&gallery.path).join(&gallery.gallery.datas_cache.get(&id).unwrap().path);
+    if let Some(exif) = ExifFile::new(path) {
+        let (w, h) = exif.get_dimensions();
+        let (w, h) = match exif.get_orientation() {
+            Orientation::Rotate90 | Orientation::Rotate270 | Orientation::Rotate90HorizontalFlip | Orientation::Rotate90VerticalFlip => (h, w),
+            _ => (w, h),
+        };
+        return Some((w, h));
+    }
+    None
 }
 
 const SUPPORTED_EXTENSIONS: [&str; 6] = ["png", "jpg", "jpeg", "gif", "bmp", "webp"];

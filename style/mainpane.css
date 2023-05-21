@@ -12,18 +12,23 @@
     gap: 10px;
 }
 .mainpane ul.pictures-list li {
-    flex-grow: 1;
+    background-color: rgb(193, 193, 193);
+    /* flex-grow: 1; */
     height: 140px;
-    min-width: 100px;
     border-radius: 5px;
-
+    overflow: hidden;
+}
+.mainpane ul.pictures-list li.loading {
+    background-color: red;
+}
+.mainpane ul.pictures-list li .thumb-container {
+    width: 100%;
+    height: 100%;
+}
+.mainpane ul.pictures-list li .thumb-container .thumb {
+    width: 100%;
+    height: 100%;
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-}
-.mainpane ul.pictures-list li img{
-    max-height: 100%;
-    max-width: 50%;
-    object-fit: cover;
-    opacity: 0;
 }

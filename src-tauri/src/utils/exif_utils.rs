@@ -4,13 +4,12 @@ use std::{
     sync::atomic::{AtomicU64, Ordering},
     time::{SystemTime, UNIX_EPOCH},
 };
-
 use pm_common::gallery_cache::{Orientation, Ratio};
 
 use crate::gallery::gallery_cache::PictureCache;
 
 pub struct ExifFile {
-    path: OsString,
+    pub path: OsString,
     meta: rexiv2::Metadata,
     pub uid: String,
     pub uuid_generated: bool,
@@ -77,6 +76,10 @@ impl ExifFile {
     }
     pub fn get_f_number(&self) -> Option<f64> {
         self.meta.get_fnumber()
+    }
+    // Does not takes into account orientation
+    pub fn get_dimensions(&self) -> (i32, i32) {
+        (self.meta.get_pixel_width(), self.meta.get_pixel_height())
     }
 
     pub fn to_picture_cache(&self, path: String) -> PictureCache {

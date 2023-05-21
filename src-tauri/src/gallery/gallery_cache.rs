@@ -1,4 +1,4 @@
-use crate::utils::{exif_utils::ExifFile, images_utils::is_supported_img};
+use crate::utils::{exif_utils::ExifFile, thumbnails::is_supported_img};
 use log::{info, warn};
 use pm_common::gallery_cache::{Orientation, Ratio};
 use serde::{Deserialize, Serialize};
@@ -76,7 +76,9 @@ pub fn read_dir_recursive(path: PathBuf, datas_cache: &mut HashMap<String, Pictu
     for path in paths {
         let path = path.unwrap().path();
         if path.is_dir() {
-            paths_cache.children.push(read_dir_recursive(path, datas_cache, gallery_path));
+            if !path.file_name().unwrap().to_str().unwrap().starts_with('.') {
+                paths_cache.children.push(read_dir_recursive(path, datas_cache, gallery_path));
+            }
         } else if is_supported_img(path.clone()) {
             let stripped_path = path
                 .strip_prefix(gallery_path)
