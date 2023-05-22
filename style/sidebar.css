@@ -3,3 +3,6 @@
     width: 250px;
     background-color: aliceblue;
 }
+.sidebar.rightbar {
+    width: 10px;
+}

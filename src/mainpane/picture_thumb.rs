@@ -30,12 +30,10 @@ pub fn PictureThumb(props: &Props) -> HtmlResult {
         let w = h * width / height;
 
         return Ok(html! {
-            <li style={format!("width: {}px; height: {}px;", w, h)}>
-                <div class="thumb-container">
-                    <Suspense fallback={html!{}}>
-                        <PictureThumbImage id={props.id.clone()}/>
-                    </Suspense>
-                </div>
+            <li style={format!("flex-basis: {}px; flex-grow: {};", w, w)}>
+                <Suspense fallback={html!{}}>
+                    <PictureThumbImage id={props.id.clone()} width={w} height={h}/>
+                </Suspense>
             </li>
         });
     }
@@ -44,8 +42,15 @@ pub fn PictureThumb(props: &Props) -> HtmlResult {
     return Ok(html! { <li></li> });
 }
 
+
+#[derive(Properties, PartialEq)]
+pub struct ImageProps {
+    pub id: String,
+    pub width: i32,
+    pub height: i32,
+}
 #[function_component]
-fn PictureThumbImage(props: &Props) -> HtmlResult {
+fn PictureThumbImage(props: &ImageProps) -> HtmlResult {
     let static_ctx = use_context::<StaticContext>().unwrap();
 
     let has_thumb = use_future_with_deps(
@@ -59,7 +64,9 @@ fn PictureThumbImage(props: &Props) -> HtmlResult {
     }
 
     Ok(html! {
-        <div class="thumb" style={format!("background-image: url(reqimg://get-thumbnail/?id={}&window={})", props.id, static_ctx.window_label)}>
+        <div class="thumb"
+            style={format!("background-image: url(reqimg://get-thumbnail/?id={}&window={}); aspect-ratio: {} / {};",
+            props.id, static_ctx.window_label, props.width, props.height)}>
         </div>
     })
 }

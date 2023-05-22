@@ -9,25 +9,22 @@
     display: flex;
     flex-wrap: wrap;
     align-content: stretch;
+    align-items: top;
     gap: 10px;
 }
 .mainpane ul.pictures-list li {
     background-color: rgb(193, 193, 193);
-    /* flex-grow: 1; */
-    height: 140px;
+    flex-grow: 1;
     border-radius: 5px;
     overflow: hidden;
 }
 .mainpane ul.pictures-list li.loading {
     background-color: red;
 }
-.mainpane ul.pictures-list li .thumb-container {
+.mainpane ul.pictures-list li .thumb {
     width: 100%;
     height: 100%;
-}
-.mainpane ul.pictures-list li .thumb-container .thumb {
-    width: 100%;
-    height: 100%;
+
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
