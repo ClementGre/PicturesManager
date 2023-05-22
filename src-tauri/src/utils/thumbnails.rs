@@ -14,15 +14,38 @@ use crate::gallery::windows_galleries::{WindowGallery, WindowsGalleriesState};
 
 use super::exif_utils::ExifFile;
 
-pub fn get_existing_thumbnail(gallery_path: &str, id: &str) -> Option<Vec<u8>> {
-    let thumb_path = PathBuf::from(&gallery_path).join(".thumbnails").join(format!("{}.png", &id));
-    if let Ok(data) = read(thumb_path.clone()) {
-        return Some(data);
-    }
-    None
+// First called function do determine images dimensions
+// Dimensions are in the right orientation
+#[tauri::command]
+pub fn get_image_dimensions(window: Window, galleries_state: tauri::State<'_, WindowsGalleriesState>, id: String) -> Option<(u32, u32)> {
+    let galleries = galleries_state.get_galleries();
+    let gallery = WindowGallery::get(&galleries, &window);
+    let cache = gallery.gallery.datas_cache.get(&id)?;
+    let (w, h) = cache.dimensions;
+
+    Some(match cache.orientation {
+        Orientation::Rotate90 | Orientation::Rotate270 | Orientation::Rotate90HorizontalFlip | Orientation::Rotate90VerticalFlip => (h, w),
+        _ => (w, h),
+    })
 }
 
-pub async fn gen_thumbnail(gallery_path: String, image_path: String, id: String, target_height: u32) -> Option<()> {
+// Second called function to make sure thumbnail exists
+#[tauri::command]
+pub async fn gen_image_thumbnail(window: Window, galleries_state: tauri::State<'_, WindowsGalleriesState>, id: String) -> Result<bool, ()> {
+    let path;
+    let gallery_path;
+    let orientation;
+    {
+        let galleries = galleries_state.get_galleries();
+        let gallery = WindowGallery::get(&galleries, &window);
+        orientation = gallery.gallery.datas_cache.get(&id).unwrap().orientation;
+        path = gallery.gallery.datas_cache.get(&id).unwrap().path.clone();
+        gallery_path = gallery.path.clone();
+    }
+
+    Ok(gen_thumbnail(gallery_path, path, id, orientation, 280).await.is_some())
+}
+async fn gen_thumbnail(gallery_path: String, image_path: String, id: String, orientation: Orientation, target_height: u32) -> Option<()> {
     // Check if thumbnail already exists
     let thumb_path = PathBuf::from(&gallery_path).join(".thumbnails").join(format!("{}.png", &id));
     if thumb_path.exists() {
@@ -76,43 +99,22 @@ pub async fn gen_thumbnail(gallery_path: String, image_path: String, id: String,
     Some(())
 }
 
-#[tauri::command]
-pub async fn gen_image_thumbnail(window: Window, galleries_state: tauri::State<'_, WindowsGalleriesState>, id: String) -> Result<bool, ()> {
-    let path;
-    let gallery_path;
-    {
-        let galleries = galleries_state.get_galleries();
-        let gallery = WindowGallery::get(&galleries, &window);
-        path = gallery.gallery.datas_cache.get(&id).unwrap().path.clone();
-        gallery_path = gallery.path.clone();
-    }
 
-    Ok(gen_thumbnail(gallery_path, path, id, 280).await.is_some())
-}
-
-#[tauri::command]
-pub fn get_image_dimensions(window: Window, galleries_state: tauri::State<'_, WindowsGalleriesState>, id: String) -> Option<(i32, i32)> {
-    let galleries = galleries_state.get_galleries();
-    let gallery = WindowGallery::get(&galleries, &window);
-
-    let path = PathBuf::from(&gallery.path).join(&gallery.gallery.datas_cache.get(&id).unwrap().path);
-    if let Some(exif) = ExifFile::new(path) {
-        let (w, h) = exif.get_dimensions();
-        let (w, h) = match exif.get_orientation() {
-            Orientation::Rotate90 | Orientation::Rotate270 | Orientation::Rotate90HorizontalFlip | Orientation::Rotate90VerticalFlip => (h, w),
-            _ => (w, h),
-        };
-        return Some((w, h));
+// Third called function to get thumbnail data through custom protocol
+pub fn get_existing_thumbnail(gallery_path: &str, id: &str) -> Option<Vec<u8>> {
+    let thumb_path = PathBuf::from(&gallery_path).join(".thumbnails").join(format!("{}.png", &id));
+    if let Ok(data) = read(thumb_path.clone()) {
+        return Some(data);
     }
     None
 }
 
-const SUPPORTED_EXTENSIONS: [&str; 6] = ["png", "jpg", "jpeg", "gif", "bmp", "webp"];
 
+
+const SUPPORTED_EXTENSIONS: [&str; 6] = ["png", "jpg", "jpeg", "gif", "bmp", "webp"];
 pub fn is_supported_img_ext(ext: &OsStr) -> bool {
     SUPPORTED_EXTENSIONS.iter().any(|e| *e == ext.to_str().unwrap_or_default().to_lowercase())
 }
-
 pub fn is_supported_img(path: PathBuf) -> bool {
     if let Some(extension) = path.extension() {
         is_supported_img_ext(extension)

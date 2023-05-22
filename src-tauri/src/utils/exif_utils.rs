@@ -4,7 +4,7 @@ use std::{
     sync::atomic::{AtomicU64, Ordering},
     time::{SystemTime, UNIX_EPOCH},
 };
-use pm_common::gallery_cache::{Orientation, Ratio};
+use pm_common::gallery_cache::Orientation;
 
 use crate::gallery::gallery_cache::PictureCache;
 
@@ -66,10 +66,10 @@ impl ExifFile {
     pub fn get_focal_length(&self) -> Option<f64> {
         self.meta.get_focal_length()
     }
-    pub fn get_exposure_time(&self) -> Option<Ratio> {
+    pub fn get_exposure_time(&self) -> Option<(u32, u32)> {
         self.meta
             .get_exposure_time()
-            .map(|et| Ratio::from_num_rational(et))
+            .map(|et| (*et.numer() as u32, *et.denom() as u32))
     }
     pub fn get_iso_speed(&self) -> Option<i32> {
         self.meta.get_iso_speed()
@@ -78,8 +78,8 @@ impl ExifFile {
         self.meta.get_fnumber()
     }
     // Does not takes into account orientation
-    pub fn get_dimensions(&self) -> (i32, i32) {
-        (self.meta.get_pixel_width(), self.meta.get_pixel_height())
+    pub fn get_dimensions(&self) -> (u32, u32) {
+        (self.meta.get_pixel_width() as u32, self.meta.get_pixel_height() as u32)
     }
 
     pub fn to_picture_cache(&self, path: String) -> PictureCache {
@@ -88,8 +88,9 @@ impl ExifFile {
             uuid_generated: self.uuid_generated,
             date: self.get_date(),
             location: self.get_location(),
-            camera: self.get_camera(),
             orientation: self.get_orientation(),
+            dimensions: self.get_dimensions(),
+            camera: self.get_camera(),
             focal_length: self.get_focal_length(),
             exposure_time: self.get_exposure_time(),
             iso_speed: self.get_iso_speed(),

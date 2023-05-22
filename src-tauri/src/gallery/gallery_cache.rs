@@ -1,6 +1,6 @@
 use crate::utils::{exif_utils::ExifFile, thumbnails::is_supported_img};
 use log::{info, warn};
-use pm_common::gallery_cache::{Orientation, Ratio};
+use pm_common::gallery_cache::Orientation;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
@@ -14,14 +14,14 @@ use super::windows_galleries::{WindowGallery, WindowsGalleriesState};
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct PictureCache {
     pub path: String,
-
     pub uuid_generated: bool,
     pub date: Option<String>,
     pub location: Option<(f64, f64, f64)>,
-    pub camera: Option<String>,
     pub orientation: Orientation,
+    pub dimensions: (u32, u32),
+    pub camera: Option<String>,
     pub focal_length: Option<f64>,
-    pub exposure_time: Option<Ratio>,
+    pub exposure_time: Option<(u32, u32)>,
     pub iso_speed: Option<i32>,
     pub f_number: Option<f64>,
 }

@@ -25,8 +25,6 @@ fn main() {
     yew::Renderer::<AppLoader>::new().render();
 }
 
-
-
 #[function_component]
 pub fn AppLoader() -> Html {
     wasm_logger::init(wasm_logger::Config::default());

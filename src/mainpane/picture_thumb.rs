@@ -20,7 +20,7 @@ pub struct Props {
 pub fn PictureThumb(props: &Props) -> HtmlResult {
     let dimensions = use_future_with_deps(
         |id| async move {
-            cmd_async::<GetImageThumbnailArgs, Option<(i32, i32)>>("get_image_dimensions", &GetImageThumbnailArgs { id: id.to_string() }).await
+            cmd_async::<GetImageThumbnailArgs, Option<(u32, u32)>>("get_image_dimensions", &GetImageThumbnailArgs { id: id.to_string() }).await
         },
         props.id.clone(),
     )?;
@@ -29,9 +29,15 @@ pub fn PictureThumb(props: &Props) -> HtmlResult {
         let h = 140;
         let w = h * width / height;
 
+        let fallback = html!{
+            <div class="thumb"
+                style={format!("aspect-ratio: {} / {};", w, h)}>
+            </div>
+        };
+
         return Ok(html! {
             <li style={format!("flex-basis: {}px; flex-grow: {};", w, w)}>
-                <Suspense fallback={html!{}}>
+                <Suspense fallback={fallback}>
                     <PictureThumbImage id={props.id.clone()} width={w} height={h}/>
                 </Suspense>
             </li>
@@ -46,8 +52,8 @@ pub fn PictureThumb(props: &Props) -> HtmlResult {
 #[derive(Properties, PartialEq)]
 pub struct ImageProps {
     pub id: String,
-    pub width: i32,
-    pub height: i32,
+    pub width: u32,
+    pub height: u32,
 }
 #[function_component]
 fn PictureThumbImage(props: &ImageProps) -> HtmlResult {

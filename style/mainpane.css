@@ -10,12 +10,12 @@
     flex-wrap: wrap;
     align-content: stretch;
     align-items: top;
-    gap: 10px;
+    gap: 4px;
 }
 .mainpane ul.pictures-list li {
     background-color: rgb(193, 193, 193);
     flex-grow: 1;
-    border-radius: 5px;
+    border-radius: 2px;
     overflow: hidden;
 }
 .mainpane ul.pictures-list li.loading {
