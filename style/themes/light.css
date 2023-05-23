@@ -48,13 +48,13 @@ header.th-light .buttons button:hover, header.th-light .buttons button:focus{
     background-color: rgba(0, 0, 0, 0.1);
 }
 header.th-light .buttons button svg {
-    color: rgb(60, 60, 60);
+    color: #3c3c3c;
 }
 
 /***** TITLE *****/
 
 header.th-light .title p {
-    color: rgb(60, 60, 60);
+    color: #3c3c3c;
 }
 
 /***** WINDOWS BUTTONS *****/
@@ -74,4 +74,46 @@ header.th-light .windows-buttons>div>div {
 header.th-light .windows-buttons>div.maximize>div {
     background-color: transparent;
     border-color: black;
+}
+
+/**************************************/
+/************* SIDE PANES *************/
+/**************************************/
+
+
+main.th-light .sidebar {
+    color: black;
+    background-color: white;
+}
+main.th-light .sidebar.rightbar {
+    border-left: 2px solid #a5a5a5;
+}
+main.th-light .sidebar.leftbar {
+    border-right: 2px solid #a5a5a5;
+}
+
+/* Tabs header */
+main.th-light .sidebar .tabs-header {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+main.th-light .sidebar .tabs-header button {
+    color: #3c3c3c;
+}
+main.th-light .sidebar .tabs-header button:hover,
+main.th-light .sidebar .tabs-header button:focus {
+    border-color: #cacaca;
+}
+main.th-light .sidebar .tabs-header button.selected {
+    background-color: white;
+}
+
+
+/**************************************/
+/************* MAIN PANE **************/
+/**************************************/
+
+
+main.th-light .mainpane{
+    color: black;
+    background-color: #ededed;
 }

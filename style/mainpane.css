@@ -1,6 +1,5 @@
 .mainpane{
     flex-shrink: 1;
-    background-color: rgb(237, 237, 237);
 }
 .mainpane ul.pictures-list {
     list-style: none;
@@ -11,6 +10,10 @@
     align-content: stretch;
     align-items: top;
     gap: 4px;
+}
+.mainpane ul.pictures-list::after {
+    content: '';
+    flex-grow: 100000000;
 }
 .mainpane ul.pictures-list li {
     background-color: rgb(193, 193, 193);

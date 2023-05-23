@@ -84,8 +84,20 @@ header.th-dark .windows-buttons>div.maximize>div {
 /************* SIDE PANES *************/
 /**************************************/
 
-
+main.th-dark .sidebar {
+    color: white;
+    background-color: rgb(41, 42, 43);
+}
 
 /**************************************/
 /************* MAIN PANE **************/
 /**************************************/
+
+main.th-dark .mainpane {
+    color: rgb(255, 255, 255);
+    background-color: rgb(30, 30, 30);
+}
+main.th-dark .mainpane {
+    color: rgb(255, 255, 255);
+    background-color: rgb(30, 30, 30);
+}

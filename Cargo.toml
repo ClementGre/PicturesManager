@@ -16,15 +16,7 @@ serde-wasm-bindgen = "0.4.5"
 wasm-bindgen = { version = "0.2.84", features = ["serde-serialize"] }
 wasm-bindgen-futures = "0.4.34"
 wasm-logger = "0.2.0"
-web-sys = { version = "0.3.61", features = [
-    "Window",
-    "Navigator",
-    "Element",
-    "DomRect",
-    "MediaQueryList",
-    "Url",
-    "Blob"
-] }
+web-sys = { version = "0.3.61", features = ["Window", "Navigator", "Element", "DomRect", "MediaQueryList", "Url", "Blob"] }
 yew = { version = "0.20.0", features = ["csr"] }
 gloo = "0.8.0"
 gloo-console = "0.2.3"
@@ -40,9 +32,7 @@ urlencoding = "2.1.2"
 unidecode = "0.3.0"
 once_cell = "1.17.1"
 pm-common = { path = "src-common" }
-tauri-sys = { git = "https://github.com/JonasKruckenberg/tauri-sys", features = [
-    "all",
-] }
+tauri-sys = { git = "https://github.com/JonasKruckenberg/tauri-sys", features = ["all"] }
 futures = "0.3.28"
 intl-memoizer = "0.5.1"
 yewdux = "0.9"
@@ -54,10 +44,16 @@ yew_icons = { version = "0.7", features = [
     "FontAwesomeSolidStar",
     "FontAwesomeSolidMessage",
     "BootstrapWindows",
-    "BootstrapHouseGearFill"
+    "BootstrapHouseGearFill",
+
+    "OcticonsFileDirectoryOpenFill16",
+    "FontAwesomeSolidTag",
+    "BootstrapCalendarDateFill",
+    "FontAwesomeSolidMapLocationDot",
+    "FontAwesomeSolidBinoculars",
 ] }
 base64 = "0.21.0"
-instant = { version = "0.1", features = [ "wasm-bindgen", "inaccurate" ] }
+instant = { version = "0.1", features = ["wasm-bindgen", "inaccurate"] }
 
 [workspace]
 members = ["src-tauri"]

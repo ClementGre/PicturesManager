@@ -132,7 +132,7 @@ pub fn App() -> HtmlResult {
         <>
             <ContextProvider<StaticContext> context={(*static_context).clone()}>
                 <Header class={if context.theme == Theme::Light { "th-light" } else { "th-dark" }}/>
-                <main class="light">
+                <main class={if context.theme == Theme::Light { "th-light" } else { "th-dark" }}>
                     <LeftBar/>
                     <MainPane/>
                     <RightBar/>

@@ -12,8 +12,6 @@ use tauri::Window;
 
 use crate::gallery::windows_galleries::{WindowGallery, WindowsGalleriesState};
 
-use super::exif_utils::ExifFile;
-
 // First called function do determine images dimensions
 // Dimensions are in the right orientation
 #[tauri::command]
@@ -55,10 +53,9 @@ async fn gen_thumbnail(gallery_path: String, image_path: String, id: String, ori
 
     let img_path: PathBuf = PathBuf::from(&gallery_path).join(&image_path);
     let img = ImageReader::open(img_path.clone()).ok()?.decode().ok()?;
-    let exif = ExifFile::new(img_path)?;
 
     // Rotate image if needed
-    let img = match exif.get_orientation() {
+    let img = match orientation {
         Orientation::Rotate90 => img.rotate90(),
         Orientation::Rotate180 => img.rotate180(),
         Orientation::Rotate270 => img.rotate270(),
