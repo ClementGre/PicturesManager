@@ -1,5 +1,7 @@
 .mainpane{
     flex-shrink: 1;
+    color: var(--text-color);
+    background-color: var(--bg-color);
 }
 .mainpane ul.pictures-list {
     list-style: none;

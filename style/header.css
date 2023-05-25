@@ -12,6 +12,8 @@ header {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    color: var(--text-color);
+    background-color: var(--bg-color);
 }
 
 /* MACOS SPACER */
@@ -71,13 +73,22 @@ header .windows-menu .menu p {
     pointer-events: none;
     white-space: nowrap;
 }
+header .windows-menu .menu .menu-item p,
+header .windows-menu .menu .menu-item p span {
+    line-height: 35px;
+}
+header .windows-menu.opened>.menu.opened,
+header .windows-menu .menu.selected,
+header .windows-menu .item.selected {
+    background-color: var(--hover-bg-color);
+}
 
 header .windows-menu.alt-mode .menu p span {
-    line-height: 40px;
     pointer-events: none;
     white-space: nowrap;
     text-decoration: underline;
     text-underline-offset: 2px;
+    text-decoration-color: var(--menu-underline-color);
 }
 
 header .windows-menu .menu .children-box {
@@ -97,7 +108,6 @@ header .windows-menu .children-box {
 header .windows-menu.opened .menu.opened>.children-box {
     display: flex;
 }
-
 header .windows-menu .children-scroll {
     width: fit-content;
 }
@@ -107,10 +117,9 @@ header .windows-menu .menu>.children-box>.children {
     flex-direction: column;
     max-height: 100%;
     border-radius: 0 0 5px 5px;
-    /* -webkit-backdrop-filter: blur(5px);
-    backdrop-filter: blur(5px); */
     pointer-events: all;
     overflow: scroll;
+    background-color: var(--menu-bg-color);
 }
 
 header .windows-menu>.menu>.children-box>.children {
@@ -138,6 +147,7 @@ header .windows-menu .menu-item.separator hr {
     height: 1px;
     border: none;
     margin: 5px 0;
+    background-color: var(--menu-separator-color);
 }
 
 header .windows-menu .menu-arrow {
@@ -153,6 +163,7 @@ header .windows-menu .menu-arrow>div {
     left: 50%;
     border-radius: 1px;
     transform-origin: center right;
+    background-color: var(--text-color);
 }
 
 header .windows-menu .menu-arrow>div:first-child {
@@ -176,15 +187,15 @@ header .buttons {
     /* Scroll shadow */
     background:
         /* Prevents the visibility of the shadow when too close to an end*/
-        linear-gradient(90deg, var(--header-background-color), var(--header-background-color)) left,
-        linear-gradient(90deg, var(--header-background-color), var(--header-background-color)) right,
-        linear-gradient(90deg, var(--header-background-color), transparent) left 7px top 50%,
-        linear-gradient(90deg, transparent, var(--header-background-color)) right 7px top 50%,
+        linear-gradient(90deg, var(--bg-color), var(--bg-color)) left,
+        linear-gradient(90deg, var(--bg-color), var(--bg-color)) right,
+        linear-gradient(90deg, var(--bg-color), transparent) left 7px top 50%,
+        linear-gradient(90deg, transparent, var(--bg-color)) right 7px top 50%,
         /* The shadow */
         radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, .2), rgba(0, 0, 0, 0)),
         radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, .2), rgba(0, 0, 0, 0)) right 1px bottom 50%;
     background-repeat: no-repeat;
-    background-color: var(--header-background-color);
+    background-color: var(--bg-color);
     background-size:
         7px 100%, 7px 100%,
         7px 100%, 7px 100%,
@@ -207,11 +218,19 @@ header .buttons button {
     border: none;
     outline: inherit;
     cursor: default;
+
+    color: var(--text-color);
+    background-color: transparent;
+}
+header .buttons button:hover,
+header.buttons button:focus {
+    background-color: var(--hover-bg-color);
 }
 
 header .buttons button svg {
     width: 20px;
     height: 20px;
+    color: var(--button-svg-color);
 }
 
 /* TITLE */
@@ -229,6 +248,7 @@ header .title p {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--title-color)
 }
 
 header .title p.title {
@@ -255,6 +275,9 @@ header .windows-buttons>div {
     height: 100%;
     transition: all 0.2s ease-in-out;
 }
+header .windows-buttons>div:hover {
+    background-color: var(--hover-bg-color);
+}
 
 header .windows-buttons>div>div {
     position: absolute;
@@ -262,7 +285,7 @@ header .windows-buttons>div>div {
     top: 50%;
     left: 50%;
     transform: translateX(-50%) translateY(-50%);
-    background-color: white;
+    background-color: var(--windows-buttons-color);
     border-radius: 1px;
     width: 10px;
     height: 10px;
@@ -276,6 +299,11 @@ header .windows-buttons>div.maximize>div {
     background-color: transparent;
     border-style: solid;
     border-width: 1px;
+    background-color: transparent;
+    border-color: var(--windows-buttons-color);
+}
+header .windows-buttons>div.close:hover {
+    background-color: #d43429;
 }
 
 header .windows-buttons>div.close>div.first {
