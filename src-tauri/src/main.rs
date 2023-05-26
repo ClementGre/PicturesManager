@@ -1,30 +1,31 @@
 #![cfg_attr(all(not(debug_assertions), target_os = "windows"), windows_subsystem = "windows")]
 
+use log::info;
+use tauri::{http::ResponseBuilder, Manager};
+use tauri_plugin_window_state::StateFlags;
+use url::Url;
+
 use app_data::{AppData, AppDataState};
 use gallery::windows_galleries::WindowsGalleriesState;
 use header::macos::WindowMacosExt;
-use header::window::save_windows_states;
-use tauri::{http::ResponseBuilder, Manager};
-mod header;
-use log::info;
-use tauri_plugin_window_state::StateFlags;
-use url::Url;
-use utils::thumbnails::{gen_image_thumbnail, get_existing_thumbnail, get_image_dimensions};
-use utils::translator::TranslatorState;
-mod utils;
-use utils::commands::greet;
-use crate::app_data::{get_settings, set_settings};
-use crate::gallery::windows_galleries::WindowGallery;
-use utils::logger::{get_logger_plugin, log_from_front};
-mod app_data;
-mod gallery;
-use header::menubar::{menu_quit, menu_close_window};
-
+use header::menubar::{menu_close_window, menu_quit, menu_update_gallery};
 #[cfg(target_os = "macos")]
 use header::menubar::setup_menubar;
+use header::window::save_windows_states;
+use utils::commands::greet;
+use utils::logger::{get_logger_plugin, log_from_front};
+use utils::thumbnails::{gen_image_thumbnail, get_existing_thumbnail, get_image_dimensions};
+use utils::translator::TranslatorState;
 
+use crate::app_data::{get_settings, set_settings};
+use crate::gallery::gallery_cache::{get_gallery_datas_cache, get_gallery_paths_cache};
+use crate::gallery::windows_galleries::WindowGallery;
 use crate::utils::translator::{get_available_locales, get_system_locale, get_translation_file, Translator};
-use crate::gallery::gallery_cache::{update_gallery_cache, get_gallery_datas_cache, get_gallery_paths_cache};
+
+mod header;
+mod utils;
+mod app_data;
+mod gallery;
 
 fn main() {
 
@@ -146,8 +147,8 @@ fn main() {
             // Menus
             menu_quit,
             menu_close_window,
+            menu_update_gallery,
             // Gallery
-            update_gallery_cache,
             get_gallery_datas_cache,
             get_gallery_paths_cache,
             gen_image_thumbnail,

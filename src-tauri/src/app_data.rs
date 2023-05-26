@@ -1,8 +1,14 @@
-use std::{fs::create_dir_all, fs::File, io::{BufWriter, BufReader}, sync::{Mutex, MutexGuard}};
+use std::{
+    fs::create_dir_all,
+    fs::File,
+    io::{BufReader, BufWriter},
+    sync::{Mutex, MutexGuard},
+};
+
+use serde::{Deserialize, Serialize};
+use tauri::{AppHandle, Manager, Wry};
 
 use pm_common::app_data::Settings;
-use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, Manager};
 
 #[derive(Default)]
 pub struct AppDataState {
@@ -13,12 +19,11 @@ pub struct AppDataState {
 #[serde(default)]
 pub struct AppData {
     pub settings: Settings,
-    pub last_gallery: Option<String>
+    pub last_gallery: Option<String>,
 }
 
 impl AppDataState {
-
-    pub fn save(&self, app: &AppHandle) {
+    pub fn save(&self, app: &AppHandle<Wry>) {
         let dir = app.path_resolver().app_data_dir().unwrap();
         let file = dir.join("app_data.json");
 
@@ -33,7 +38,7 @@ impl AppDataState {
     }
 }
 impl AppData {
-    pub fn load(app: &AppHandle) -> Self {
+    pub fn load(app: &AppHandle<Wry>) -> Self {
         let dir = app.path_resolver().app_data_dir().unwrap();
         let file = dir.join("app_data.json");
 
@@ -41,7 +46,7 @@ impl AppData {
             let file = File::open(&file).expect("Unable to open settings file");
             let reader = BufReader::new(file);
             serde_json::from_reader(reader).expect("Unable to parse settings file")
-        }else {
+        } else {
             AppData::default()
         }
     }
@@ -53,7 +58,7 @@ pub fn get_settings(app_data: tauri::State<AppDataState>) -> Settings {
 }
 
 #[tauri::command]
-pub fn set_settings(app: AppHandle, app_data: tauri::State<AppDataState>, settings: Settings) {
+pub fn set_settings(app: AppHandle<Wry>, app_data: tauri::State<AppDataState>, settings: Settings) {
     app_data.data().settings = settings.clone();
     app_data.save(&app);
     app.emit_all("settings-changed", settings).unwrap();

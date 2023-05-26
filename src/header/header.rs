@@ -1,14 +1,16 @@
-use crate::app::StaticContext;
-use crate::header::menubar::MenuBar;
-use crate::utils::logger::info;
-use crate::utils::utils::{cmd, cmd_async, cmd_arg};
-use pm_common::app_data::{Settings, Theme};
 use serde::{Deserialize, Serialize};
 use tauri_sys::window::current_window;
 use yew::platform::spawn_local;
 use yew::prelude::*;
 use yew_icons::{Icon, IconId};
 use yewdux::prelude::use_store;
+
+use pm_common::app_data::{Settings, Theme};
+
+use crate::app::StaticContext;
+use crate::header::menubar::MenuBar;
+use crate::utils::logger::info;
+use crate::utils::utils::{cmd, cmd_arg, cmd_async};
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -17,19 +19,18 @@ pub struct Props {
 
 #[derive(Serialize, Deserialize)]
 pub struct GreetArgs<'a> {
-    pub name: &'a str
+    pub name: &'a str,
 }
 #[derive(Serialize, Deserialize)]
 pub struct SetSettingsArgs {
-    pub settings: Settings
+    pub settings: Settings,
 }
 
-
+#[allow(non_snake_case)]
 #[function_component]
 pub fn Header(props: &Props) -> Html {
-
     let static_ctx = use_context::<StaticContext>().unwrap();
-    
+
     let on_minimize = Callback::from(move |_: MouseEvent| {
         spawn_local(async {
             current_window().minimize().await.expect("failed to minimize window");
@@ -68,7 +69,7 @@ pub fn Header(props: &Props) -> Html {
         Callback::from(move |_| {
             let mut settings = (*settings).clone();
             settings.theme = Theme::Light;
-            cmd_arg("set_settings", &SetSettingsArgs{settings});
+            cmd_arg("set_settings", &SetSettingsArgs { settings });
         })
     };
     let theme_dark = {
@@ -76,7 +77,7 @@ pub fn Header(props: &Props) -> Html {
         Callback::from(move |_| {
             let mut settings = (*settings).clone();
             settings.theme = Theme::Dark;
-            cmd_arg("set_settings", &SetSettingsArgs{settings});
+            cmd_arg("set_settings", &SetSettingsArgs { settings });
         })
     };
     let theme_os = {
@@ -84,7 +85,7 @@ pub fn Header(props: &Props) -> Html {
         Callback::from(move |_| {
             let mut settings = (*settings).clone();
             settings.theme = Theme::System;
-            cmd_arg("set_settings", &SetSettingsArgs{settings});
+            cmd_arg("set_settings", &SetSettingsArgs { settings });
         })
     };
 
@@ -93,7 +94,7 @@ pub fn Header(props: &Props) -> Html {
         Callback::from(move |_| {
             let mut settings = (*settings).clone();
             settings.force_win_header = !settings.force_win_header;
-            cmd_arg("set_settings", &SetSettingsArgs{settings});
+            cmd_arg("set_settings", &SetSettingsArgs { settings });
         })
     };
 
@@ -102,11 +103,8 @@ pub fn Header(props: &Props) -> Html {
     let macos_header = {
         let static_ctx = static_ctx.clone();
         let settings = settings.clone();
-        use_memo(|settings| {
-            static_ctx.macos && !settings.force_win_header
-        }, settings)
+        use_memo(|settings| static_ctx.macos && !settings.force_win_header, settings)
     };
-
 
     html! {
         <>

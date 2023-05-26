@@ -1,6 +1,6 @@
 use gloo::events::EventListener;
 use unidecode::unidecode;
-use wasm_bindgen::{JsCast};
+use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
 use yew::prelude::*;
 use yewdux::prelude::use_store;
@@ -8,7 +8,7 @@ use yewdux::prelude::use_store;
 use crate::{
     header::menu::{get_menus, MenuItem},
     header::menu_item_component::MenuItemComponent,
-    utils::{keystroke::KeyStroke, logger::info, utils::cmd, translator::Translator},
+    utils::{keystroke::KeyStroke, logger::info, translator::Translator, utils::cmd},
 };
 
 fn register_shortcuts(items: &Vec<MenuItem>, shortcuts: &mut Vec<(KeyStroke, String)>) {
@@ -48,6 +48,7 @@ pub enum NavigationMessageResult {
     ConsumedAndClose, // Requests menu to be closed
 }
 
+#[allow(non_snake_case)]
 #[function_component]
 pub fn MenuBar() -> Html {
     let (t, _) = use_store::<Translator>();
@@ -120,7 +121,7 @@ pub fn MenuBar() -> Html {
         use_effect(move || {
             let document = gloo::utils::document();
             let listener = EventListener::new(&document, "keydown", move |e| {
-                let e = e.dyn_ref::<web_sys::KeyboardEvent>().unwrap();
+                let e = e.dyn_ref::<KeyboardEvent>().unwrap();
 
                 // Keyboard shortcuts
                 shortcuts.clone().iter().for_each(|(ks, id)| {
@@ -400,6 +401,7 @@ pub struct MenuTextProps {
     pub text: String,
 }
 
+#[allow(non_snake_case)]
 #[function_component]
 pub fn MenuTextComponent(props: &MenuTextProps) -> Html {
     let text = props.text.clone();

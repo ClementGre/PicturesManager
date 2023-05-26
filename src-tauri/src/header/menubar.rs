@@ -1,10 +1,15 @@
+use std::collections::HashMap;
+
 #[cfg(target_os = "macos")]
 use tauri::AboutMetadata;
-use tauri::{Window, AppHandle};
+use tauri::{AppHandle, State, Window, Wry};
 #[cfg(target_os = "macos")]
 use tauri::{CustomMenuItem, Menu, MenuItem, Submenu};
 
-use super::window::{quit_app, close_window};
+use crate::gallery::gallery_cache::{update_gallery_cache, PathsCache, PictureCache};
+use crate::gallery::windows_galleries::WindowsGalleriesState;
+
+use super::window::{close_window, quit_app};
 
 #[cfg(target_os = "macos")]
 pub fn setup_menubar(app_name: String) -> Menu {
@@ -44,10 +49,7 @@ pub fn setup_menubar(app_name: String) -> Menu {
     edit_menu = edit_menu.add_native_item(MenuItem::SelectAll);
 
     menu = menu.add_submenu(Submenu::new("Edit", edit_menu));
-    menu = menu.add_submenu(Submenu::new(
-        "View",
-        Menu::new().add_native_item(MenuItem::EnterFullScreen),
-    ));
+    menu = menu.add_submenu(Submenu::new("View", Menu::new().add_native_item(MenuItem::EnterFullScreen)));
 
     let mut window_menu = Menu::new();
     window_menu = window_menu.add_native_item(MenuItem::Minimize);
@@ -62,19 +64,22 @@ pub fn setup_menubar(app_name: String) -> Menu {
     let quit = CustomMenuItem::new("quit".to_string(), "Quit").accelerator("Cmd+F");
     let close = CustomMenuItem::new("close".to_string(), "Close");
     let submenu = Submenu::new("Test", Menu::new().add_item(quit).add_item(close));
-    menu = menu
-        .add_item(CustomMenuItem::new("hide", "Hide"))
-        .add_submenu(submenu);
+    menu = menu.add_item(CustomMenuItem::new("hide", "Hide")).add_submenu(submenu);
 
     menu
 }
 
-
 #[tauri::command]
-pub fn menu_quit(app: AppHandle) {
+pub fn menu_quit(app: AppHandle<Wry>) {
     quit_app(&app);
 }
 #[tauri::command]
-pub fn menu_close_window(window: Window, app: AppHandle) {
+pub fn menu_close_window(window: Window<Wry>, app: AppHandle<Wry>) {
     close_window(window, app);
+}
+#[tauri::command]
+pub async fn menu_update_gallery(window: Window<Wry>, galleries_state: State<'_, WindowsGalleriesState>) -> Result<(), ()> {
+    let data = update_gallery_cache(&window, galleries_state);
+    window.emit("gallery-cache-changed", data).unwrap();
+    Ok(())
 }

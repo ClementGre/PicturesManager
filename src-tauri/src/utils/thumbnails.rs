@@ -1,21 +1,23 @@
+use std::fs::{create_dir_all, read, write};
+use std::io::BufWriter;
+use std::num::NonZeroU32;
+use std::{ffi::OsStr, path::PathBuf};
+
 use fast_image_resize as fr;
 use image::codecs::png::PngEncoder;
 use image::io::Reader as ImageReader;
 use image::{ColorType, ImageEncoder};
 use log::info;
+use tauri::{Window, Wry};
+
 use pm_common::gallery_cache::Orientation;
-use std::fs::{create_dir_all, read, write};
-use std::io::BufWriter;
-use std::num::NonZeroU32;
-use std::{ffi::OsStr, path::PathBuf};
-use tauri::Window;
 
 use crate::gallery::windows_galleries::{WindowGallery, WindowsGalleriesState};
 
 // First called function do determine images dimensions
 // Dimensions are in the right orientation
 #[tauri::command]
-pub fn get_image_dimensions(window: Window, galleries_state: tauri::State<'_, WindowsGalleriesState>, id: String) -> Option<(u32, u32)> {
+pub fn get_image_dimensions(window: Window<Wry>, galleries_state: tauri::State<'_, WindowsGalleriesState>, id: String) -> Option<(u32, u32)> {
     let galleries = galleries_state.get_galleries();
     let gallery = WindowGallery::get(&galleries, &window);
     let cache = gallery.gallery.datas_cache.get(&id)?;
@@ -29,7 +31,7 @@ pub fn get_image_dimensions(window: Window, galleries_state: tauri::State<'_, Wi
 
 // Second called function to make sure thumbnail exists
 #[tauri::command]
-pub async fn gen_image_thumbnail(window: Window, galleries_state: tauri::State<'_, WindowsGalleriesState>, id: String) -> Result<bool, ()> {
+pub async fn gen_image_thumbnail(window: Window<Wry>, galleries_state: tauri::State<'_, WindowsGalleriesState>, id: String) -> Result<bool, ()> {
     let path;
     let gallery_path;
     let orientation;
@@ -96,7 +98,6 @@ async fn gen_thumbnail(gallery_path: String, image_path: String, id: String, ori
     Some(())
 }
 
-
 // Third called function to get thumbnail data through custom protocol
 pub fn get_existing_thumbnail(gallery_path: &str, id: &str) -> Option<Vec<u8>> {
     let thumb_path = PathBuf::from(&gallery_path).join(".thumbnails").join(format!("{}.png", &id));
@@ -105,8 +106,6 @@ pub fn get_existing_thumbnail(gallery_path: &str, id: &str) -> Option<Vec<u8>> {
     }
     None
 }
-
-
 
 const SUPPORTED_EXTENSIONS: [&str; 6] = ["png", "jpg", "jpeg", "gif", "bmp", "webp"];
 pub fn is_supported_img_ext(ext: &OsStr) -> bool {

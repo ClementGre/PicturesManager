@@ -186,14 +186,14 @@ header .buttons {
     overscroll-behavior-x: none;
     /* Scroll shadow */
     background:
-        /* Prevents the visibility of the shadow when too close to an end*/
+        /* Prevents the visibility of the shadow when too close to an end */
         linear-gradient(90deg, var(--bg-color), var(--bg-color)) left,
         linear-gradient(90deg, var(--bg-color), var(--bg-color)) right,
         linear-gradient(90deg, var(--bg-color), transparent) left 7px top 50%,
         linear-gradient(90deg, transparent, var(--bg-color)) right 7px top 50%,
         /* The shadow */
-        radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, .2), rgba(0, 0, 0, 0)),
-        radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, .2), rgba(0, 0, 0, 0)) right 1px bottom 50%;
+        radial-gradient(farthest-side at 0 50%, var(--button-row-scroll-shadow), transparent),
+        radial-gradient(farthest-side at 100% 50%, var(--button-row-scroll-shadow), transparent) right 1px bottom 50%;
     background-repeat: no-repeat;
     background-color: var(--bg-color);
     background-size:

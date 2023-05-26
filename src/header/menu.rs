@@ -54,20 +54,32 @@ pub fn get_menus(t: &Rc<Translator>) -> Vec<MenuItem> {
         t.tr("menu-bar-file"),
         vec![
             MenuItem::new_item_acc("open_gallery".to_string(), t.tr("menu-bar-file-open-gallery"), "Ctrl+O".to_string()),
-            MenuItem::new_menu("open_recent_gallery".to_string(), t.tr("menu-bar-file-recent-galleries").to_string(), vec![
-                MenuItem::new_item("recent_gallery_1".to_string(), "Gallerie récente _1".to_string()),
-                MenuItem::new_item("recent_gallery_2".to_string(), "Gallerie récente _2".to_string()),
-                MenuItem::new_menu("recent_gallery_other_1".to_string(), "_Autre (1)".to_string(), vec![
-                    MenuItem::new_item("recent_gallery_3".to_string(), "Gallerie récente _3".to_string()),
-                    MenuItem::new_item("recent_gallery_4".to_string(), "Gallerie récente _4".to_string()),
-                ]),
-                MenuItem::new_item("recent_gallery_5".to_string(), "_Gallerie récente 5".to_string()),
-                MenuItem::new_menu("recent_gallery_other_2".to_string(), "A_utre (2)".to_string(), vec![
-                    MenuItem::new_item("recent_gallery_6".to_string(), "G_allerie récente 6".to_string()),
-                    MenuItem::new_item("recent_gallery_7".to_string(), "Ga_llerie récente 7".to_string()),
-                ]),
-                MenuItem::new_item("recent_gallery_8".to_string(), "Gallerie r_écente 8".to_string()),
-            ]),
+            MenuItem::new_menu(
+                "open_recent_gallery".to_string(),
+                t.tr("menu-bar-file-recent-galleries").to_string(),
+                vec![
+                    MenuItem::new_item("recent_gallery_1".to_string(), "Gallerie récente _1".to_string()),
+                    MenuItem::new_item("recent_gallery_2".to_string(), "Gallerie récente _2".to_string()),
+                    MenuItem::new_menu(
+                        "recent_gallery_other_1".to_string(),
+                        "_Autre (1)".to_string(),
+                        vec![
+                            MenuItem::new_item("recent_gallery_3".to_string(), "Gallerie récente _3".to_string()),
+                            MenuItem::new_item("recent_gallery_4".to_string(), "Gallerie récente _4".to_string()),
+                        ],
+                    ),
+                    MenuItem::new_item("recent_gallery_5".to_string(), "_Gallerie récente 5".to_string()),
+                    MenuItem::new_menu(
+                        "recent_gallery_other_2".to_string(),
+                        "A_utre (2)".to_string(),
+                        vec![
+                            MenuItem::new_item("recent_gallery_6".to_string(), "G_allerie récente 6".to_string()),
+                            MenuItem::new_item("recent_gallery_7".to_string(), "Ga_llerie récente 7".to_string()),
+                        ],
+                    ),
+                    MenuItem::new_item("recent_gallery_8".to_string(), "Gallerie r_écente 8".to_string()),
+                ],
+            ),
             MenuItem::new_item_acc("new_gallery".to_string(), t.tr("menu-bar-file-new-gallery"), "Ctrl+N".to_string()),
             MenuItem::new_separator(0),
             MenuItem::new_item_acc("close_window".to_string(), t.tr("menu-bar-file-close-gallery"), "Ctrl+W".to_string()),
@@ -94,7 +106,7 @@ pub fn get_menus(t: &Rc<Translator>) -> Vec<MenuItem> {
         "tools".to_string(),
         t.tr("menu-bar-tools"),
         vec![
-            MenuItem::new_item("update_Gallery".to_string(), t.tr("menu-bar-tools-update-gallery")),
+            MenuItem::new_item("update_gallery".to_string(), t.tr("menu-bar-tools-update-gallery")),
             MenuItem::new_item("edit_exif".to_string(), t.tr("menu-bar-tools-edit-exif")),
         ],
     ));

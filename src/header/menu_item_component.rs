@@ -1,10 +1,11 @@
-use crate::header::menubar::extract_key_from_text;
-use crate::utils::utils::cmd;
 use gloo_timers::callback::Timeout;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
 use web_sys::{Element, MouseEvent};
 use yew::{classes, html, AttrValue, Callback, Component, Context, Html, NodeRef, Properties};
+
+use crate::header::menubar::extract_key_from_text;
+use crate::utils::utils::cmd;
 
 use super::menubar::NavigationMessageResult;
 use super::menubar::NavigationMessageResult::Consumed;

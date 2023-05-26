@@ -8,36 +8,36 @@
 /***** HEADER *****/
 
 header.th-dark {
-    --bg-color: hsl(0, 0%, 16%);
-    --hover-bg-color: hsl(0, 0%, 26%);
+    --bg-color: hsl(215, 12%, 15%);
+    --hover-bg-color: hsl(215, 8%, 26%);
     /* Menu */
-    --menu-bg-color: hsl(0, 0%, 16%);
+    --menu-bg-color: hsl(215, 12%, 15%);
     --menu-underline-color: hsl(0, 0%, 70%);
-    --menu-separator-color: hsl(0, 0%, 50%);
+    --menu-separator-color: hsl(0, 0%, 16%);
     /* Buttons */
-    --button-svg-color: hsl(0, 0%, 100%);
+    --button-svg-color: white;
+    --button-row-scroll-shadow: hsl(215, 12%, 80%, 30%);
     /* Title */
     --title-color: #e6e6e6;
     /* Windows buttons */
     --windows-buttons-color: white;
-
 }
 
 /***** SIDE BAR *****/
 
 main.th-dark .sidebar {
     --text-color: white;
-    --bg-color: rgb(30, 30, 30);
+    --bg-color: hsl(215, 12%, 12%);
     --separator-color: hsl(0, 0%, 16%);
     /* Tabs Header */
-    --header-bg-color: hsl(0, 0%, 8%);
+    --header-bg-color: hsl(215, 12%, 8%);
     --header-svg-color: white;
-    --header-button-hover-color: hsl(0, 0%, 12%);
+    --header-button-hover-color: hsl(215, 8%, 14%);
 }
 
 /***** MAIN PANE *****/
 
 main.th-dark .mainpane {
     --text-color: white;
-    --bg-color: hsl(0, 0%, 8%);
+    --bg-color: hsl(215, 12%, 8%);
 }

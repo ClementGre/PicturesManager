@@ -1,15 +1,17 @@
 use std::env;
 
-use super::translator::TranslatorState;
-use crate::{app_data::AppDataState, gallery::windows_galleries::WindowsGalleriesState};
 use fluent::{FluentArgs, FluentValue};
 use log::trace;
-use tauri::Window;
+use tauri::{AppHandle, Window, Wry};
+
+use crate::{app_data::AppDataState, gallery::windows_galleries::WindowsGalleriesState};
+
+use super::translator::TranslatorState;
 
 #[tauri::command]
 pub fn greet(
-    window: Window,
-    _: tauri::AppHandle,
+    window: Window<Wry>,
+    _: AppHandle<Wry>,
     app_data: tauri::State<AppDataState>,
     galleries: tauri::State<WindowsGalleriesState>,
     translator: tauri::State<TranslatorState>,
@@ -29,7 +31,8 @@ pub fn greet(
             .get_galleries()
             .iter()
             .find(|gallery| gallery.window_label == window.label())
-            .unwrap().path,
+            .unwrap()
+            .path,
         translator.tra("test", &args)
     )
 }

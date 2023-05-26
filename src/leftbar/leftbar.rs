@@ -1,4 +1,4 @@
-use yew::{function_component, html, Children, Html, Properties, classes};
+use yew::{classes, function_component, html, Children, Html, Properties};
 use yew_icons::{Icon, IconId};
 use yewdux::prelude::{use_selector, Dispatch};
 
@@ -9,6 +9,7 @@ pub struct Props {
     pub children: Children, // the field name `children` is important!
 }
 
+#[allow(non_snake_case)]
 #[function_component]
 pub fn LeftBar() -> Html {
     let selected_tab = use_selector(|context: &Context| context.left_tab.clone());
@@ -45,7 +46,7 @@ pub fn LeftBar() -> Html {
                 </button>
             </div>
             <div class="content">
-                {selected_tab}
+                {"Selected tab: "} {selected_tab}
             </div>
         </section>
     }

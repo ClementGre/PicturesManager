@@ -6,10 +6,10 @@ use std::{
 use fluent::{bundle::FluentBundle, FluentArgs, FluentResource};
 use fluent_langneg::{negotiate_languages, NegotiationStrategy};
 use log::warn;
-use tauri::{AppHandle, PathResolver};
+use tauri::{AppHandle, PathResolver, Wry};
 use unic_langid::{langid, LanguageIdentifier};
 
-const RES_IDS: [&str;2] = ["back", "common"];
+const RES_IDS: [&str; 2] = ["back", "common"];
 
 #[derive(Default)]
 pub struct TranslatorState {
@@ -101,7 +101,7 @@ impl Translator {
 }
 
 #[tauri::command]
-pub fn get_available_locales(app: AppHandle) -> Vec<String> {
+pub fn get_available_locales(app: AppHandle<Wry>) -> Vec<String> {
     get_available_locales_strings(app.path_resolver())
 }
 #[tauri::command]
@@ -110,7 +110,7 @@ pub fn get_system_locale() -> Option<String> {
 }
 
 #[tauri::command]
-pub fn get_translation_file(app: AppHandle, locale: &str, resid: &str) -> String {
+pub fn get_translation_file(app: AppHandle<Wry>, locale: &str, resid: &str) -> String {
     let path = app
         .path_resolver()
         .resolve_resource(format!("../translations/{}/{}.ftl", locale, resid))

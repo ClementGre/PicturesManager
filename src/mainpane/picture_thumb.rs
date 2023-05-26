@@ -16,6 +16,7 @@ pub struct GetImageThumbnailArgs {
 pub struct Props {
     pub id: String,
 }
+#[allow(non_snake_case)]
 #[function_component]
 pub fn PictureThumb(props: &Props) -> HtmlResult {
     let dimensions = use_future_with_deps(
@@ -29,7 +30,7 @@ pub fn PictureThumb(props: &Props) -> HtmlResult {
         let h = 140;
         let w = h * width / height;
 
-        let fallback = html!{
+        let fallback = html! {
             <div class="thumb"
                 style={format!("aspect-ratio: {} / {};", w, h)}>
             </div>
@@ -48,13 +49,13 @@ pub fn PictureThumb(props: &Props) -> HtmlResult {
     return Ok(html! { <li></li> });
 }
 
-
 #[derive(Properties, PartialEq)]
 pub struct ImageProps {
     pub id: String,
     pub width: u32,
     pub height: u32,
 }
+#[allow(non_snake_case)]
 #[function_component]
 fn PictureThumbImage(props: &ImageProps) -> HtmlResult {
     let static_ctx = use_context::<StaticContext>().unwrap();

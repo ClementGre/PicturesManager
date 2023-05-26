@@ -1,12 +1,4 @@
-use crate::header::header::Header;
-use crate::leftbar::leftbar::LeftBar;
-use crate::mainpane::mainpane::MainPane;
-use crate::rightbar::rightbar::RightBar;
-use crate::utils::logger::info;
-use crate::utils::translator::Translator;
-use crate::utils::utils::cmd_async_get;
 use futures::stream::StreamExt;
-use pm_common::app_data::{Settings, Theme};
 use tauri_sys::event::listen;
 use tauri_sys::os::{self, OsKind};
 use tauri_sys::window::{self, current_window};
@@ -15,6 +7,16 @@ use yew::prelude::*;
 use yew::suspense::{use_future, use_future_with_deps};
 use yewdux::prelude::use_store;
 use yewdux::store::Store;
+
+use pm_common::app_data::{Settings, Theme};
+
+use crate::header::header::Header;
+use crate::leftbar::leftbar::LeftBar;
+use crate::mainpane::mainpane::MainPane;
+use crate::rightbar::rightbar::RightBar;
+use crate::utils::logger::info;
+use crate::utils::translator::Translator;
+use crate::utils::utils::cmd_async_get;
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct StaticContext {
@@ -26,23 +28,25 @@ pub struct StaticContext {
 #[derive(Clone, Debug, Default, PartialEq, Store)]
 pub struct Context {
     pub theme: Theme,
-    pub left_tab: u16
+    pub left_tab: u16,
 }
 
+#[allow(non_snake_case)]
 #[function_component]
 pub fn App() -> HtmlResult {
     /******************************/
     /******* StaticContext ********/
     /******************************/
     let os = use_future(|| async { os::kind().await.unwrap_or(OsKind::Linux) })?;
-    
-    let static_context = use_memo(|_| {
-        StaticContext{
+
+    let static_context = use_memo(
+        |_| StaticContext {
             macos: *os == OsKind::Darwin,
             windows: *os == OsKind::WindowsNT,
             window_label: current_window().label(),
-        }
-    }, ());
+        },
+        (),
+    );
 
     /******************************/
     /********** Settings **********/

@@ -16,6 +16,7 @@ header.th-light{
     --menu-separator-color: hsl(0, 0%, 50%);
     /* Buttons */
     --button-svg-color: hsl(0, 0%, 24%);
+    --button-row-scroll-shadow: rgba(0, 0, 0, .2);
     /* Title */
     --title-color: hsl(0, 0%, 24%);
     /* Windows buttons */

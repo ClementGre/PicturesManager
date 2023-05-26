@@ -4,6 +4,7 @@ use std::{
     sync::atomic::{AtomicU64, Ordering},
     time::{SystemTime, UNIX_EPOCH},
 };
+
 use pm_common::gallery_cache::Orientation;
 
 use crate::gallery::gallery_cache::PictureCache;
@@ -60,16 +61,14 @@ impl ExifFile {
         self.meta.get_tag_string("Exif.Image.Model").ok()
     }
     pub fn get_orientation(&self) -> Orientation {
-        Orientation::from_revix2(self.meta.get_orientation())
+        Orientation::from_rexiv2(self.meta.get_orientation())
     }
-    
+
     pub fn get_focal_length(&self) -> Option<f64> {
         self.meta.get_focal_length()
     }
     pub fn get_exposure_time(&self) -> Option<(u32, u32)> {
-        self.meta
-            .get_exposure_time()
-            .map(|et| (*et.numer() as u32, *et.denom() as u32))
+        self.meta.get_exposure_time().map(|et| (*et.numer() as u32, *et.denom() as u32))
     }
     pub fn get_iso_speed(&self) -> Option<i32> {
         self.meta.get_iso_speed()
@@ -100,10 +99,10 @@ impl ExifFile {
 }
 
 trait FromRexiv2<T> {
-    fn from_revix2(r: T) -> Self;
+    fn from_rexiv2(r: T) -> Self;
 }
 impl FromRexiv2<rexiv2::Orientation> for Orientation {
-    fn from_revix2(orientation: rexiv2::Orientation) -> Self {
+    fn from_rexiv2(orientation: rexiv2::Orientation) -> Self {
         match orientation {
             rexiv2::Orientation::Normal => Orientation::Normal,
             rexiv2::Orientation::HorizontalFlip => Orientation::HorizontalFlip,

@@ -1,13 +1,16 @@
-use crate::utils::{exif_utils::ExifFile, thumbnails::is_supported_img};
-use log::{info, warn};
-use pm_common::gallery_cache::Orientation;
-use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     fs,
     path::{Path, PathBuf},
 };
-use tauri::Window;
+
+use log::{info, warn};
+use serde::{Deserialize, Serialize};
+use tauri::{Window, Wry};
+
+use pm_common::gallery_cache::Orientation;
+
+use crate::utils::{exif_utils::ExifFile, thumbnails::is_supported_img};
 
 use super::windows_galleries::{WindowGallery, WindowsGalleriesState};
 
@@ -33,8 +36,10 @@ pub struct PathsCache {
     pub pictures: Vec<String>,
 }
 
-#[tauri::command]
-pub fn update_gallery_cache(window: Window, galleries_state: tauri::State<WindowsGalleriesState>) -> (HashMap<String, PictureCache>, PathsCache) {
+pub fn update_gallery_cache(
+    window: &Window<Wry>,
+    galleries_state: tauri::State<WindowsGalleriesState>,
+) -> (HashMap<String, PictureCache>, PathsCache) {
     let mut galleries = galleries_state.get_galleries();
     let gallery = WindowGallery::get_mut(&mut galleries, &window);
 
@@ -54,14 +59,14 @@ pub fn update_gallery_cache(window: Window, galleries_state: tauri::State<Window
     (datas_cache, paths_cache)
 }
 #[tauri::command]
-pub fn get_gallery_datas_cache(window: Window, galleries_state: tauri::State<WindowsGalleriesState>) -> HashMap<String, PictureCache> {
+pub fn get_gallery_datas_cache(window: Window<Wry>, galleries_state: tauri::State<WindowsGalleriesState>) -> HashMap<String, PictureCache> {
     let galleries = galleries_state.get_galleries();
     let gallery = WindowGallery::get(&galleries, &window);
 
     gallery.gallery.datas_cache.clone()
 }
 #[tauri::command]
-pub fn get_gallery_paths_cache(window: Window, galleries_state: tauri::State<WindowsGalleriesState>) -> PathsCache {
+pub fn get_gallery_paths_cache(window: Window<Wry>, galleries_state: tauri::State<WindowsGalleriesState>) -> PathsCache {
     let galleries = galleries_state.get_galleries();
     let gallery = WindowGallery::get(&galleries, &window);
 
