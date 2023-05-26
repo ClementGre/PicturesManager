@@ -5,12 +5,21 @@ use tauri_sys::event::listen;
 use yew::platform::spawn_local;
 use yew::suspense::use_future;
 use yew::{function_component, html, Children, Html, Properties};
-use yewdux::prelude::use_store;
+use yewdux::prelude::{use_selector, use_store};
+use yewdux::store::Store;
 
 use pm_common::gallery_cache::{PathsCache, PictureCache};
 
-use crate::mainpane::pictures_list::{CacheContext, PicturesList};
+use crate::app::Context;
+use crate::app::MainPaneDisplayType::{Pictures, PicturesAndDirs};
+use crate::mainpane::pictures_list::PicturesList;
 use crate::utils::utils::cmd_async_get;
+
+#[derive(Clone, Debug, Default, PartialEq, Store)]
+pub struct CacheContext {
+    pub datas_cache: HashMap<String, PictureCache>,
+    pub paths_cache: PathsCache,
+}
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -45,9 +54,28 @@ pub fn MainPane() -> Html {
         }
     });
 
+    let content = use_selector(|context: &Context| context.main_pane_content.clone());
+
     html! {
         <section class="mainpane">
-            <PicturesList />
+            {
+                if let Pictures(pics) = (*content).clone() {
+                    html! {
+                        <PicturesList pics={pics} dirs={vec![]} />
+                    }
+                }else if let PicturesAndDirs(pics, dirs) = (*content).clone() {
+                    html! {
+                        <PicturesList pics={pics} dirs={dirs}/>
+                    }
+                }else{
+                    html!{
+                        <div class="empty">
+                            <p>{"Nothing to display"}</p>
+                        </div>
+                }
+                }
+
+            }
         </section>
     }
 }

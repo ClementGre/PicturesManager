@@ -30,7 +30,7 @@ main.th-dark .sidebar {
     --bg-color: hsl(215, 12%, 12%);
     --separator-color: hsl(0, 0%, 16%);
     /* Tabs Header */
-    --header-bg-color: hsl(215, 12%, 8%);
+    --header-bg-color: hsl(215, 12%, 6%);
     --header-svg-color: white;
     --header-button-hover-color: hsl(215, 8%, 14%);
 }
@@ -39,5 +39,5 @@ main.th-dark .sidebar {
 
 main.th-dark .mainpane {
     --text-color: white;
-    --bg-color: hsl(215, 12%, 8%);
+    --bg-color: hsl(215, 12%, 6%);
 }

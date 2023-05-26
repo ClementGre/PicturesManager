@@ -26,9 +26,18 @@ pub struct StaticContext {
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Store)]
+pub enum MainPaneDisplayType {
+    Pictures(Vec<String>),
+    PicturesAndDirs(Vec<String>, Vec<String>),
+    #[default]
+    None,
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Store)]
 pub struct Context {
     pub theme: Theme,
     pub left_tab: u16,
+    pub main_pane_content: MainPaneDisplayType,
 }
 
 #[allow(non_snake_case)]

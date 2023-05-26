@@ -3,6 +3,7 @@ use yew_icons::{Icon, IconId};
 use yewdux::prelude::{use_selector, Dispatch};
 
 use crate::app::Context;
+use crate::leftbar::files_tree::FilesTree;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -46,7 +47,29 @@ pub fn LeftBar() -> Html {
                 </button>
             </div>
             <div class="content">
-                {"Selected tab: "} {selected_tab}
+                {
+                    if *selected_tab == 0 {
+                        html! {
+                            <FilesTree />
+                        }
+                    } else if *selected_tab == 1 {
+                        html! {
+                            {"Tags view"}
+                        }
+                    } else if *selected_tab == 2 {
+                        html! {
+                            {"Date view"}
+                        }
+                    } else if *selected_tab == 3 {
+                        html! {
+                            {"Locations view"}
+                        }
+                    } else {
+                        html! {
+                            {"Custom views"}
+                        }
+                    }
+                }
             </div>
         </section>
     }

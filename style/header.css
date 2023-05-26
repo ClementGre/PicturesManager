@@ -223,7 +223,7 @@ header .buttons button {
     background-color: transparent;
 }
 header .buttons button:hover,
-header.buttons button:focus {
+header .buttons button:focus {
     background-color: var(--hover-bg-color);
 }
 

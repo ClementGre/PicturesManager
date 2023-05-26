@@ -74,8 +74,10 @@ pub fn get_gallery_paths_cache(window: Window<Wry>, galleries_state: tauri::Stat
 }
 
 pub fn read_dir_recursive(path: PathBuf, datas_cache: &mut HashMap<String, PictureCache>, gallery_path: &Path) -> PathsCache {
-    let mut paths_cache = PathsCache::default();
-
+    let mut paths_cache = PathsCache {
+        dir_name: path.file_name().unwrap().to_str().unwrap().to_string(),
+        ..Default::default()
+    };
     let paths = fs::read_dir(path).unwrap();
 
     for path in paths {

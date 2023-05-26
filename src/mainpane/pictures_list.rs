@@ -1,28 +1,20 @@
-use std::collections::HashMap;
-
-use wasm_bindgen_futures::spawn_local;
 use yew::suspense::Suspense;
-use yew::{function_component, html, suspense::use_future, Callback, Children, Html, Properties};
-use yewdux::{prelude::use_store, store::Store};
+use yew::{function_component, html, Children, Html, Properties};
+use yewdux::prelude::use_store;
 
-use pm_common::gallery_cache::{PathsCache, PictureCache};
+pub use pm_common::gallery_cache::PictureCache;
 
-use crate::{mainpane::picture_thumb::PictureThumb, utils::utils::cmd_async_get};
+use crate::mainpane::mainpane::CacheContext;
+use crate::mainpane::picture_thumb::PictureThumb;
 
 #[derive(Properties, PartialEq)]
-pub struct Props {
-    pub children: Children, // the field name `children` is important!
+pub struct PicturesListProps {
+    pub pics: Vec<String>,
+    pub dirs: Vec<String>,
 }
-
-#[derive(Clone, Debug, Default, PartialEq, Store)]
-pub struct CacheContext {
-    pub datas_cache: HashMap<String, PictureCache>,
-    pub paths_cache: PathsCache,
-}
-
 #[allow(non_snake_case)]
 #[function_component]
-pub fn PicturesList() -> Html {
+pub fn PicturesList(props: &PicturesListProps) -> Html {
     let (cache, _) = use_store::<CacheContext>();
 
     let fallback = html! {
@@ -30,19 +22,20 @@ pub fn PicturesList() -> Html {
         </li>
     };
 
-    let mut count = 0;
     html! {
         <>
             <ul class="pictures-list">
                 {
 
-                    cache.datas_cache.iter().map(|(id, _)| {
-                        count += 1;
-                        if count > 50 {
-                            return html! {
-
-                            }
+                    props.dirs.iter().map(|path| {
+                        html! {
+                            <li>{"Directory: "}{path}</li>
                         }
+                    }).collect::<Html>()
+                }
+                {
+
+                    props.pics.iter().map(|id| {
                         html! {
                             <Suspense fallback={fallback.clone()} key={id.clone()}>
                                 <PictureThumb id={id.clone()} />

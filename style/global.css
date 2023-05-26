@@ -25,24 +25,21 @@ header {
     width: 100%;
 }
 main {
-    height: auto;
     display: flex;
     align-items: stretch;
     align-content: stretch;
-    flex-grow: 1;
     width: 100%;
-    overflow-x: auto;
-    overscroll-behavior-x: none;
+    height: 100%;
 }
 main > section {
     overscroll-behavior-x: none;
     overscroll-behavior-y: none;
     flex-grow: 1;
     flex-shrink: 0;
-    overflow: auto;
 }
 main > section.mainpane {
     flex-shrink: 1;
+    overflow: auto;
 }
 
 
