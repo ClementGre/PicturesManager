@@ -31,17 +31,16 @@ pub fn PictureThumb(props: &Props) -> HtmlResult {
         let w = h * width / height;
 
         let fallback = html! {
-            <div class="thumb"
-                style={format!("aspect-ratio: {} / {};", w, h)}>
-            </div>
-        };
-
-        return Ok(html! {
-            <li style={format!("flex-basis: {}px; flex-grow: {};", w, w)}>
-                <Suspense fallback={fallback}>
-                    <PictureThumbImage id={props.id.clone()} width={w} height={h}/>
-                </Suspense>
+            <li class="loading" style={format!("flex-basis: {}px; flex-grow: {};", w, w)}>
+                <div class="thumb" style={format!("aspect-ratio: {} / {};", w, h)} />
             </li>
+        };
+        return Ok(html! {
+            <Suspense fallback={fallback}>
+                <li style={format!("flex-basis: {}px; flex-grow: {};", w, w)}>
+                    <PictureThumbImage id={props.id.clone()} width={w} height={h}/>
+                </li>
+            </Suspense>
         });
     }
 

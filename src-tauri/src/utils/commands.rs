@@ -36,3 +36,12 @@ pub fn greet(
         translator.tra("test", &args)
     )
 }
+
+#[tauri::command]
+pub fn open_devtools(window: Window<Wry>) {
+    if window.is_devtools_open() {
+        window.close_devtools();
+    } else {
+        window.open_devtools();
+    }
+}

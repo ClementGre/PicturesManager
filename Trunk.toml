@@ -1,5 +1,6 @@
 [build]
 target = "./index.html"
+sass-flags = ["--style", "compressed"]
 
 [watch]
 ignore = ["./src-tauri"]
@@ -8,3 +9,4 @@ ignore = ["./src-tauri"]
 address = "127.0.0.1"
 port = 1420
 open = false
+sass-flags = ["--style", "compressed"]

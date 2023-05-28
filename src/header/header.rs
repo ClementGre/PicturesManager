@@ -54,6 +54,10 @@ pub fn Header(props: &Props) -> Html {
         });
     });
 
+    let on_devtools = Callback::from(move |_: MouseEvent| {
+        cmd("open_devtools");
+    });
+
     // Settings actions
 
     let (settings, settings_dispatch) = use_store::<Settings>();
@@ -193,7 +197,7 @@ pub fn Header(props: &Props) -> Html {
                             html!()
                         }
                     }
-                    <button>
+                    <button onclick={on_devtools}>
                         <Icon icon_id={IconId::FontAwesomeSolidStar} />
                     </button>
 

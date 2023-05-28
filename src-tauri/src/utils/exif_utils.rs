@@ -10,7 +10,7 @@ use pm_common::gallery_cache::Orientation;
 use crate::gallery::gallery_cache::PictureCache;
 
 pub struct ExifFile {
-    pub path: OsString,
+    path: OsString,
     meta: rexiv2::Metadata,
     pub uid: String,
     pub uuid_generated: bool,
@@ -79,6 +79,15 @@ impl ExifFile {
     // Does not takes into account orientation
     pub fn get_dimensions(&self) -> (u32, u32) {
         (self.meta.get_pixel_width() as u32, self.meta.get_pixel_height() as u32)
+    }
+
+    pub fn regen_uid(&mut self) -> String {
+        self.uid = gen_new_uid();
+        self.meta
+            .set_tag_string("Xmp.PicturesManagerClementGre.uid", self.uid.as_str())
+            .expect("Unable to set UID XMP Field");
+        self.meta.save_to_file(self.path.clone()).expect("Unable to save metadata to file");
+        self.uid.clone()
     }
 
     pub fn to_picture_cache(&self, path: String) -> PictureCache {

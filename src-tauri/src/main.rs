@@ -12,7 +12,7 @@ use header::menubar::{menu_close_window, menu_quit, menu_update_gallery};
 #[cfg(target_os = "macos")]
 use header::menubar::setup_menubar;
 use header::window::save_windows_states;
-use utils::commands::greet;
+use utils::commands::{greet, open_devtools};
 use utils::logger::{get_logger_plugin, log_from_front};
 use utils::thumbnails::{gen_image_thumbnail, get_existing_thumbnail, get_image_dimensions};
 use utils::translator::TranslatorState;
@@ -140,7 +140,6 @@ fn main() {
             get_available_locales,
             get_system_locale,
             get_translation_file,
-            greet,
             // Data
             get_settings,
             set_settings,
@@ -152,7 +151,10 @@ fn main() {
             get_gallery_datas_cache,
             get_gallery_paths_cache,
             gen_image_thumbnail,
-            get_image_dimensions
+            get_image_dimensions,
+            // Other commands
+            greet,
+            open_devtools
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

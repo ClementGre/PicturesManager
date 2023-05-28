@@ -1,3 +1,4 @@
+@import "themes/dark";
 header,
 header * {
     user-select: none;
@@ -7,7 +8,6 @@ header * {
 }
 
 header {
-    height: 40px;
     overflow: visible;
     display: flex;
     flex-direction: row;
@@ -40,15 +40,14 @@ header .windows-icon {
     flex-shrink: 0;
     position: relative;
     width: 40px;
-}
-
-header .windows-icon img {
-    width: 25px;
-    height: 25px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-50%);
+    img {
+        width: 25px;
+        height: 25px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50%);
+    }
 }
 
 /* WINDOWS MENU */
@@ -299,7 +298,6 @@ header .windows-buttons>div.maximize>div {
     background-color: transparent;
     border-style: solid;
     border-width: 1px;
-    background-color: transparent;
     border-color: var(--windows-buttons-color);
 }
 header .windows-buttons>div.close:hover {

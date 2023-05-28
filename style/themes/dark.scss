@@ -10,26 +10,25 @@
 header.th-dark {
     --bg-color: hsl(215, 12%, 15%);
     --hover-bg-color: hsl(215, 8%, 26%);
-    /* Menu */
+    // Menu
     --menu-bg-color: hsl(215, 12%, 15%);
     --menu-underline-color: hsl(0, 0%, 70%);
     --menu-separator-color: hsl(0, 0%, 16%);
-    /* Buttons */
+    // Buttons
     --button-svg-color: white;
     --button-row-scroll-shadow: hsl(215, 12%, 80%, 30%);
-    /* Title */
+    // Title
     --title-color: #e6e6e6;
-    /* Windows buttons */
+    // Windows buttons
     --windows-buttons-color: white;
 }
-
 /***** SIDE BAR *****/
 
 main.th-dark .sidebar {
     --text-color: white;
     --bg-color: hsl(215, 12%, 12%);
     --separator-color: hsl(0, 0%, 16%);
-    /* Tabs Header */
+    // Tabs Header
     --header-bg-color: hsl(215, 12%, 6%);
     --header-svg-color: white;
     --header-button-hover-color: hsl(215, 8%, 14%);
@@ -40,4 +39,6 @@ main.th-dark .sidebar {
 main.th-dark .mainpane {
     --text-color: white;
     --bg-color: hsl(215, 12%, 6%);
+    // Pictures list
+    --pictures-list-thumbnail-loading-bg-color: hsl(215, 12%, 40%);
 }

@@ -7,7 +7,7 @@ use fast_image_resize as fr;
 use image::codecs::png::PngEncoder;
 use image::io::Reader as ImageReader;
 use image::{ColorType, ImageEncoder};
-use log::info;
+use log::{info, warn};
 use tauri::{Window, Wry};
 
 use pm_common::gallery_cache::Orientation;
@@ -54,7 +54,12 @@ async fn gen_thumbnail(gallery_path: String, image_path: String, id: String, ori
     let start = std::time::Instant::now();
 
     let img_path: PathBuf = PathBuf::from(&gallery_path).join(&image_path);
-    let img = ImageReader::open(img_path.clone()).ok()?.decode().ok()?;
+    let img = ImageReader::open(img_path.clone()).ok()?.decode();
+    if img.is_err() {
+        warn!("Unable to decode image: {:?}, error: {}", img_path, img.err().unwrap());
+        return None;
+    }
+    let img = img.ok()?;
 
     // Rotate image if needed
     let img = match orientation {

@@ -94,7 +94,11 @@ pub fn read_dir_recursive(path: PathBuf, datas_cache: &mut HashMap<String, Pictu
                 .expect("Non UTF-8 path")
                 .to_string();
 
-            if let Some(exif_file) = ExifFile::new(path.clone()) {
+            if let Some(mut exif_file) = ExifFile::new(path.clone()) {
+                if datas_cache.contains_key(&exif_file.uid) {
+                    // TODO: compare locations with old cache and regenerate uid for the file that changed location (or was renamed)
+                    exif_file.regen_uid();
+                }
                 datas_cache.insert(exif_file.uid.clone(), exif_file.to_picture_cache(stripped_path));
                 paths_cache.pictures.push(exif_file.uid.clone());
             } else {

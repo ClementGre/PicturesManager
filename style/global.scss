@@ -8,10 +8,7 @@ html, body{
     overflow: hidden;
 }
 body{
-    margin: 0;  
-    display: flex;
-    flex-flow: column;
-    align-items: stretch;
+    margin: 0;
     font-family: var(--system-ui);
     font-weight: 400;
     font-size: 11pt;
@@ -23,13 +20,15 @@ body{
 header {
     flex-shrink: 0;
     width: 100%;
+    height: 40px;
 }
 main {
     display: flex;
     align-items: stretch;
     align-content: stretch;
+    flex-shrink: 2;
     width: 100%;
-    height: 100%;
+    height: calc(100% - 40px);
 }
 main > section {
     overscroll-behavior-x: none;

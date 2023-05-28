@@ -17,13 +17,12 @@
     flex-grow: 100000000;
 }
 .mainpane ul.pictures-list li {
-    background-color: rgb(193, 193, 193);
     flex-grow: 1;
     border-radius: 2px;
     overflow: hidden;
 }
 .mainpane ul.pictures-list li.loading {
-    background-color: red;
+    background-color: var(--pictures-list-thumbnail-loading-bg-color);
 }
 .mainpane ul.pictures-list li .thumb {
     width: 100%;
