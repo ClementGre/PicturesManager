@@ -7,8 +7,7 @@ use yewdux::store::Store;
 
 use super::utils::{cmd_async, cmd_async_get};
 
-const RES_IDS: [&str;2] = ["header", "common"];
-
+const RES_IDS: [&str; 2] = ["header", "common"];
 
 #[derive(Store)]
 pub struct Translator {
@@ -22,7 +21,7 @@ impl PartialEq for Translator {
         self.locales == other.locales
     }
 }
-impl Default for Translator{
+impl Default for Translator {
     fn default() -> Self {
         Self {
             locales: vec![],
@@ -57,10 +56,7 @@ impl Translator {
             }
             bundles.push(bundle);
         }
-        Self {
-            locales,
-            bundles,
-        }
+        Self { locales, bundles }
     }
 
     async fn load_ressource_to_bundle(bundle: &mut TrBundle, locale: &LanguageIdentifier, res_id: &str) {
@@ -81,9 +77,11 @@ impl Translator {
     pub fn get_bundle_for_key(&self, key: &str) -> Option<&TrBundle> {
         self.bundles.iter().find(|bundle| bundle.has_message(&key))
     }
+    #[allow(dead_code)]
     pub fn tr(&self, key: &str) -> String {
         self.translate(key, None)
     }
+    #[allow(dead_code)]
     pub fn tra(&self, key: &str, args: &FluentArgs) -> String {
         self.translate(key, Some(args))
     }

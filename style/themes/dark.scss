@@ -32,6 +32,8 @@ main.th-dark .sidebar {
     --header-bg-color: hsl(215, 12%, 6%);
     --header-svg-color: white;
     --header-button-hover-color: hsl(215, 8%, 14%);
+    // Components
+    --hover-bg-color: hsl(215, 8%, 22%);
 }
 
 /***** MAIN PANE *****/
@@ -40,5 +42,5 @@ main.th-dark .mainpane {
     --text-color: white;
     --bg-color: hsl(215, 12%, 6%);
     // Pictures list
-    --pictures-list-thumbnail-loading-bg-color: hsl(215, 12%, 40%);
+    --pictures-list-thumbnail-loading-bg-color: hsl(215, 12%, 30%);
 }

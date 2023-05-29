@@ -18,9 +18,11 @@ pub struct TranslatorState {
 
 impl TranslatorState {
     // Some functions are directly accessible here to ease the use of the translator
+    #[allow(dead_code)]
     pub fn tr(&self, key: &str) -> String {
         self.translate(key, None)
     }
+    #[allow(dead_code)]
     pub fn tra(&self, key: &str, args: &FluentArgs) -> String {
         self.translate(key, Some(args))
     }

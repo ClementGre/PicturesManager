@@ -6,12 +6,11 @@ use tauri_plugin_window_state::StateFlags;
 use url::Url;
 
 use app_data::{AppData, AppDataState};
-use gallery::windows_galleries::WindowsGalleriesState;
+use gallery::windows_galleries::{get_gallery_path, WindowsGalleriesState};
 use header::macos::WindowMacosExt;
-use header::menubar::{menu_close_window, menu_quit, menu_update_gallery};
 #[cfg(target_os = "macos")]
 use header::menubar::setup_menubar;
-use header::window::save_windows_states;
+use header::menubar::{menu_close_window, menu_quit, menu_update_gallery};
 use utils::commands::{greet, open_devtools};
 use utils::logger::{get_logger_plugin, log_from_front};
 use utils::thumbnails::{gen_image_thumbnail, get_existing_thumbnail, get_image_dimensions};
@@ -19,16 +18,17 @@ use utils::translator::TranslatorState;
 
 use crate::app_data::{get_settings, set_settings};
 use crate::gallery::gallery_cache::{get_gallery_datas_cache, get_gallery_paths_cache};
+use crate::gallery::gallery_data::{get_gallery_data, get_gallery_settings, set_gallery_data, set_gallery_settings};
 use crate::gallery::windows_galleries::WindowGallery;
+use crate::header::window::close_window;
 use crate::utils::translator::{get_available_locales, get_system_locale, get_translation_file, Translator};
 
-mod header;
-mod utils;
 mod app_data;
 mod gallery;
+mod header;
+mod utils;
 
 fn main() {
-
     rexiv2::register_xmp_namespace("PicturesManagerClementGre", "PicturesManagerClementGre").unwrap();
 
     #[allow(unused_mut)]
@@ -54,20 +54,19 @@ fn main() {
     builder
         .on_window_event(|event| match event.event() {
             tauri::WindowEvent::Focused(_) => {}
-            tauri::WindowEvent::CloseRequested { /* api, */ .. } => {
-                save_windows_states(&event.window().app_handle());
+            tauri::WindowEvent::CloseRequested { api, .. } => {
+                api.prevent_close();
+                close_window(event.window().clone(), event.window().app_handle());
             }
             tauri::WindowEvent::Destroyed => {
+                info!("🚩 Window {} destroyed", event.window().label());
                 let app_handle = event.window().app_handle();
 
                 let galleries = app_handle.state::<WindowsGalleriesState>();
                 galleries.on_close(event.window().label().into());
 
-                
-
                 if event.window().app_handle().windows().len() == 0 {
-                    info!("🚩 No more windows, exiting");
-                    
+                    info!("🚩 No more windows, tauri will exit");
                     event.window().app_handle().state::<AppDataState>().save(&event.window().app_handle());
                 }
             }
@@ -90,7 +89,6 @@ fn main() {
             }
         })
         .register_uri_scheme_protocol("reqimg", move |app, request| {
-
             let res_not_found = ResponseBuilder::new().status(404).body(Vec::new());
 
             let url = Url::parse(request.uri()).unwrap();
@@ -106,20 +104,18 @@ fn main() {
                 match action {
                     "get-thumbnail" => {
                         // The frontend must make sure the thumbnail exists before by calling the command gen_image_thumbnail.
-                        // This is only for data transfert.
+                        // This is only for data transfer.
 
                         let id = url.query_pairs().find(|(key, _)| key == "id").unwrap().1.to_string();
 
                         if let Some(data) = get_existing_thumbnail(&gallery.path, &id) {
-                            tauri::http::ResponseBuilder::new()
-                                .mimetype("image/png")
-                                .body(data)
+                            ResponseBuilder::new().mimetype("image/png").body(data)
                         } else {
                             info!("🖼️ Sending no thumbnail {}", id);
                             res_not_found
                         }
                     }
-                    _ => res_not_found
+                    _ => res_not_found,
                 }
             } else {
                 res_not_found
@@ -148,8 +144,14 @@ fn main() {
             menu_close_window,
             menu_update_gallery,
             // Gallery
+            get_gallery_path,
             get_gallery_datas_cache,
             get_gallery_paths_cache,
+            get_gallery_data,
+            set_gallery_data,
+            get_gallery_settings,
+            set_gallery_settings,
+            // Images
             gen_image_thumbnail,
             get_image_dimensions,
             // Other commands

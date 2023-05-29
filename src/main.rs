@@ -2,6 +2,7 @@ use yew::suspense::Suspense;
 use yew::{function_component, html, Html};
 
 use crate::app::App;
+use crate::utils::logger::init_backend_logger;
 
 mod app;
 mod header;
@@ -23,15 +24,22 @@ mod utils;
 // │   ├── main.rs
 
 fn main() {
-    wasm_logger::init(wasm_logger::Config::default());
+    init_backend_logger().expect("Failed to initialize backend logger");
     yew::Renderer::<AppLoader>::new().render();
 }
 
 #[function_component(AppLoader)]
 pub fn app_loader() -> Html {
-    wasm_logger::init(wasm_logger::Config::default());
-
-    let fallback = html! {"Loading..."};
+    let fallback = html! {
+        <>
+            <header class="th-light"/>
+            <main class="th-light">
+                <section class="sidebar leftbar"/>
+                <section class="mainpane"/>
+                <section class="side-bar rightbar"/>
+            </main>
+        </>
+    };
     html! {
         <>
             <Suspense {fallback}>

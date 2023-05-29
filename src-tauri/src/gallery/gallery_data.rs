@@ -1,9 +1,3 @@
-use super::{
-    gallery_cache::{PathsCache, PictureCache},
-    gallery_clusters::{DatesClusters, LocationClusters},
-    gallery_tags::TagGroup
-};
-use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     fs::{create_dir_all, File},
@@ -11,21 +5,30 @@ use std::{
     path::PathBuf,
 };
 
+use serde::{Deserialize, Serialize};
+use tauri::{State, Window, Wry};
+
+use pm_common::gallery::{GalleryData, GallerySettings};
+
+use crate::gallery::windows_galleries::{WindowGallery, WindowsGalleriesState};
+
+use super::{
+    gallery_cache::{PathsCache, PictureCache},
+    gallery_clusters::{DatesClusters, LocationClusters},
+    gallery_tags::TagGroup,
+};
+
 #[derive(Debug, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct Gallery {
     pub settings: GallerySettings,
+    pub data: GalleryData,
     pub tag_groups: HashMap<String, TagGroup>,
     pub datas_cache: HashMap<String, PictureCache>,
     pub paths_cache: PathsCache,
     pub dates_cache: Vec<String>,
     pub dates_clusters: Vec<DatesClusters>,
     pub location_clusters: Vec<LocationClusters>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Default)]
-pub struct GallerySettings {
-    test: String,
 }
 
 impl Gallery {
@@ -50,4 +53,24 @@ impl Gallery {
         let writter = BufWriter::new(file);
         serde_json::to_writer_pretty(writter, &self).unwrap();
     }
+}
+
+#[tauri::command]
+pub fn get_gallery_data(galleries: State<WindowsGalleriesState>, window: Window<Wry>) -> GalleryData {
+    WindowGallery::get(&galleries.get_galleries(), &window).gallery.data.clone()
+}
+#[tauri::command]
+pub fn set_gallery_data(galleries: State<WindowsGalleriesState>, window: Window<Wry>, data: GalleryData) {
+    let mut galleries = galleries.get_galleries();
+    WindowGallery::get_mut(&mut galleries, &window).gallery.data = data;
+}
+
+#[tauri::command]
+pub fn get_gallery_settings(galleries: State<WindowsGalleriesState>, window: Window<Wry>) -> GallerySettings {
+    WindowGallery::get(&galleries.get_galleries(), &window).gallery.settings.clone()
+}
+#[tauri::command]
+pub fn set_gallery_settings(galleries: State<WindowsGalleriesState>, window: Window<Wry>, settings: GallerySettings) {
+    let mut galleries = galleries.get_galleries();
+    WindowGallery::get_mut(&mut galleries, &window).gallery.settings = settings;
 }

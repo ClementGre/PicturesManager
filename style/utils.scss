@@ -1,0 +1,37 @@
+@use 'sass:math';
+
+@mixin no-select {
+	user-select: none;
+	-webkit-user-select: none;
+	cursor: default;
+}
+
+@function strip-units($number) {
+	@return calc($number / ($number * 0 + 1px));
+}
+
+// Returned value has no unit
+@function sqrt-with-unit($number) {
+	@return math.sqrt(strip-units($number));
+}
+
+@mixin arrow-builder($length, $thickness){
+	div {
+		width: $length;
+		height: $thickness;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		border-radius: calc($thickness / 2);
+		transform-origin: right center;
+		background-color: var(--text-color);
+		$trx: - calc($length) - 3px * calc(sqrt-with-unit($thickness) / 4);
+		$try-shift: calc(sqrt-with-unit($thickness) / 2) * 1px;
+		&:first-child {
+			transform: translateX($trx) translateY(calc(-50% + #{$try-shift})) rotate(45deg);
+		}
+		&:last-child {
+			transform: translateX($trx) translateY(calc(-50% - #{$try-shift})) rotate(-45deg);
+		}
+	}
+}

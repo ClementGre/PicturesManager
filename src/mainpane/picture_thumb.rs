@@ -1,11 +1,9 @@
+use log::warn;
 use serde::{Deserialize, Serialize};
 use yew::suspense::Suspense;
 use yew::{function_component, html, suspense::use_future_with_deps, use_context, HtmlResult, Properties};
 
-use crate::{
-    app::StaticContext,
-    utils::{logger::warn, utils::cmd_async},
-};
+use crate::{app::StaticContext, utils::utils::cmd_async};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GetImageThumbnailArgs {
@@ -44,7 +42,7 @@ pub fn PictureThumb(props: &Props) -> HtmlResult {
         });
     }
 
-    warn(format!("No thumb for {}", props.id).as_str());
+    warn!("No thumb for {}", props.id);
     return Ok(html! { <li></li> });
 }
 
@@ -65,7 +63,7 @@ fn PictureThumbImage(props: &ImageProps) -> HtmlResult {
     )?;
 
     if !*has_thumb {
-        warn(format!("No thumb for {}", props.id).as_str());
+        warn!("No thumb for {}", props.id);
         return Ok(html! {});
     }
 

@@ -1,4 +1,5 @@
 use gloo::events::EventListener;
+use log::info;
 use unidecode::unidecode;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
@@ -8,7 +9,7 @@ use yewdux::prelude::use_store;
 use crate::{
     header::menu::{get_menus, MenuItem},
     header::menu_item_component::MenuItemComponent,
-    utils::{keystroke::KeyStroke, logger::info, translator::Translator, utils::cmd},
+    utils::{keystroke::KeyStroke, translator::Translator, utils::cmd},
 };
 
 fn register_shortcuts(items: &Vec<MenuItem>, shortcuts: &mut Vec<(KeyStroke, String)>) {
@@ -191,7 +192,7 @@ pub fn MenuBar() -> Html {
 
                 let target = e.target().and_then(|div| div.dyn_into::<HtmlElement>().ok());
                 if let Some(div) = target {
-                    info(format!("target: {}", div.class_name()).as_str());
+                    info!("target: {}", div.class_name());
                     if !div.class_name().split_whitespace().any(|c| "menu-item" == c || "menu" == c) {
                         // Close menu only if the target is not a menu-item (menu will otherwise be closed on click RELEASE)
                         is_alt_mode.set(false);

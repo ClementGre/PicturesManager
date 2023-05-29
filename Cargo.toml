@@ -36,6 +36,7 @@ tauri-sys = { git = "https://github.com/JonasKruckenberg/tauri-sys", features = 
 futures = "0.3.28"
 intl-memoizer = "0.5.1"
 yewdux = "0.9"
+yew-hooks = "0.2.0"
 yew_icons = { version = "0.7", features = [
     "FontAwesomeSolidMoon",
     "FontAwesomeSolidSun",
@@ -51,6 +52,8 @@ yew_icons = { version = "0.7", features = [
     "BootstrapCalendarDateFill",
     "FontAwesomeSolidMapLocationDot",
     "FontAwesomeSolidBinoculars",
+
+    "FontAwesomeSolidAngleRight",
 ] }
 base64 = "0.21.0"
 instant = { version = "0.1", features = ["wasm-bindgen", "inaccurate"] }

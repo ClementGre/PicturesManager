@@ -1,323 +1,310 @@
 @import "themes/dark";
-header,
-header * {
-    user-select: none;
-    cursor: default;
-    user-select: none;
-    -webkit-user-select: none;
+
+header, header * {
+	cursor: default;
+	user-select: none;
+	-webkit-user-select: none;
 }
 
 header {
-    overflow: visible;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    color: var(--text-color);
-    background-color: var(--bg-color);
+	overflow: visible;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	color: var(--text-color);
+	background-color: var(--bg-color);
+	p {
+		margin: 0;
+	}
 }
 
 /* MACOS SPACER */
 
 header .macos-spacer {
-    flex-shrink: 0;
-    width: 80px;
+	flex-shrink: 0;
+	width: 80px;
 }
 
 header .spacer {
-    flex-shrink: 1000000;
-    flex-grow: 2;
-    width: 30px;
+	flex-shrink: 1000000;
+	flex-grow: 2;
+	width: 30px;
 }
 
 header .fixed-spacer {
-    flex-shrink: 1000000;
-    width: 30px;
+	flex-shrink: 1000000;
+	width: 30px;
 }
 
 /* WINDOWS ICON */
 
 header .windows-icon {
-    flex-shrink: 0;
-    position: relative;
-    width: 40px;
-    img {
-        width: 25px;
-        height: 25px;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translateX(-50%) translateY(-50%);
-    }
+	flex-shrink: 0;
+	position: relative;
+	width: 40px;
+	img {
+		width: 25px;
+		height: 25px;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translateX(-50%) translateY(-50%);
+	}
 }
 
 /* WINDOWS MENU */
 
 header .windows-menu {
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: row;
-    padding: 0;
-    align-items: stretch;
-    outline: none;
-    font-weight: 300;
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: row;
+	padding: 0;
+	align-items: stretch;
+	outline: none;
+	font-weight: 300;
 }
 
 header .windows-menu .menu {
-    padding: 0 10px;
-    overflow: visible;
+	padding: 0 10px;
+	overflow: visible;
 }
 
 header .windows-menu .menu p {
-    line-height: 40px;
-    pointer-events: none;
-    white-space: nowrap;
+	line-height: 40px;
+	pointer-events: none;
+	white-space: nowrap;
 }
 header .windows-menu .menu .menu-item p,
 header .windows-menu .menu .menu-item p span {
-    line-height: 35px;
+	line-height: 35px;
 }
-header .windows-menu.opened>.menu.opened,
+header .windows-menu.opened > .menu.opened,
 header .windows-menu .menu.selected,
 header .windows-menu .item.selected {
-    background-color: var(--hover-bg-color);
+	background-color: var(--hover-bg-color);
 }
 
 header .windows-menu.alt-mode .menu p span {
-    pointer-events: none;
-    white-space: nowrap;
-    text-decoration: underline;
-    text-underline-offset: 2px;
-    text-decoration-color: var(--menu-underline-color);
+	pointer-events: none;
+	white-space: nowrap;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	text-decoration-color: var(--menu-underline-color);
 }
 
 header .windows-menu .menu .children-box {
-    position: fixed;
-    display: none;
-    width: calc(100vw);
-    height: calc(100vh);
-    align-items: flex-start;
-    pointer-events: none;
+	position: fixed;
+	display: none;
+	width: calc(100vw);
+	height: calc(100vh);
+	align-items: flex-start;
+	pointer-events: none;
 }
 
 header .windows-menu .children-box {
-    top: 0;
-    left: 0;
+	top: 0;
+	left: 0;
 }
 
-header .windows-menu.opened .menu.opened>.children-box {
-    display: flex;
+header .windows-menu.opened .menu.opened > .children-box {
+	display: flex;
 }
 header .windows-menu .children-scroll {
-    width: fit-content;
+	width: fit-content;
 }
 
-header .windows-menu .menu>.children-box>.children {
-    display: flex;
-    flex-direction: column;
-    max-height: 100%;
-    border-radius: 0 0 5px 5px;
-    pointer-events: all;
-    overflow: scroll;
-    background-color: var(--menu-bg-color);
+header .windows-menu .menu > .children-box > .children {
+	display: flex;
+	flex-direction: column;
+	max-height: 100%;
+	border-radius: 0 0 5px 5px;
+	pointer-events: all;
+	overflow: scroll;
+	background-color: var(--menu-bg-color);
 }
 
-header .windows-menu>.menu>.children-box>.children {
-    border-radius: 0 0 5px 5px;
+header .windows-menu > .menu > .children-box > .children {
+	border-radius: 0 0 5px 5px;
 }
 
-header .windows-menu>.menu .menu>.children-box>.children {
-    border-radius: 5px;
+header .windows-menu > .menu .menu > .children-box > .children {
+	border-radius: 5px;
 }
 
 header .windows-menu .menu .menu-item {
-    padding: 0 10px;
-    display: flex;
-    justify-content: space-between;
-    flex-direction: row;
-    gap: 30px;
-    border-radius: 5px;
-    min-width: fit-content;
-    width: 100%;
-    outline: none;
+	padding: 0 10px;
+	display: flex;
+	justify-content: space-between;
+	flex-direction: row;
+	gap: 30px;
+	border-radius: 5px;
+	min-width: fit-content;
+	width: 100%;
+	outline: none;
 }
 
 header .windows-menu .menu-item.separator hr {
-    width: 100%;
-    height: 1px;
-    border: none;
-    margin: 5px 0;
-    background-color: var(--menu-separator-color);
+	width: 100%;
+	height: 1px;
+	border: none;
+	margin: 5px 0;
+	background-color: var(--menu-separator-color);
 }
 
 header .windows-menu .menu-arrow {
-    width: 20px;
-    position: relative;
-}
-
-header .windows-menu .menu-arrow>div {
-    width: 10px;
-    height: 2px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    border-radius: 1px;
-    transform-origin: center right;
-    background-color: var(--text-color);
-}
-
-header .windows-menu .menu-arrow>div:first-child {
-    transform: translateX(-50%) translateY(calc(-50% + 0.354px)) rotate(45deg);
-}
-
-header .windows-menu .menu-arrow>div:last-child {
-    transform: translateX(-50%) translateY(calc(-50% - 0.354px)) rotate(-45deg);
+	width: 20px;
+	position: relative;
+	> div {
+		width: 10px;
+		height: 2px;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		border-radius: 1px;
+		transform-origin: center right;
+		background-color: var(--text-color);
+		&:first-child {
+			transform: translateX(-50%) translateY(calc(-50% + 0.354px)) rotate(45deg);
+		}
+		&:last-child {
+			transform: translateX(-50%) translateY(calc(-50% - 0.354px)) rotate(-45deg);
+		}
+	}
 }
 
 /* BUTTONS */
 
 header .buttons {
-    flex-shrink: 1;
-    min-width: 0;
-    padding: 0 4px;
-    overflow: scroll;
-    display: flex;
-    scrollbar-width: none;
-    overscroll-behavior-x: none;
-    /* Scroll shadow */
-    background:
-        /* Prevents the visibility of the shadow when too close to an end */
-        linear-gradient(90deg, var(--bg-color), var(--bg-color)) left,
-        linear-gradient(90deg, var(--bg-color), var(--bg-color)) right,
-        linear-gradient(90deg, var(--bg-color), transparent) left 7px top 50%,
-        linear-gradient(90deg, transparent, var(--bg-color)) right 7px top 50%,
-        /* The shadow */
-        radial-gradient(farthest-side at 0 50%, var(--button-row-scroll-shadow), transparent),
-        radial-gradient(farthest-side at 100% 50%, var(--button-row-scroll-shadow), transparent) right 1px bottom 50%;
-    background-repeat: no-repeat;
-    background-color: var(--bg-color);
-    background-size:
-        7px 100%, 7px 100%,
-        7px 100%, 7px 100%,
-        7px 100%, 7px 100%;
+	flex-shrink: 1;
+	min-width: 0;
+	padding: 0 4px;
+	overflow: scroll;
+	display: flex;
+	scrollbar-width: none;
+	overscroll-behavior-x: none;
+	/* Scroll shadow */
+	background: /* Prevents the visibility of the shadow when too close to an end */
+			linear-gradient(90deg, var(--bg-color), var(--bg-color)) left,
+			linear-gradient(90deg, var(--bg-color), var(--bg-color)) right,
+			linear-gradient(90deg, var(--bg-color), transparent) left 7px top 50%,
+			linear-gradient(90deg, transparent, var(--bg-color)) right 7px top 50%,
+				/* The shadow */
+			radial-gradient(farthest-side at 0 50%, var(--button-row-scroll-shadow), transparent),
+			radial-gradient(farthest-side at 100% 50%, var(--button-row-scroll-shadow), transparent) right 1px bottom 50%;
+	background-repeat: no-repeat;
+	background-color: var(--bg-color);
+	background-size: 7px 100%, 7px 100%,
+	7px 100%, 7px 100%,
+	7px 100%, 7px 100%;
 
-    background-attachment: local, local, local, local, scroll, scroll;
-}
+	background-attachment: local, local, local, local, scroll, scroll;
 
-header .buttons::-webkit-scrollbar {
-    display: none;
+	&::-webkit-scrollbar {
+		display: none;
+	}
 }
 
 header .buttons button {
-    height: 32px;
-    width: 32px;
-    margin: 4px;
-    padding: 6px;
-    border-radius: 6px;
+	height: 32px;
+	width: 32px;
+	margin: 4px;
+	padding: 6px;
+	border-radius: 6px;
 
-    border: none;
-    outline: inherit;
-    cursor: default;
+	border: none;
+	outline: inherit;
+	cursor: default;
 
-    color: var(--text-color);
-    background-color: transparent;
-}
-header .buttons button:hover,
-header .buttons button:focus {
-    background-color: var(--hover-bg-color);
-}
+	color: var(--text-color);
+	background-color: transparent;
 
-header .buttons button svg {
-    width: 20px;
-    height: 20px;
-    color: var(--button-svg-color);
+	&:hover, &:focus {
+		background-color: var(--hover-bg-color);
+	}
+	svg {
+		width: 20px;
+		height: 20px;
+		color: var(--button-svg-color);
+	}
 }
 
 /* TITLE */
 
 header .title {
-    min-width: 0;
-    flex-shrink: 1000;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
+	min-width: 0;
+	flex-shrink: 1000;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	p {
+		display: block;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		color: var(--title-color);
 
-header .title p {
-    display: block;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--title-color)
-}
-
-header .title p.title {
-    font-weight: 600;
-    font-size: 13px;
-}
-
-header .title p.path {
-    font-weight: 300;
-    font-size: 11px;
+		&.title {
+			font-weight: 600;
+			font-size: 13px;
+		}
+		&.path {
+			font-weight: 300;
+			font-size: 11px;
+		}
+	}
 }
 
 /* WINDOWS BUTTONS */
 
 header .windows-buttons {
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: row;
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: row;
+	> div {
+		position: relative;
+		width: 46px;
+		height: 100%;
+		transition: all 0.2s ease-in-out;
+		&:hover {
+			background-color: var(--hover-bg-color);
+		}
+	}
 }
 
-header .windows-buttons>div {
-    position: relative;
-    width: 46px;
-    height: 100%;
-    transition: all 0.2s ease-in-out;
-}
-header .windows-buttons>div:hover {
-    background-color: var(--hover-bg-color);
-}
-
-header .windows-buttons>div>div {
-    position: absolute;
-    z-index: 10;
-    top: 50%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-50%);
-    background-color: var(--windows-buttons-color);
-    border-radius: 1px;
-    width: 10px;
-    height: 10px;
-}
-
-header .windows-buttons>div.minimize>div {
-    height: 1px;
-}
-
-header .windows-buttons>div.maximize>div {
-    background-color: transparent;
-    border-style: solid;
-    border-width: 1px;
-    border-color: var(--windows-buttons-color);
-}
-header .windows-buttons>div.close:hover {
-    background-color: #d43429;
-}
-
-header .windows-buttons>div.close>div.first {
-    /* sqrt(2*10^2) */
-    width: 14px;
-    height: 1px;
-    transform: translateX(-50%) translateY(-50%) rotate(45deg);
-}
-
-header .windows-buttons>div.close>div.second {
-    /* sqrt(2*10^2) */
-    width: 14px;
-    height: 1px;
-    transform: translateX(-50%) translateY(-50%) rotate(-45deg);
-}
-
-header p {
-    margin: 0;
+header .windows-buttons > div {
+	> div {
+		position: absolute;
+		z-index: 10;
+		top: 50%;
+		left: 50%;
+		transform: translateX(-50%) translateY(-50%);
+		background-color: var(--windows-buttons-color);
+		border-radius: 1px;
+		width: 10px;
+		height: 10px;
+	}
+	&.minimize > div {
+			height: 1px;
+	}
+	&.maximize > div {
+			background-color: transparent;
+			border-style: solid;
+			border-width: 1px;
+			border-color: var(--windows-buttons-color);
+	}
+	&.close {
+		&:hover {
+			background-color: #d43429;
+		}
+		> div.first {
+			width: 14px;
+			height: 1px;
+			transform: translateX(-50%) translateY(-50%) rotate(45deg);
+		}
+		> div.second {
+			width: 14px;
+			height: 1px;
+			transform: translateX(-50%) translateY(-50%) rotate(-45deg);
+		}
+	}
 }

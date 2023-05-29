@@ -1,12 +1,10 @@
-use std::collections::HashMap;
-
 #[cfg(target_os = "macos")]
 use tauri::AboutMetadata;
 use tauri::{AppHandle, State, Window, Wry};
 #[cfg(target_os = "macos")]
 use tauri::{CustomMenuItem, Menu, MenuItem, Submenu};
 
-use crate::gallery::gallery_cache::{update_gallery_cache, PathsCache, PictureCache};
+use crate::gallery::gallery_cache::update_gallery_cache;
 use crate::gallery::windows_galleries::WindowsGalleriesState;
 
 use super::window::{close_window, quit_app};

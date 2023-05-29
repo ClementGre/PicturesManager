@@ -1,28 +1,34 @@
 use futures::stream::StreamExt;
-use tauri_sys::event::listen;
+use log::{info, trace};
+use serde::{Deserialize, Serialize};
+use tauri_sys::event::{listen, once};
 use tauri_sys::os::{self, OsKind};
+use tauri_sys::path::home_dir;
 use tauri_sys::window::{self, current_window};
+use web_sys::console::info;
 use yew::platform::spawn_local;
 use yew::prelude::*;
 use yew::suspense::{use_future, use_future_with_deps};
+use yew_hooks::{use_effect_once, use_is_first_mount};
 use yewdux::prelude::use_store;
 use yewdux::store::Store;
 
 use pm_common::app_data::{Settings, Theme};
+use pm_common::gallery::{GalleryData, GallerySettings};
 
 use crate::header::header::Header;
 use crate::leftbar::leftbar::LeftBar;
 use crate::mainpane::mainpane::MainPane;
 use crate::rightbar::rightbar::RightBar;
-use crate::utils::logger::info;
 use crate::utils::translator::Translator;
-use crate::utils::utils::cmd_async_get;
+use crate::utils::utils::{cmd_async, cmd_async_get};
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct StaticContext {
     pub macos: bool,
     pub windows: bool,
     pub window_label: String,
+    pub home_dir: String,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Store)]
@@ -36,8 +42,17 @@ pub enum MainPaneDisplayType {
 #[derive(Clone, Debug, Default, PartialEq, Store)]
 pub struct Context {
     pub theme: Theme,
-    pub left_tab: u16,
+    pub gallery_path: String,
     pub main_pane_content: MainPaneDisplayType,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct GalleryDataContainer {
+    pub data: GalleryData,
+}
+#[derive(Serialize, Deserialize)]
+pub struct GallerySettingsContainer {
+    pub settings: GallerySettings,
 }
 
 #[allow(non_snake_case)]
@@ -47,12 +62,13 @@ pub fn App() -> HtmlResult {
     /******* StaticContext ********/
     /******************************/
     let os = use_future(|| async { os::kind().await.unwrap_or(OsKind::Linux) })?;
-
+    let home_dir = use_future(|| async { home_dir().await.expect("No home directory!") })?;
     let static_context = use_memo(
         |_| StaticContext {
             macos: *os == OsKind::Darwin,
             windows: *os == OsKind::WindowsNT,
             window_label: current_window().label(),
+            home_dir: home_dir.to_string_lossy().to_string(),
         },
         (),
     );
@@ -62,44 +78,42 @@ pub fn App() -> HtmlResult {
     /******************************/
     let (settings, settings_dispatch) = use_store::<Settings>();
     let settings_future = use_future(|| async { cmd_async_get::<Settings>("get_settings").await })?;
-    {
+    if use_is_first_mount() {
+        settings_dispatch.set(settings_future.clone());
         let settings_dispatch = settings_dispatch.clone();
-        use_effect_with_deps(
-            move |_| {
-                // Initial setup
-                settings_dispatch.set(settings_future.clone());
-            },
-            (),
-        );
-    }
-    spawn_local({
-        let settings_dispatch = settings_dispatch.clone();
-        async move {
+        spawn_local(async move {
             let mut events = listen::<Settings>("settings-changed").await.unwrap();
             while let Some(e) = events.next().await {
                 settings_dispatch.set(e.payload);
-                info("Settings changed")
+                info!("Settings changed")
             }
-        }
-    });
+        });
+    }
 
     /******************************/
     /********** Context ***********/
     /******************************/
     let (context, context_dispatch) = use_store::<Context>();
 
-    // OS theme got with use_future and updated with event listener
+    let gallery_path_future = use_future(|| async { cmd_async_get::<String>("get_gallery_path").await })?;
     let os_theme_future = use_future(|| async { current_window().theme().await.unwrap() })?;
+
     let os_theme = use_state(|| os_theme_future.clone());
-    spawn_local({
+
+    if use_is_first_mount() {
+        context_dispatch.reduce_mut(|context| {
+            context.gallery_path = gallery_path_future.clone();
+        });
+
         let os_theme = os_theme.clone();
-        async move {
-            let mut events = listen::<tauri_sys::window::Theme>("tauri://theme-changed").await.unwrap();
+        spawn_local(async move {
+            let mut events = listen::<window::Theme>("tauri://theme-changed").await.unwrap();
             while let Some(e) = events.next().await {
                 os_theme.set(e.payload);
             }
-        }
-    });
+        });
+    }
+
     // Context theme updated with settings and os_theme
     {
         let settings = settings.clone();
@@ -140,6 +154,49 @@ pub fn App() -> HtmlResult {
             language.clone(),
         )?
     };
+
+    /******************************/
+    /******** Gallery Data ********/
+    /******************************/
+
+    let gallery_data_future = use_future(|| async { cmd_async_get::<GalleryData>("get_gallery_data").await })?;
+    let gallery_settings_future = use_future(|| async { cmd_async_get::<GallerySettings>("get_gallery_settings").await })?;
+    let (gallery_data, gallery_data_dispatch) = use_store::<GalleryData>();
+    let (gallery_settings, gallery_settings_dispatch) = use_store::<GallerySettings>();
+
+    let close_app = use_state(|| false);
+    if *close_app {
+        spawn_local(async move {
+            info!("🚩 Received close request from frontend, sending back gallery data and settings, then closing window");
+
+            cmd_async::<GalleryDataContainer, ()>(
+                "set_gallery_data",
+                &GalleryDataContainer {
+                    data: (*gallery_data).clone(),
+                },
+            )
+            .await;
+            cmd_async::<GallerySettingsContainer, ()>(
+                "set_gallery_settings",
+                &GallerySettingsContainer {
+                    settings: (*gallery_settings).clone(),
+                },
+            )
+            .await;
+
+            current_window().close().await.unwrap();
+        });
+        return Ok(html! {});
+    }
+
+    if use_is_first_mount() {
+        gallery_data_dispatch.set((*gallery_data_future).clone());
+        gallery_settings_dispatch.set((*gallery_settings_future).clone());
+        spawn_local(async move {
+            let _ = once::<()>("tauri://close-requested").await.unwrap();
+            close_app.set(true);
+        });
+    }
 
     Ok(html! {
         <>

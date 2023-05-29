@@ -1,15 +1,16 @@
+use log::info;
 use serde::{Deserialize, Serialize};
 use tauri_sys::window::current_window;
 use yew::platform::spawn_local;
 use yew::prelude::*;
 use yew_icons::{Icon, IconId};
-use yewdux::prelude::use_store;
+use yewdux::prelude::{use_selector, use_store};
 
 use pm_common::app_data::{Settings, Theme};
 
+use crate::app::Context;
 use crate::app::StaticContext;
 use crate::header::menubar::MenuBar;
-use crate::utils::logger::info;
 use crate::utils::utils::{cmd, cmd_arg, cmd_async};
 
 #[derive(Properties, PartialEq)]
@@ -30,6 +31,7 @@ pub struct SetSettingsArgs {
 #[function_component]
 pub fn Header(props: &Props) -> Html {
     let static_ctx = use_context::<StaticContext>().unwrap();
+    let gallery_path = use_selector(move |ctx: &Context| ctx.gallery_path.clone());
 
     let on_minimize = Callback::from(move |_: MouseEvent| {
         spawn_local(async {
@@ -50,7 +52,7 @@ pub fn Header(props: &Props) -> Html {
     let on_greet = Callback::from(move |_: MouseEvent| {
         spawn_local(async {
             let new_msg = cmd_async::<_, String>("greet", &GreetArgs { name: &*"test" }).await;
-            info(new_msg.as_str());
+            info!("{}", new_msg);
         });
     });
 
@@ -110,6 +112,11 @@ pub fn Header(props: &Props) -> Html {
         use_memo(|settings| static_ctx.macos && !settings.force_win_header, settings)
     };
 
+    let mut path = (*gallery_path).clone();
+    if gallery_path.starts_with(&static_ctx.home_dir) {
+        path.replace_range(0..static_ctx.home_dir.len() - 1, "~");
+    }
+
     html! {
         <>
             <header data-tauri-drag-region="true" class={classes!(props.class.clone())}>
@@ -119,8 +126,8 @@ pub fn Header(props: &Props) -> Html {
                             <>
                                 <div class="macos-spacer" data-tauri-drag-region="true"/>
                                 <div class="title" data-tauri-drag-region="true">
-                                    <p class="title" data-tauri-drag-region="true">{"PictureFiler"}</p>
-                                    <p class="path" data-tauri-drag-region="true">{"~/Downloads/Gallery/"}</p>
+                                    <p class="title" data-tauri-drag-region="true">{"PictureManager"}</p>
+                                    <p class="path" data-tauri-drag-region="true">{path.clone()}</p>
                                 </div>
                             </>
                         }
@@ -209,8 +216,9 @@ pub fn Header(props: &Props) -> Html {
                             <>
                                 <div class="fixed-spacer" data-tauri-drag-region="true"/>
                                 <div class="title" data-tauri-drag-region="true">
-                                    <p class="title" data-tauri-drag-region="true">{"PictureFiler"}</p>
-                                    <p class="path" data-tauri-drag-region="true">{"~/Downloads/Gallery/"}</p>
+                                    <p class="title" data-tauri-drag-region="true">{"PictureManager"}</p>
+
+                                    <p class="path" data-tauri-drag-region="true">{path}</p>
                                 </div>
                                 <div class="spacer" data-tauri-drag-region="true"/>
                                 <div class="windows-buttons" data-tauri-drag-region="true">

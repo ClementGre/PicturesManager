@@ -1,44 +1,43 @@
-use serde::{Serialize, Deserialize};
+use log::{LevelFilter, Log, Metadata, Record, SetLoggerError};
+use serde::{Deserialize, Serialize};
 
 use super::utils::cmd_arg;
 
-#[repr(usize)]
-#[derive(Debug, Hash, Serialize, Deserialize)]
-pub enum Level {
-    Error,
-    Warn,
-    Info,
-    Debug,
-    Trace,
+#[cfg(not(debug_assertions))]
+const LOG_LEVEL: LevelFilter = LevelFilter::Info;
+#[cfg(debug_assertions)]
+const LOG_LEVEL: LevelFilter = LevelFilter::Trace;
+
+static LOGGER: BackendLogger = BackendLogger;
+
+pub fn init_backend_logger() -> Result<(), SetLoggerError> {
+    log::set_logger(&LOGGER).map(|()| log::set_max_level(LOG_LEVEL))
 }
 
 #[derive(Serialize, Deserialize)]
 struct LoggingArgs<'a> {
     message: &'a str,
-    level: Level
-}
-#[allow(dead_code)]
-pub fn error(msg: &str){
-    log(msg, Level::Error)
-}
-#[allow(dead_code)]
-pub fn warn(msg: &str){
-    log(msg, Level::Warn)
-}
-#[allow(dead_code)]
-pub fn info(msg: &str){
-    log(msg, Level::Info)
-}
-#[allow(dead_code)]
-pub fn debug(msg: &str){
-    log(msg, Level::Debug)
-}
-#[allow(dead_code)]
-pub fn tr(msg: &str){
-    log(msg, Level::Trace)
+    level: usize,
 }
 
-pub fn log(msg: &str, level: Level){
-    let message = msg.to_owned();
-    cmd_arg("log_from_front", &LoggingArgs{message: message.as_str(), level});
+struct BackendLogger;
+
+impl Log for BackendLogger {
+    fn enabled(&self, metadata: &Metadata) -> bool {
+        metadata.level() <= LOG_LEVEL
+    }
+
+    fn log(&self, record: &Record) {
+        if self.enabled(record.metadata()) {
+            cmd_arg(
+                "log_from_front",
+                &LoggingArgs {
+                    message: record.args().to_string().as_str(),
+                    level: record.level() as usize,
+                },
+            );
+        }
+    }
+
+    fn flush(&self) {}
 }

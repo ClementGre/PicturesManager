@@ -6,11 +6,11 @@
 .mainpane ul.pictures-list {
     list-style: none;
     padding: 0;
-    margin: 15px;
+    margin: 11px;
     display: flex;
     flex-wrap: wrap;
     align-content: stretch;
-    gap: 4px;
+    gap: 3px;
 }
 .mainpane ul.pictures-list::after {
     content: '';

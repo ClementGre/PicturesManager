@@ -1,10 +1,8 @@
 use yew::suspense::Suspense;
-use yew::{function_component, html, Children, Html, Properties};
-use yewdux::prelude::use_store;
+use yew::{function_component, html, Html, Properties};
 
 pub use pm_common::gallery_cache::PictureCache;
 
-use crate::mainpane::mainpane::CacheContext;
 use crate::mainpane::picture_thumb::PictureThumb;
 
 #[derive(Properties, PartialEq)]
@@ -15,8 +13,6 @@ pub struct PicturesListProps {
 #[allow(non_snake_case)]
 #[function_component]
 pub fn PicturesList(props: &PicturesListProps) -> Html {
-    let (cache, _) = use_store::<CacheContext>();
-
     let fallback = html! {
         <li class="loading">
         </li>
