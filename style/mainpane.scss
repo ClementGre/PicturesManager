@@ -11,24 +11,52 @@
     flex-wrap: wrap;
     align-content: stretch;
     gap: 3px;
+    ::after {
+        content: '';
+        flex-grow: 100000000;
+    }
 }
-.mainpane ul.pictures-list::after {
-    content: '';
-    flex-grow: 100000000;
-}
+
 .mainpane ul.pictures-list li {
     flex-grow: 1;
     border-radius: 2px;
     overflow: hidden;
-}
-.mainpane ul.pictures-list li.loading {
-    background-color: var(--pictures-list-thumbnail-loading-bg-color);
-}
-.mainpane ul.pictures-list li .thumb {
-    width: 100%;
-    height: 100%;
+    animation: fadeIn .3s;
 
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
+    &.loading {
+        background-color: var(--pictures-list-thumbnail-loading-bg-color);
+    }
+    .thumb {
+        width: 100%;
+        height: 100%;
+
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+    }
+    .dir-thumb {
+        position: relative;
+        background-color: white;
+        transition: background-color 0.2s ease-in-out;
+        &:hover {
+            background-color: var(--pictures-list-dir-hover-color);
+        }
+        svg {
+            width: 60%;
+            height: 60%;
+            color: var(--pictures-list-dir-svg-color);
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        p {
+            width: 100%;
+            margin: 0;
+            position: absolute;
+            bottom: 6%;
+            text-align: center;
+            @include no-select;
+        }
+    }
 }

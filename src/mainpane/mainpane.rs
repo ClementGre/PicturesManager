@@ -11,7 +11,7 @@ use yewdux::store::Store;
 use pm_common::gallery_cache::{PathsCache, PictureCache};
 
 use crate::app::Context;
-use crate::app::MainPaneDisplayType::{Pictures, PicturesAndDirs};
+use crate::app::MainPaneDisplayType::FilesTabPicturesAndDirs;
 use crate::mainpane::pictures_list::PicturesList;
 use crate::utils::utils::cmd_async_get;
 
@@ -59,11 +59,7 @@ pub fn MainPane() -> Html {
     html! {
         <section class="mainpane">
             {
-                if let Pictures(pics) = (*content).clone() {
-                    html! {
-                        <PicturesList pics={pics} dirs={vec![]} />
-                    }
-                }else if let PicturesAndDirs(pics, dirs) = (*content).clone() {
+                if let FilesTabPicturesAndDirs(pics, dirs) = (*content).clone() {
                     html! {
                         <PicturesList pics={pics} dirs={dirs}/>
                     }

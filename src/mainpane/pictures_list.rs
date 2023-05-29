@@ -3,12 +3,13 @@ use yew::{function_component, html, Html, Properties};
 
 pub use pm_common::gallery_cache::PictureCache;
 
+use crate::mainpane::dir_thumb::DirThumb;
 use crate::mainpane::picture_thumb::PictureThumb;
 
 #[derive(Properties, PartialEq)]
 pub struct PicturesListProps {
     pub pics: Vec<String>,
-    pub dirs: Vec<String>,
+    pub dirs: Vec<Vec<String>>,
 }
 #[allow(non_snake_case)]
 #[function_component]
@@ -21,24 +22,22 @@ pub fn PicturesList(props: &PicturesListProps) -> Html {
     html! {
         <>
             <ul class="pictures-list">
-                {
-
-                    props.dirs.iter().map(|path| {
-                        html! {
-                            <li>{"Directory: "}{path}</li>
-                        }
-                    }).collect::<Html>()
-                }
-                {
-
-                    props.pics.iter().map(|id| {
-                        html! {
-                            <Suspense fallback={fallback.clone()} key={id.clone()}>
-                                <PictureThumb id={id.clone()} />
-                            </Suspense>
-                        }
-                    }).collect::<Html>()
-                }
+                <Suspense fallback={fallback.clone()}>
+                    {
+                        props.dirs.iter().map(|path| {
+                            html! {
+                                <DirThumb key={path.join("/")} path={path.clone()} />
+                            }
+                        }).collect::<Html>()
+                    }
+                    {
+                        props.pics.iter().map(|id| {
+                            html! {
+                                <PictureThumb key={id.clone()} id={id.clone()} />
+                            }
+                        }).collect::<Html>()
+                    }
+                </Suspense>
             </ul>
         </>
     }

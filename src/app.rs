@@ -1,15 +1,14 @@
 use futures::stream::StreamExt;
-use log::{info, trace};
+use log::info;
 use serde::{Deserialize, Serialize};
 use tauri_sys::event::{listen, once};
 use tauri_sys::os::{self, OsKind};
 use tauri_sys::path::home_dir;
 use tauri_sys::window::{self, current_window};
-use web_sys::console::info;
 use yew::platform::spawn_local;
 use yew::prelude::*;
 use yew::suspense::{use_future, use_future_with_deps};
-use yew_hooks::{use_effect_once, use_is_first_mount};
+use yew_hooks::use_is_first_mount;
 use yewdux::prelude::use_store;
 use yewdux::store::Store;
 
@@ -33,8 +32,7 @@ pub struct StaticContext {
 
 #[derive(Clone, Debug, Default, PartialEq, Store)]
 pub enum MainPaneDisplayType {
-    Pictures(Vec<String>),
-    PicturesAndDirs(Vec<String>, Vec<String>),
+    FilesTabPicturesAndDirs(Vec<String>, Vec<Vec<String>>),
     #[default]
     None,
 }

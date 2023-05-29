@@ -54,6 +54,8 @@ yew_icons = { version = "0.7", features = [
     "FontAwesomeSolidBinoculars",
 
     "FontAwesomeSolidAngleRight",
+
+    "FontAwesomeSolidFolderOpen",
 ] }
 base64 = "0.21.0"
 instant = { version = "0.1", features = ["wasm-bindgen", "inaccurate"] }

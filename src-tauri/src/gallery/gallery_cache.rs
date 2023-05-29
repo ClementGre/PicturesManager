@@ -15,6 +15,7 @@ use crate::utils::{exif_utils::ExifFile, thumbnails::is_supported_img};
 use super::windows_galleries::{WindowGallery, WindowsGalleriesState};
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
+#[serde(default)]
 pub struct PictureCache {
     pub path: String,
     pub uuid_generated: bool,
@@ -30,6 +31,7 @@ pub struct PictureCache {
 }
 
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
+#[serde(default)]
 pub struct PathsCache {
     pub dir_name: String,
     pub children: Vec<PathsCache>,
