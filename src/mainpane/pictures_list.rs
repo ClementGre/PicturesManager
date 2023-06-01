@@ -8,15 +8,15 @@ use crate::mainpane::picture_thumb::PictureThumb;
 
 #[derive(Properties, PartialEq)]
 pub struct PicturesListProps {
+    pub root_dir: Vec<String>,
     pub pics: Vec<String>,
-    pub dirs: Vec<Vec<String>>,
+    pub dirs: Vec<String>,
 }
 #[allow(non_snake_case)]
 #[function_component]
 pub fn PicturesList(props: &PicturesListProps) -> Html {
     let fallback = html! {
-        <li class="loading">
-        </li>
+        <></>
     };
 
     html! {
@@ -24,9 +24,9 @@ pub fn PicturesList(props: &PicturesListProps) -> Html {
             <ul class="pictures-list">
                 <Suspense fallback={fallback.clone()}>
                     {
-                        props.dirs.iter().map(|path| {
+                        props.dirs.iter().map(|dir| {
                             html! {
-                                <DirThumb key={path.join("/")} path={path.clone()} />
+                                <DirThumb key={dir.clone()} root_dir={props.root_dir.clone()} dir={dir.clone()} />
                             }
                         }).collect::<Html>()
                     }

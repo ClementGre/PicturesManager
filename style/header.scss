@@ -94,6 +94,7 @@ header .windows-menu.alt-mode .menu p span {
 
 header .windows-menu .menu .children-box {
 	position: fixed;
+	z-index: 10;
 	display: none;
 	width: calc(100vw);
 	height: calc(100vh);
@@ -274,7 +275,6 @@ header .windows-buttons {
 header .windows-buttons > div {
 	> div {
 		position: absolute;
-		z-index: 10;
 		top: 50%;
 		left: 50%;
 		transform: translateX(-50%) translateY(-50%);

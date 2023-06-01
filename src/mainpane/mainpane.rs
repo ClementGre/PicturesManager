@@ -59,9 +59,9 @@ pub fn MainPane() -> Html {
     html! {
         <section class="mainpane">
             {
-                if let FilesTabPicturesAndDirs(pics, dirs) = (*content).clone() {
+                if let FilesTabPicturesAndDirs(root_dir, pics, dirs) = (*content).clone() {
                     html! {
-                        <PicturesList pics={pics} dirs={dirs}/>
+                        <PicturesList {root_dir} {pics} {dirs}/>
                     }
                 }else{
                     html!{

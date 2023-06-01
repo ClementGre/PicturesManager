@@ -6,7 +6,8 @@ use pm_common::gallery::GalleryData;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
-    pub path: Vec<String>,
+    pub root_dir: Vec<String>,
+    pub dir: String,
 }
 #[allow(non_snake_case)]
 #[function_component]
@@ -14,7 +15,8 @@ pub fn DirThumb(props: &Props) -> Html {
     let data_dispatch = Dispatch::<GalleryData>::new();
 
     let onclick = {
-        let path = props.path.clone();
+        let mut path = props.root_dir.clone();
+        path.push(props.dir.clone());
         data_dispatch.reduce_mut_callback(move |data| {
             data.files_tab_selected_dir = path.clone();
         })
@@ -24,7 +26,7 @@ pub fn DirThumb(props: &Props) -> Html {
         <li style={format!("flex-basis: {}px; flex-grow: {};", 140, 140)} onclick={onclick}>
             <div class="thumb dir-thumb" style={format!("aspect-ratio: 1;")}>
                 <Icon icon_id={IconId::FontAwesomeSolidFolderOpen} />
-                <p>{props.path.last().unwrap_or(&String::default())}</p>
+                <p>{props.dir.clone()}</p>
             </div>
         </li>
     }

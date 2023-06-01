@@ -1,4 +1,7 @@
-use serde::{Serialize, Deserialize};
+use std::rc::Rc;
+
+use serde::{Deserialize, Serialize};
+use yew::html::IntoPropValue;
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default, PartialEq)]
 pub struct PictureCache {
@@ -22,6 +25,11 @@ pub struct PathsCache {
     pub pictures: Vec<String>,
 }
 
+impl IntoPropValue<Rc<PathsCache>> for PathsCache {
+    fn into_prop_value(self) -> Rc<PathsCache> {
+        Rc::new(self)
+    }
+}
 
 #[derive(Clone, Copy, Default, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
 pub enum Orientation {

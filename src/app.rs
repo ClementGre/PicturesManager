@@ -32,7 +32,8 @@ pub struct StaticContext {
 
 #[derive(Clone, Debug, Default, PartialEq, Store)]
 pub enum MainPaneDisplayType {
-    FilesTabPicturesAndDirs(Vec<String>, Vec<Vec<String>>),
+    // Root dir path as vec, Pictures Ids, Dirs names
+    FilesTabPicturesAndDirs(Vec<String>, Vec<String>, Vec<String>),
     #[default]
     None,
 }
