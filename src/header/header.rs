@@ -31,7 +31,7 @@ pub struct SetSettingsArgs {
 #[function_component]
 pub fn Header(props: &Props) -> Html {
     let static_ctx = use_context::<StaticContext>().unwrap();
-    let gallery_path = use_selector(move |ctx: &Context| ctx.gallery_path.clone());
+    let gallery_path = use_selector(|ctx: &Context| ctx.gallery_path.clone());
 
     let on_minimize = Callback::from(move |_: MouseEvent| {
         spawn_local(async {

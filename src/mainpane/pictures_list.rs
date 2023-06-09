@@ -26,14 +26,20 @@ pub fn PicturesList(props: &PicturesListProps) -> Html {
                     {
                         props.dirs.iter().map(|dir| {
                             html! {
-                                <DirThumb key={dir.clone()} root_dir={props.root_dir.clone()} dir={dir.clone()} />
+                                <>
+                                    {""} // Without this, the order might not be persistent while loading.
+                                    <DirThumb key={dir.clone()} root_dir={props.root_dir.clone()} dir={dir.clone()} />
+                                </>
                             }
                         }).collect::<Html>()
                     }
                     {
                         props.pics.iter().map(|id| {
                             html! {
-                                <PictureThumb key={id.clone()} id={id.clone()} />
+                                <>
+                                    {""} // Without this, the order might not be persistent while loading.
+                                    <PictureThumb key={id.clone()} id={id.clone()} />
+                                </>
                             }
                         }).collect::<Html>()
                     }

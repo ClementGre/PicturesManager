@@ -16,7 +16,7 @@ serde-wasm-bindgen = "0.4.5"
 wasm-bindgen = { version = "0.2.84", features = ["serde-serialize"] }
 wasm-bindgen-futures = "0.4.34"
 wasm-logger = "0.2.0"
-web-sys = { version = "0.3.61", features = ["Window", "Navigator", "Element", "DomRect", "MediaQueryList", "Url", "Blob"] }
+web-sys = { version = "0.3.61", features = ["Window", "Navigator", "HtmlElement", "Element", "DomRect", "MediaQueryList", "Url", "Blob"] }
 yew = { version = "0.20.0", features = ["csr"] }
 gloo = "0.8.0"
 gloo-console = "0.2.3"

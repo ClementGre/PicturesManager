@@ -21,7 +21,7 @@
     flex-grow: 1;
     border-radius: 2px;
     overflow: hidden;
-    animation: fadeIn .3s;
+    // animation: fadeIn .3s;
 
     &.loading {
         background-color: var(--pictures-list-thumbnail-loading-bg-color);
