@@ -62,14 +62,19 @@ pub fn Header(props: &Props) -> Html {
 
     // Settings actions
 
-    let (settings, settings_dispatch) = use_store::<Settings>();
-    let switch_language = settings_dispatch.reduce_mut_callback(|settings| {
-        if settings.language == Some("fr".to_string()) {
-            settings.language = Some("en".to_string())
-        } else {
-            settings.language = Some("fr".to_string())
-        }
-    });
+    let (settings, _) = use_store::<Settings>();
+    let switch_language = {
+        let settings = settings.clone();
+        Callback::from(move |_| {
+            let mut settings = (*settings).clone();
+            if settings.language == Some("fr".to_string()) {
+                settings.language = Some("en".to_string());
+            } else {
+                settings.language = Some("fr".to_string());
+            }
+            cmd_arg("set_settings", &SetSettingsArgs { settings });
+        })
+    };
     let theme_light = {
         let settings = settings.clone();
         Callback::from(move |_| {

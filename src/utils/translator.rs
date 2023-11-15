@@ -7,7 +7,7 @@ use yewdux::store::Store;
 
 use super::utils::{cmd_async, cmd_async_get};
 
-const RES_IDS: [&str; 2] = ["header", "common"];
+const RES_IDS: [&str; 2] = ["menu-bar", "common"];
 
 #[derive(Store)]
 pub struct Translator {

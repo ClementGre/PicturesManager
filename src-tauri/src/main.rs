@@ -9,7 +9,6 @@ use app_data::{AppData, AppDataState};
 use gallery::windows_galleries::{get_gallery_path, WindowsGalleriesState};
 use header::macos::WindowMacosExt;
 #[cfg(target_os = "macos")]
-use header::menubar::setup_menubar;
 use header::menubar::{menu_close_window, menu_quit, menu_update_gallery};
 use utils::commands::{greet, open_devtools};
 use utils::logger::{get_logger_plugin, log_from_front};
@@ -32,31 +31,27 @@ fn main() {
     rexiv2::register_xmp_namespace("PicturesManagerClementGre", "PicturesManagerClementGre").unwrap();
 
     #[allow(unused_mut)]
-    let mut builder = tauri::Builder::default().setup(|app| {
-        let data = app.state::<AppDataState>();
-        *data.data() = AppData::load(&app.app_handle());
-
-        let translator = app.state::<TranslatorState>();
-        *translator.translator.lock().unwrap() = Some(Translator::new(&app, data.data().settings.language.clone()));
-
-        let galleries = app.state::<WindowsGalleriesState>();
-
-        galleries.open_from_path(&mut app.app_handle(), String::from("/Users/clement/Pictures/Gallery"));
-
-        Ok(())
-    });
-
-    #[cfg(target_os = "macos")]
-    {
-        builder = builder.menu(setup_menubar(String::from("Pictures Manager")));
-    }
+    let mut builder = tauri::Builder::default();
 
     builder
+        .setup(|app| {
+            let data = app.state::<AppDataState>();
+            *data.data() = AppData::load(&app.app_handle());
+
+            let translator = app.state::<TranslatorState>();
+            *translator.translator.lock().unwrap() = Some(Translator::new(&(app.app_handle()), data.data().settings.language.clone()));
+
+            let galleries = app.state::<WindowsGalleriesState>();
+
+            galleries.open_from_path(&mut app.app_handle(), String::from("/Users/clement/Pictures/Gallery"));
+
+            Ok(())
+        })
         .on_window_event(|event| match event.event() {
             tauri::WindowEvent::Focused(_) => {}
             tauri::WindowEvent::CloseRequested { api, .. } => {
                 api.prevent_close();
-                close_window(event.window().clone(), event.window().app_handle());
+                close_window(&event.window(), &event.window().app_handle());
             }
             tauri::WindowEvent::Destroyed => {
                 info!("🚩 Window {} destroyed", event.window().label());
@@ -66,7 +61,7 @@ fn main() {
                 galleries.on_close(event.window().label().into());
 
                 if event.window().app_handle().windows().len() == 0 {
-                    info!("🚩 No more windows, tauri will exit");
+                    info!("🚩 No more windows, tauri will exit automatically");
                     event.window().app_handle().state::<AppDataState>().save(&event.window().app_handle());
                 }
             }

@@ -10,6 +10,10 @@ use tauri::{AppHandle, Manager, Wry};
 
 use pm_common::app_data::Settings;
 
+use crate::gallery::windows_galleries::WindowsGalleriesState;
+use crate::header::window::re_open_windows;
+use crate::utils::translator::{Translator, TranslatorState};
+
 #[derive(Default)]
 pub struct AppDataState {
     data: Mutex<AppData>,
@@ -58,8 +62,21 @@ pub fn get_settings(app_data: tauri::State<AppDataState>) -> Settings {
 }
 
 #[tauri::command]
-pub fn set_settings(app: AppHandle<Wry>, app_data: tauri::State<AppDataState>, settings: Settings) {
+pub fn set_settings(
+    app: AppHandle<Wry>,
+    translator: tauri::State<TranslatorState>,
+    app_data: tauri::State<AppDataState>,
+    galleries: tauri::State<WindowsGalleriesState>,
+    settings: Settings,
+) {
+    let old_settings = app_data.data().settings.clone();
     app_data.data().settings = settings.clone();
     app_data.save(&app);
+
+    if old_settings.language != settings.language {
+        *translator.translator.lock().unwrap() = Some(Translator::new(&app, settings.language.clone()));
+        re_open_windows(&app, galleries);
+    }
+
     app.emit_all("settings-changed", settings).unwrap();
 }

@@ -1,11 +1,5 @@
-### Header strings
-
-## Test
-
-test = Bien le bonjour monsieur {$name}, vous avez spécifié le nombre {$nombre} !!
-
-## Menu bar
-## Underscores are used to indicate the Alt+<key> shortcut
+### Menu bar strings
+## Underscores are used to indicate the Alt+key shortcut
 
 menu-bar-file = _Fichier
 menu-bar-file-open-gallery = _Ouvrir une gallerie
@@ -29,7 +23,3 @@ menu-bar-edit-select-all = Tout _sélectionner
 menu-bar-tools = _Outils
 menu-bar-tools-update-gallery = _Actualiser la galerie
 menu-bar-tools-edit-exif = _Corriger les données EXIF
-
-
-
-

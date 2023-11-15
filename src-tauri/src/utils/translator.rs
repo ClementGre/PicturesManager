@@ -9,7 +9,7 @@ use log::warn;
 use tauri::{AppHandle, PathResolver, Wry};
 use unic_langid::{langid, LanguageIdentifier};
 
-const RES_IDS: [&str; 2] = ["back", "common"];
+const RES_IDS: [&str; 3] = ["back", "common", "menu-bar"];
 
 #[derive(Default)]
 pub struct TranslatorState {
@@ -54,7 +54,7 @@ pub struct Translator {
 type TrBundle = FluentBundle<FluentResource, intl_memoizer::concurrent::IntlLangMemoizer>;
 
 impl Translator {
-    pub fn new(app: &tauri::App, app_language: Option<String>) -> Self {
+    pub fn new(app: &AppHandle, app_language: Option<String>) -> Self {
         let requested: Vec<LanguageIdentifier> = vec![app_language
             .unwrap_or(sys_locale::get_locale().unwrap_or("en-US".into()))
             .parse()
@@ -87,7 +87,7 @@ impl Translator {
         self.bundles.iter().find(|bundle| bundle.has_message(&key))
     }
 
-    fn load_ressource_to_bundle(app: &tauri::App, bundle: &mut TrBundle, locale: &LanguageIdentifier, res_id: &str) {
+    fn load_ressource_to_bundle(app: &AppHandle, bundle: &mut TrBundle, locale: &LanguageIdentifier, res_id: &str) {
         let resource_path = app
             .path_resolver()
             .resolve_resource(format!("../translations/{}/{}.ftl", locale, res_id))
@@ -98,7 +98,7 @@ impl Translator {
                 FluentResource::try_new(fs::read_to_string(&resource_path).expect("failed to load translation file"))
                     .expect("failed to parse translation file"),
             )
-            .unwrap();
+            .unwrap()
     }
 }
 

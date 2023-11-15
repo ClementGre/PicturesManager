@@ -42,7 +42,7 @@ pub struct MainPaneDimensions {
     pub width: i32,
     pub height: i32,
     pub scroll_top: i32,
-    pub scroll_bottom: i32
+    pub scroll_bottom: i32,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Store)]
@@ -50,7 +50,7 @@ pub struct Context {
     pub theme: Theme,
     pub gallery_path: String,
     pub main_pane_content: MainPaneDisplayType,
-    pub main_pane_dimesions: MainPaneDimensions
+    pub main_pane_dimesions: MainPaneDimensions,
 }
 
 #[derive(Serialize, Deserialize)]

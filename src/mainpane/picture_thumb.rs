@@ -1,11 +1,12 @@
-use log::{warn, info};
+use log::warn;
 use serde::{Deserialize, Serialize};
 use web_sys::HtmlElement;
 use yew::suspense::Suspense;
 use yew::{function_component, html, suspense::use_future_with_deps, use_context, HtmlResult, Properties};
-use yew::{use_node_ref, NodeRef, use_state, use_memo};
-use yew_hooks::{use_is_first_mount, use_update, use_size};
+use yew::{use_node_ref, NodeRef};
+use yew_hooks::{use_is_first_mount, use_size, use_update};
 use yewdux::prelude::use_selector;
+
 use crate::app::Context;
 use crate::{app::StaticContext, utils::utils::cmd_async};
 
@@ -55,7 +56,7 @@ pub fn PictureThumb(props: &Props) -> HtmlResult {
                 <div class="thumb" style={format!("aspect-ratio: {} / {};", w, h)} />
             </li>
         };
-    
+
         if is_first_mount {
             update();
             // Force a first empty render to initialize node ref
@@ -73,7 +74,7 @@ pub fn PictureThumb(props: &Props) -> HtmlResult {
             }
         }
 
-        if !visible { 
+        if !visible {
             return Ok(fallback);
         }
         return Ok(html! {

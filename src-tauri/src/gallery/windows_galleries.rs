@@ -35,7 +35,7 @@ impl WindowsGalleriesState {
     }
 
     // Called in order to open a new gallery window
-    pub fn open_from_path(&self, app_handle: &mut AppHandle<Wry>, path: String) {
+    pub fn open_from_path(&self, app_handle: &AppHandle<Wry>, path: String) {
         let label = self.get_new_unique_label();
 
         self.galleries.lock().unwrap().push(WindowGallery {

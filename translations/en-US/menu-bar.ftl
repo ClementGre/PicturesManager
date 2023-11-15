@@ -1,10 +1,4 @@
-### Header strings
-
-## Test
-test = Hi, you're on the front !
-
-
-## Menu bar
+### Menu bar strings
 ## Underscores are used to indicate the Alt+<key> shortcut
 
 menu-bar-file = _File
@@ -30,4 +24,3 @@ menu-bar-tools = _Tools
 menu-bar-tools-update-gallery = _Update gallery
 menu-bar-tools-edit-exif = _Edit EXIF data
 
-    
