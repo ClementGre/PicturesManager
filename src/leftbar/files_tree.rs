@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use yew::{classes, function_component, html, use_callback, use_state, use_state_eq, Callback, Html, Properties};
+use yew_hooks::use_is_first_mount;
 use yew_icons::{Icon, IconId};
 use yewdux::prelude::{use_selector, use_store, Dispatch};
 
@@ -16,6 +17,33 @@ pub fn FilesTree() -> Html {
     let (cache, _) = use_store::<CacheContext>();
     let selected_dir = use_selector(|data: &GalleryData| data.files_tab_selected_dir.clone());
     let current_left_tab = use_selector(|data: &GalleryData| data.current_left_tab.clone());
+    let (gallery_data, data_dispatch) = use_store::<GalleryData>();
+    let ctx_dispatch = Dispatch::<Context>::new();
+
+    if use_is_first_mount() {
+        let mut selected_path_cache = &cache.paths_cache;
+        let mut made_path = Vec::default();
+        for dir in gallery_data.files_tab_selected_dir.clone().to_vec() {
+            let result = selected_path_cache.children.iter().find(|child| child.dir_name == dir);
+            if result.is_some() {
+                selected_path_cache = result.unwrap();
+                made_path.push(dir);
+            } else {
+                data_dispatch.reduce_mut(|data| {
+                    data.files_tab_selected_dir = made_path.clone();
+                });
+                break;
+            }
+        }
+        let dirs: Vec<String> = selected_path_cache.children.iter().map(|child| child.dir_name.clone()).collect();
+        ctx_dispatch.reduce_mut(|ctx| {
+            ctx.main_pane_content = MainPaneDisplayType::FilesTabPicturesAndDirs(
+                gallery_data.files_tab_selected_dir.clone(),
+                selected_path_cache.pictures.clone(),
+                dirs.clone(),
+            );
+        });
+    }
 
     html! {
         <ul class="files-tree root">
@@ -56,15 +84,12 @@ fn DirTree(props: &DirTreeProps) -> Html {
         let pictures = props.path_cache.pictures.clone();
         let dirs = props.path_cache.children.clone();
         let parents = parents.clone();
-        use_callback(
-            move |_, _| {
-                let dirs: Vec<String> = dirs.iter().map(|child| child.dir_name.clone()).collect();
-                ctx_dispatch.reduce_mut(|ctx| {
-                    ctx.main_pane_content = MainPaneDisplayType::FilesTabPicturesAndDirs(parents.clone(), pictures.clone(), dirs.clone());
-                });
-            },
-            (),
-        )
+        use_callback((), move |_, _| {
+            let dirs: Vec<String> = dirs.iter().map(|child| child.dir_name.clone()).collect();
+            ctx_dispatch.reduce_mut(|ctx| {
+                ctx.main_pane_content = MainPaneDisplayType::FilesTabPicturesAndDirs(parents.clone(), pictures.clone(), dirs.clone());
+            });
+        })
     };
 
     // Open if a children is selected
@@ -132,7 +157,7 @@ fn DirTree(props: &DirTreeProps) -> Html {
                             {
                                 props.path_cache.children.iter().enumerate().map(|(i, path_cache)| {
                                     html! {
-                                        <DirTree key={i} parents={parents.clone()} path_cache={path_cache.clone()}
+                                        <DirTree key={i} parents={parents.clone()} path_cache={Rc::new(path_cache.clone())}
                                             selected_dir={props.selected_dir.clone()} is_current_tab={props.is_current_tab}/>
                                     }
                                 }).collect::<Html>()

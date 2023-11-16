@@ -7,7 +7,7 @@ use tauri_sys::path::home_dir;
 use tauri_sys::window::{self, current_window};
 use yew::platform::spawn_local;
 use yew::prelude::*;
-use yew::suspense::{use_future, use_future_with_deps};
+use yew::suspense::{use_future, use_future_with};
 use yew_hooks::use_is_first_mount;
 use yewdux::prelude::use_store;
 use yewdux::store::Store;
@@ -50,7 +50,7 @@ pub struct Context {
     pub theme: Theme,
     pub gallery_path: String,
     pub main_pane_content: MainPaneDisplayType,
-    pub main_pane_dimesions: MainPaneDimensions,
+    pub main_pane_dimensions: MainPaneDimensions,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -70,15 +70,12 @@ pub fn App() -> HtmlResult {
     /******************************/
     let os = use_future(|| async { os::kind().await.unwrap_or(OsKind::Linux) })?;
     let home_dir = use_future(|| async { home_dir().await.expect("No home directory!") })?;
-    let static_context = use_memo(
-        |_| StaticContext {
-            macos: *os == OsKind::Darwin,
-            windows: *os == OsKind::WindowsNT,
-            window_label: current_window().label(),
-            home_dir: home_dir.to_string_lossy().to_string(),
-        },
-        (),
-    );
+    let static_context = use_memo((), |_| StaticContext {
+        macos: *os == OsKind::Darwin,
+        windows: *os == OsKind::WindowsNT,
+        window_label: current_window().label(),
+        home_dir: home_dir.to_string_lossy().to_string(),
+    });
 
     /******************************/
     /********** Settings **********/
@@ -124,42 +121,36 @@ pub fn App() -> HtmlResult {
     // Context theme updated with settings and os_theme
     {
         let settings = settings.clone();
-        use_effect_with_deps(
-            move |(settings, os_theme)| {
-                context_dispatch.reduce_mut(|context| {
-                    context.theme = if settings.theme == Theme::System {
-                        if **os_theme == window::Theme::Light {
-                            Theme::Light
-                        } else {
-                            Theme::Dark
-                        }
+        use_effect_with((settings, os_theme), move |(settings, os_theme)| {
+            context_dispatch.reduce_mut(|context| {
+                context.theme = if settings.theme == Theme::System {
+                    if **os_theme == window::Theme::Light {
+                        Theme::Light
                     } else {
-                        settings.theme
+                        Theme::Dark
                     }
-                })
-            },
-            (settings, os_theme),
-        );
+                } else {
+                    settings.theme
+                }
+            })
+        });
     }
 
     /******************************/
     /********* Translator *********/
     /******************************/
-    let (_, translator_dispach) = use_store::<Translator>();
+    let (_, translator_dispatch) = use_store::<Translator>();
     let language = {
         let settings = settings.clone();
-        use_memo(move |settings| settings.language.clone(), settings)
+        use_memo(settings, move |settings| settings.language.clone())
     };
     let _ = {
         let language = language.clone();
         // Acts as an async callback that updates with language change
-        use_future_with_deps(
-            |language| async move {
-                let translator = Translator::new((**language).clone()).await;
-                translator_dispach.set(translator);
-            },
-            language.clone(),
-        )?
+        use_future_with(language.clone(), |language| async move {
+            let translator = Translator::new((**language).clone()).await;
+            translator_dispatch.set(translator);
+        })?
     };
 
     /******************************/

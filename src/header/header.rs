@@ -114,7 +114,7 @@ pub fn Header(props: &Props) -> Html {
     let macos_header = {
         let static_ctx = static_ctx.clone();
         let settings = settings.clone();
-        use_memo(|settings| static_ctx.macos && !settings.force_win_header, settings)
+        use_memo(settings, |settings| static_ctx.macos && !settings.force_win_header)
     };
 
     let mut path = (*gallery_path).clone();

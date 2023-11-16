@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use serde::{Deserialize, Serialize};
 use yew::html::IntoPropValue;
+use yew::Properties;
 
 #[derive(Debug, Serialize, Deserialize, Clone, Default, PartialEq)]
 pub struct PictureCache {
@@ -18,7 +19,7 @@ pub struct PictureCache {
     pub f_number: Option<f64>,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Default, Clone)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Default, Clone, Properties)]
 pub struct PathsCache {
     pub dir_name: String,
     pub children: Vec<PathsCache>,

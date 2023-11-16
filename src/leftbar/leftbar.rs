@@ -20,47 +20,54 @@ pub fn LeftBar() -> Html {
     html! {
         <section class="sidebar leftbar">
             <div class="tabs-header">
-                // System filesystem view
+                // Filesystem view
                 <button class={classes!(if *selected_tab == 0 { Some("selected") } else { None })}
                      onclick={data_dispatch.reduce_mut_callback(|data| data.current_left_tab = 0)}>
-                    <Icon icon_id={IconId::OcticonsFileDirectoryOpenFill16}/>
+                    <Icon icon_id={IconId::LucideFolderClosed}/>
                 </button>
-                // Tags view
+                // Custom hierarchies view
                 <button class={classes!(if *selected_tab == 1 { Some("selected") } else { None })}
                     onclick={data_dispatch.reduce_mut_callback(|data| data.current_left_tab = 1)}>
-                    <Icon icon_id={IconId::FontAwesomeSolidTag}/>
+                    <Icon icon_id={IconId::OcticonsListOrdered16}/>
                 </button>
-                // Date view
+                // Fast filtering view
                 <button class={classes!(if *selected_tab == 2 { Some("selected") } else { None })}
                     onclick={data_dispatch.reduce_mut_callback(|data| data.current_left_tab = 2)}>
-                    <Icon icon_id={IconId::BootstrapCalendarDateFill}/>
+                    <Icon icon_id={IconId::LucideFilter}/>
                 </button>
-                // Locations view
+                // Clusters list view
                 <button class={classes!(if *selected_tab == 3 { Some("selected") } else { None })}
                     onclick={data_dispatch.reduce_mut_callback(|data| data.current_left_tab = 3)}>
-                    <Icon icon_id={IconId::FontAwesomeSolidMapLocationDot}/>
-                </button>
-                // Custom views
-                <button class={classes!(if *selected_tab == 4 { Some("selected") } else { None })}
-                    onclick={data_dispatch.reduce_mut_callback(|data| data.current_left_tab = 4)}>
-                    <Icon icon_id={IconId::FontAwesomeSolidBinoculars}/>
+                    <Icon icon_id={IconId::HeroiconsOutlineRectangleGroup}/>
                 </button>
             </div>
-            <div class="content" style={if *selected_tab == 0 {""} else {"display: none;"}}>
-                <FilesTree />
-            </div>
-            <div class="content" style={if *selected_tab == 1 {""} else {"display: none;"}}>
-                {"Tags view"}
-            </div>
-            <div class="content" style={if *selected_tab == 2 {""} else {"display: none;"}}>
-               {"Date view"}
-            </div>
-            <div class="content" style={if *selected_tab == 3 {""} else {"display: none;"}}>
-               {"Locations view"}
-            </div>
-            <div class="content" style={if *selected_tab == 4 {""} else {"display: none;"}}>
-               {"Custom view"}
-            </div>
+            {
+                if *selected_tab == 0 {
+                    html! {
+                        <div class="content">
+                            <FilesTree />
+                        </div>
+                    }
+                }else if *selected_tab == 1 {
+                    html! {
+                        <div class="content">
+                            {"Custom Hierarchies view"}
+                        </div>
+                    }
+                }else if *selected_tab == 2 {
+                    html! {
+                        <div class="content">
+                            {"Fast filtering view"}
+                        </div>
+                    }
+                }else{
+                    html! {
+                        <div class="content">
+                            {"Clusters list view"}
+                        </div>
+                    }
+                }
+            }
         </section>
     }
 }

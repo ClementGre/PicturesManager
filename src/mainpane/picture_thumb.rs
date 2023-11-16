@@ -2,7 +2,7 @@ use log::warn;
 use serde::{Deserialize, Serialize};
 use web_sys::HtmlElement;
 use yew::suspense::Suspense;
-use yew::{function_component, html, suspense::use_future_with_deps, use_context, HtmlResult, Properties};
+use yew::{function_component, html, suspense::use_future_with, use_context, HtmlResult, Properties};
 use yew::{use_node_ref, NodeRef};
 use yew_hooks::{use_is_first_mount, use_size, use_update};
 use yewdux::prelude::use_selector;
@@ -31,14 +31,11 @@ pub struct Props {
 #[allow(non_snake_case)]
 #[function_component]
 pub fn PictureThumb(props: &Props) -> HtmlResult {
-    let dimensions = use_future_with_deps(
-        |id| async move {
-            cmd_async::<GetImageThumbnailArgs, Option<(u32, u32)>>("get_image_dimensions", &GetImageThumbnailArgs { id: id.to_string() }).await
-        },
-        props.id.clone(),
-    )?;
+    let dimensions = use_future_with(props.id.clone(), |id| async move {
+        cmd_async::<GetImageThumbnailArgs, Option<(u32, u32)>>("get_image_dimensions", &GetImageThumbnailArgs { id: id.to_string() }).await
+    })?;
 
-    let main_pane_dimensions = use_selector(|ctx: &Context| ctx.main_pane_dimesions.clone());
+    let main_pane_dimensions = use_selector(|ctx: &Context| ctx.main_pane_dimensions.clone());
     let ref_load = use_node_ref();
     let ref_pic = use_node_ref();
     let update = use_update();
@@ -101,10 +98,9 @@ pub struct ImageProps {
 fn PictureThumbImage(props: &ImageProps) -> HtmlResult {
     let static_ctx = use_context::<StaticContext>().unwrap();
 
-    let has_thumb = use_future_with_deps(
-        |id| async move { cmd_async::<GetImageThumbnailArgs, bool>("gen_image_thumbnail", &GetImageThumbnailArgs { id: id.to_string() }).await },
-        props.id.clone(),
-    )?;
+    let has_thumb = use_future_with(props.id.clone(), |id| async move {
+        cmd_async::<GetImageThumbnailArgs, bool>("gen_image_thumbnail", &GetImageThumbnailArgs { id: id.to_string() }).await
+    })?;
 
     if !*has_thumb {
         warn!("No thumb for {}", props.id);

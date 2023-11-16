@@ -63,7 +63,7 @@ pub fn MainPane() -> Html {
         let node = node.clone();
         context_dispatch.reduce_mut_callback_with(move |context, _: yew::Event| {
             let target = node.cast::<HtmlElement>().unwrap();
-            context.main_pane_dimesions = MainPaneDimensions {
+            context.main_pane_dimensions = MainPaneDimensions {
                 height: target.client_height(),
                 width: target.client_width(),
                 scroll_top: target.scroll_top(),

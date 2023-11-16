@@ -12,16 +12,16 @@ rust-version = "1.57"
 [dependencies]
 js-sys = "0.3.61"
 serde = { version = "1.0.160", features = ["derive"] }
-serde-wasm-bindgen = "0.4.5"
+serde-wasm-bindgen = "0.6.1"
 wasm-bindgen = { version = "0.2.84", features = ["serde-serialize"] }
 wasm-bindgen-futures = "0.4.34"
 wasm-logger = "0.2.0"
 web-sys = { version = "0.3.61", features = ["Window", "Navigator", "HtmlElement", "Element", "DomRect", "MediaQueryList", "Url", "Blob"] }
-yew = { version = "0.20.0", features = ["csr"] }
-gloo = "0.8.0"
-gloo-console = "0.2.3"
-gloo-utils = "0.1.6"
-gloo-timers = "0.2.6"
+yew = { version = "0.21.0", features = ["csr"] }
+gloo = "0.10.0"
+gloo-console = "0.3.0"
+gloo-utils = "0.2.0"
+gloo-timers = "0.3.0"
 log = "^0.4"
 fluent = "0.16.0"
 fluent-resmgr = "0.0.6"
@@ -35,9 +35,9 @@ pm-common = { path = "src-common" }
 tauri-sys = { git = "https://github.com/JonasKruckenberg/tauri-sys", features = ["all"] }
 futures = "0.3.28"
 intl-memoizer = "0.5.1"
-yewdux = "0.9"
-yew-hooks = "0.2.0"
-yew_icons = { version = "0.7", features = [
+yewdux = "0.9.4"
+yew-hooks = "0.3.0"
+yew_icons = { version = "0.8.0", features = [
     "FontAwesomeSolidMoon",
     "FontAwesomeSolidSun",
     "FontAwesomeSolidEarthEurope",
@@ -47,11 +47,10 @@ yew_icons = { version = "0.7", features = [
     "BootstrapWindows",
     "BootstrapHouseGearFill",
 
-    "OcticonsFileDirectoryOpenFill16",
-    "FontAwesomeSolidTag",
-    "BootstrapCalendarDateFill",
-    "FontAwesomeSolidMapLocationDot",
-    "FontAwesomeSolidBinoculars",
+    "LucideFolderClosed",
+    "LucideFilter",
+    "OcticonsListOrdered16",
+    "HeroiconsOutlineRectangleGroup",
 
     "FontAwesomeSolidAngleRight",
 
@@ -65,7 +64,7 @@ members = ["src-tauri"]
 
 [profile.release]
 lto = "fat"
-compiler-units = 1
+#compiler-units = 1
 # opt-level = "z"
 # panic = "abort"
 # strip = "debuginfo"
