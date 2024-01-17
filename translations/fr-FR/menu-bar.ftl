@@ -10,7 +10,7 @@ menu-bar-file-close-gallery = _Fermer la gallerie
 # Quit the app
 menu-bar-file-quit = _Quitter
 menu-bar-file-settings = _Préférences
-menu-bar-file-about = _About
+menu-bar-file-about = _À propos
 
 menu-bar-edit = _Édition
 menu-bar-edit-undo = _Annuler

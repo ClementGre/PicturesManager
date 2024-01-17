@@ -97,7 +97,7 @@ impl Translator {
             }
             result.to_string()
         } else {
-            String::from("No translation found")
+            String::from(key)
         }
     }
 }

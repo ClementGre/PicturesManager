@@ -129,7 +129,11 @@ pub fn Header(props: &Props) -> Html {
                     if *macos_header {
                         html! {
                             <>
-                                <div class="macos-spacer" data-tauri-drag-region="true"/>
+                                <div class="macos-spacer" data-tauri-drag-region="true">
+                                    <div data-tauri-drag-region="true"/>
+                                    <div data-tauri-drag-region="true"/>
+                                    <div data-tauri-drag-region="true"/>
+                                </div>
                                 <div class="title" data-tauri-drag-region="true">
                                     <p class="title" data-tauri-drag-region="true">{"PictureManager"}</p>
                                     <p class="path" data-tauri-drag-region="true">{path.clone()}</p>
@@ -139,7 +143,11 @@ pub fn Header(props: &Props) -> Html {
                     } else {
                         html! {
                             <>
-                                <div class="macos-spacer" data-tauri-drag-region="true"/>
+                                <div class="macos-spacer" data-tauri-drag-region="true">
+                                    <div data-tauri-drag-region="true"/>
+                                    <div data-tauri-drag-region="true"/>
+                                    <div data-tauri-drag-region="true"/>
+                                </div>
                                 <div class="windows-icon" data-tauri-drag-region="true">
                                     <img src="public/yew.png" alt="app icon" data-tauri-drag-region="true" />
                                 </div>

@@ -12,7 +12,7 @@ pub struct Props {
 #[allow(non_snake_case)]
 #[function_component]
 pub fn DirThumb(props: &Props) -> Html {
-    let data_dispatch = Dispatch::<GalleryData>::new();
+    let data_dispatch = Dispatch::<GalleryData>::global();
 
     let onclick = {
         let mut path = props.root_dir.clone();

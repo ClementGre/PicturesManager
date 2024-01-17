@@ -18,7 +18,7 @@ wasm-bindgen-futures = "0.4.34"
 wasm-logger = "0.2.0"
 web-sys = { version = "0.3.61", features = ["Window", "Navigator", "HtmlElement", "Element", "DomRect", "MediaQueryList", "Url", "Blob"] }
 yew = { version = "0.21.0", features = ["csr"] }
-gloo = "0.10.0"
+gloo = "0.11.0"
 gloo-console = "0.3.0"
 gloo-utils = "0.2.0"
 gloo-timers = "0.3.0"
@@ -35,7 +35,7 @@ pm-common = { path = "src-common" }
 tauri-sys = { git = "https://github.com/JonasKruckenberg/tauri-sys", features = ["all"] }
 futures = "0.3.28"
 intl-memoizer = "0.5.1"
-yewdux = "0.9.4"
+yewdux = "0.10.0"
 yew-hooks = "0.3.0"
 yew_icons = { version = "0.8.0", features = [
     "FontAwesomeSolidMoon",

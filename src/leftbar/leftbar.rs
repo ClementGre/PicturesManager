@@ -15,7 +15,7 @@ pub struct Props {
 #[function_component]
 pub fn LeftBar() -> Html {
     let selected_tab = use_selector(|data: &GalleryData| data.current_left_tab.clone());
-    let data_dispatch = Dispatch::<GalleryData>::new();
+    let data_dispatch = Dispatch::<GalleryData>::global();
 
     html! {
         <section class="sidebar leftbar">

@@ -33,11 +33,8 @@ pub fn setup_menubar(app_name: String, t: &TranslatorState) -> Menu {
     ));
 
     let file_menu = Menu::new()
-        .add_item(CustomMenuItem::new("open_gallery".to_string(), tr(t, "menu-bar-file-galleries")).accelerator("Cmd+O"))
-        .add_item(CustomMenuItem::new(
-            "open_recent_gallery".to_string(),
-            tr(t, "menu-bar-file-open-recent-gallery"),
-        ))
+        .add_item(CustomMenuItem::new("open_gallery".to_string(), tr(t, "menu-bar-file-open-gallery")).accelerator("Cmd+O"))
+        .add_item(CustomMenuItem::new("open_recent_gallery".to_string(), tr(t, "open_recent_gallery")))
         .add_item(CustomMenuItem::new("new_gallery".to_string(), tr(t, "menu-bar-file-new-gallery")).accelerator("Cmd+N"))
         .add_native_item(MenuItem::Separator)
         .add_native_item(MenuItem::CloseWindow);

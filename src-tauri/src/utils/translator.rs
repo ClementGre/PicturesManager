@@ -39,7 +39,7 @@ impl TranslatorState {
             }
             result.to_string()
         } else {
-            String::from("No translation found")
+            String::from(key)
         }
     }
     pub fn translator(&self) -> MutexGuard<'_, Option<Translator>> {

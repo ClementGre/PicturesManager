@@ -32,7 +32,7 @@ pub struct Props {
 #[function_component]
 pub fn MainPane() -> Html {
     let (_, cache_dispatch) = use_store::<CacheContext>();
-    let context_dispatch = Dispatch::<Context>::new();
+    let context_dispatch = Dispatch::<Context>::global();
     let _ = {
         let cache_dispatch = cache_dispatch.clone();
         use_future(|| async move {

@@ -10,10 +10,10 @@ rust-version = "1.57"
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
-yewdux = "0.9"
+yewdux = "0.10.0"
 num-rational = "0.4.1"
 log = "^0.4"
-yew = { version = "0.20.0", features = ["csr"] }
+yew = { version = "0.21.0", features = ["csr"] }
 
 [lib]
 name = "pm_common"

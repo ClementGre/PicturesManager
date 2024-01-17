@@ -1,9 +1,9 @@
 use std::rc::Rc;
 
-use yew::{classes, function_component, html, use_callback, use_state, use_state_eq, Callback, Html, Properties};
+use yew::{Callback, classes, function_component, html, Html, Properties, use_callback, use_state, use_state_eq};
 use yew_hooks::use_is_first_mount;
 use yew_icons::{Icon, IconId};
-use yewdux::prelude::{use_selector, use_store, Dispatch};
+use yewdux::prelude::{Dispatch, use_selector, use_store};
 
 use pm_common::gallery::GalleryData;
 use pm_common::gallery_cache::PathsCache;
@@ -18,7 +18,7 @@ pub fn FilesTree() -> Html {
     let selected_dir = use_selector(|data: &GalleryData| data.files_tab_selected_dir.clone());
     let current_left_tab = use_selector(|data: &GalleryData| data.current_left_tab.clone());
     let (gallery_data, data_dispatch) = use_store::<GalleryData>();
-    let ctx_dispatch = Dispatch::<Context>::new();
+    let ctx_dispatch = Dispatch::<Context>::global();
 
     if use_is_first_mount() {
         let mut selected_path_cache = &cache.paths_cache;
@@ -69,8 +69,8 @@ struct DirTreeProps {
 #[allow(non_snake_case)]
 #[function_component]
 fn DirTree(props: &DirTreeProps) -> Html {
-    let ctx_dispatch = Dispatch::<Context>::new();
-    let data_dispatch = Dispatch::<GalleryData>::new();
+    let ctx_dispatch = Dispatch::<Context>::global();
+    let data_dispatch = Dispatch::<GalleryData>::global();
 
     let mut parents = props.parents.clone();
     parents.push(props.path_cache.dir_name.clone());

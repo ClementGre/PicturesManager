@@ -18,7 +18,6 @@ impl Default for Settings {
     }
 }
 
-
 #[derive(Deserialize, Serialize, Default, Clone, Copy, Debug, PartialEq)]
 pub enum Theme {
     Light,
