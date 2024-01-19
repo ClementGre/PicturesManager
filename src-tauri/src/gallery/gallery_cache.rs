@@ -35,7 +35,7 @@ pub struct PictureCache {
 pub struct PathsCache {
     pub dir_name: String,
     pub children: Vec<PathsCache>,
-    pub pictures: Vec<String>,
+    pub pictures: Vec<String>, // EXIF uid
 }
 
 pub fn update_gallery_cache(

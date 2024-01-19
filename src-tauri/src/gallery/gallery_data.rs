@@ -22,11 +22,13 @@ use super::{
 #[serde(default)]
 pub struct Gallery {
     pub settings: GallerySettings,
-    pub data: GalleryData,
-    pub tag_groups: HashMap<String, TagGroup>,
-    pub datas_cache: HashMap<String, PictureCache>,
-    pub paths_cache: PathsCache,
-    pub dates_cache: Vec<String>,
+    pub data: GalleryData,                     // Mainly frontend UI data
+    pub tag_groups: HashMap<String, TagGroup>, // Tags groups by id
+
+    pub datas_cache: HashMap<String, PictureCache>, // Pictures datas in function of their EXIF uid
+    pub paths_cache: PathsCache,                    // Pictures EXIF uid, with directory structure (recursive structure)
+    pub dates_cache: Vec<String>,                   // Pictures uid ordered by date
+
     pub dates_clusters: Vec<DatesClusters>,
     pub location_clusters: Vec<LocationClusters>,
 }

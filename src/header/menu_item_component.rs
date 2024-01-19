@@ -77,7 +77,7 @@ impl Component for MenuItemComponent {
             item_ref: NodeRef::default(),
             menu_x: 0,
             menu_y: 0,
-            alt_shortcuts: alt_shortcuts,
+            alt_shortcuts,
         }
     }
 
@@ -168,22 +168,13 @@ impl Component for MenuItemComponent {
                     return true;
                 }
             }
-            MenuItemMsg::SelectNext => {
-                if let Some(id) = self.get_next_item_id(ctx.clone()) {
-                    self.children_selected_item = String::new();
-
-                    ctx.props().update_selected_item.emit(id.clone());
-                    if ctx.props().is_root && !ctx.props().opened_menu.is_empty() {
-                        // Update opened menu too if root
-                        self.children_opened_menu = String::new();
-                        ctx.props().update_opened_menu.emit(id.clone());
-                    } else {
-                        self.children_opened_menu = String::new();
-                    }
-                }
-            }
-            MenuItemMsg::SelectPrevious => {
-                if let Some(id) = self.get_previous_item_id(ctx.clone()) {
+            MenuItemMsg::SelectNext | MenuItemMsg::SelectPrevious => {
+                let adj_id = if let MenuItemMsg::SelectNext = msg {
+                    self.get_next_item_id(ctx.clone())
+                } else {
+                    self.get_previous_item_id(ctx.clone())
+                };
+                if let Some(id) = adj_id {
                     self.children_selected_item = String::new();
 
                     ctx.props().update_selected_item.emit(id.clone());
@@ -359,7 +350,7 @@ impl Component for MenuItemComponent {
                                 if item.items.is_some() {
                                     // If the target item is a menu -> open it
                                     ctx.link().send_message(MenuItemMsg::UpdateChildrenOpenedMenu(id.clone()));
-                                    ctx.props().navigation_message_received.emit(NavigationMessageResult::Consumed);
+                                    ctx.props().navigation_message_received.emit(Consumed);
                                 } else {
                                     // If the target item is a simple item -> fire it
                                     cmd(format!("menu_{}", item.id).as_str());
@@ -497,11 +488,11 @@ impl MenuItemComponent {
             while pos > 0 && ctx.props().brothers[pos - 1].starts_with("separator") {
                 pos -= 1
             }
-            if pos > 0 {
-                return Some(ctx.props().brothers[pos - 1].clone());
+            return if pos > 0 {
+                Some(ctx.props().brothers[pos - 1].clone())
             } else {
-                return Some(ctx.props().brothers[ctx.props().brothers.len() - 1].clone());
-            }
+                Some(ctx.props().brothers[ctx.props().brothers.len() - 1].clone())
+            };
         }
         None
     }
@@ -512,11 +503,11 @@ impl MenuItemComponent {
             while pos < ctx.props().brothers.len() - 1 && ctx.props().brothers[pos + 1].starts_with("separator") {
                 pos += 1
             }
-            if pos < ctx.props().brothers.len() - 1 {
-                return Some(ctx.props().brothers[pos + 1].clone());
+            return if pos < ctx.props().brothers.len() - 1 {
+                Some(ctx.props().brothers[pos + 1].clone())
             } else {
-                return Some(ctx.props().brothers[0].clone());
-            }
+                Some(ctx.props().brothers[0].clone())
+            };
         }
         None
     }
