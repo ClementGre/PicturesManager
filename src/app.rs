@@ -116,6 +116,15 @@ pub fn App() -> HtmlResult {
                 os_theme.set(e.payload);
             }
         });
+
+        spawn_local(async move {
+            let mut events = listen::<String>("contex_menu_tree_item_files").await.unwrap();
+            while let Some(e) = events.next().await {
+                if e.window_label == Some(current_window().label()) {
+                    info!("🚩 Received context menu event {:?}", e.payload);
+                }
+            }
+        });
     }
 
     // Context theme updated with settings and os_theme

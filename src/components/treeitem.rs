@@ -4,6 +4,8 @@ use web_sys::MouseEvent;
 use yew::{classes, html, Callback, Component, Context, Html, Properties};
 use yew_icons::{Icon, IconId};
 
+use crate::components::contextmenu::{ContextMenu, MenuItem};
+
 #[derive(PartialEq, Properties)]
 pub struct TreeItemData {
     pub id: String,
@@ -25,6 +27,7 @@ pub enum TreeItemMsg {
     ToggleOpen,
     Select,
     UpdateSelectedPath(Vec<String>),
+    ContextMenu,
 }
 
 pub struct TreeItem {
@@ -63,6 +66,24 @@ impl Component for TreeItem {
                 ctx.props().parent_message.emit(TreeItemMsg::UpdateSelectedPath(path));
                 false
             }
+            TreeItemMsg::ContextMenu => {
+                let mut menu = ContextMenu::new();
+                menu.add_item(MenuItem {
+                    label: "Open in Finder".to_string(),
+                    event: "contex_menu_tree_item_files".to_string(),
+                    payload: ctx.props().id.clone(),
+                    ..Default::default()
+                });
+                menu.add_separator();
+                menu.add_item(MenuItem {
+                    label: "Open in Terminal".to_string(),
+                    event: "contex_menu_tree_item_terminal".to_string(),
+                    payload: ctx.props().id.clone(),
+                    ..Default::default()
+                });
+                menu.show();
+                false
+            }
         };
     }
 
@@ -87,7 +108,10 @@ impl Component for TreeItem {
                         html! { <div /> }
                     }
                 }
-                <p onclick={ctx.link().callback(move |_: MouseEvent| TreeItemMsg::Select)}>{&ctx.props().name}</p>
+                <p onclick={ctx.link().callback(move |_: MouseEvent| TreeItemMsg::Select)}
+                    oncontextmenu={ctx.link().callback(move |_: MouseEvent| TreeItemMsg::ContextMenu)}>
+                    {&ctx.props().name}
+                </p>
             </div>
             {
                 // Children

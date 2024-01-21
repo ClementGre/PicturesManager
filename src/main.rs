@@ -1,5 +1,7 @@
+use gloo::events::{EventListener, EventListenerOptions};
+use wasm_bindgen::JsCast;
+use yew::{function_component, html, Html, use_effect};
 use yew::suspense::Suspense;
-use yew::{function_component, html, Html};
 
 use crate::app::App;
 use crate::utils::logger::init_backend_logger;
@@ -41,6 +43,17 @@ pub fn app_loader() -> Html {
             </main>
         </>
     };
+
+    // Disabling default debug context menu
+    use_effect(move || {
+        let document = gloo::utils::document();
+        let options = EventListenerOptions::enable_prevent_default();
+        let listener = EventListener::new_with_options(&document, "contextmenu", options, move |e| {
+            e.prevent_default();
+        });
+        || drop(listener)
+    });
+
     html! {
         <>
             <Suspense {fallback}>

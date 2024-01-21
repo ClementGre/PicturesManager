@@ -119,6 +119,7 @@ fn main() {
         .manage(TranslatorState::default())
         .manage(AppDataState::default())
         .manage(WindowsGalleriesState::default())
+        .plugin(tauri_plugin_context_menu::init())
         .plugin(get_logger_plugin())
         .plugin(
             tauri_plugin_window_state::Builder::default()
