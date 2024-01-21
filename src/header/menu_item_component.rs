@@ -170,9 +170,9 @@ impl Component for MenuItemComponent {
             }
             MenuItemMsg::SelectNext | MenuItemMsg::SelectPrevious => {
                 let adj_id = if let MenuItemMsg::SelectNext = msg {
-                    self.get_next_item_id(ctx.clone())
+                    self.get_next_item_id(ctx)
                 } else {
-                    self.get_previous_item_id(ctx.clone())
+                    self.get_previous_item_id(ctx)
                 };
                 if let Some(id) = adj_id {
                     self.children_selected_item = String::new();
@@ -336,7 +336,7 @@ impl Component for MenuItemComponent {
         if self.is_menu {
             if let NavigationMessage::Alt(key) = ctx.props().navigation_message {
                 // Opened and no children opened menu
-                // Tere is only one menu at a time that can be opened with no children opened
+                // There is only one menu at a time that can be opened with no children opened
                 if self.is_opened(ctx) && !self.has_opened_children() {
                     let mut consumed = false;
                     self.alt_shortcuts.iter().for_each(|(ks, id)| {

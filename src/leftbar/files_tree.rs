@@ -1,171 +1,104 @@
 use std::rc::Rc;
 
-use yew::{Callback, classes, function_component, html, Html, Properties, use_callback, use_state, use_state_eq};
-use yew_hooks::use_is_first_mount;
-use yew_icons::{Icon, IconId};
-use yewdux::prelude::{Dispatch, use_selector, use_store};
+use yew::{function_component, html, use_callback, use_state, Html};
+use yewdux::prelude::{use_selector, use_store, Dispatch};
 
 use pm_common::gallery::GalleryData;
 use pm_common::gallery_cache::PathsCache;
 
 use crate::app::{Context, MainPaneDisplayType};
+use crate::components::treeitem::TreeItemData;
+use crate::components::treeview::TreeView;
 use crate::mainpane::mainpane::CacheContext;
+
+fn to_tree_item_props(path_cache: &PathsCache) -> TreeItemData {
+    TreeItemData {
+        id: path_cache.dir_name.clone(), // dir name is only unique than it can be used as id
+        name: path_cache.dir_name.clone(),
+        children: Rc::new(path_cache.children.iter().map(|child| Rc::new(to_tree_item_props(child))).collect()),
+    }
+}
+fn vec_to_path_cache<'a>(root_path_cache: &'a PathsCache, path: &[String]) -> Option<&'a PathsCache> {
+    if path.len() == 0 {
+        return None;
+    }
+    root_path_cache.children.iter().find(|child| child.dir_name == path[0]).and_then(|child| {
+        if path.len() == 1 {
+            Some(child)
+        } else {
+            vec_to_path_cache(child, &path[1..])
+        }
+    })
+}
+fn make_valid_path(root_path_cache: &PathsCache, path: &Vec<String>) -> Vec<String> {
+    let mut selected_path_cache = root_path_cache;
+    let mut made_path = Vec::default();
+    for dir in path {
+        let result = selected_path_cache.children.iter().find(|child| child.dir_name == *dir);
+        if let Some(path_cache) = result {
+            selected_path_cache = path_cache;
+            made_path.push(dir.clone());
+        } else {
+            break;
+        }
+    }
+    made_path
+}
 
 #[allow(non_snake_case)]
 #[function_component]
 pub fn FilesTree() -> Html {
     let (cache, _) = use_store::<CacheContext>();
+    //let current_left_tab = use_selector(|data: &GalleryData| data.current_left_tab.clone());
     let selected_dir = use_selector(|data: &GalleryData| data.files_tab_selected_dir.clone());
-    let current_left_tab = use_selector(|data: &GalleryData| data.current_left_tab.clone());
-    let (gallery_data, data_dispatch) = use_store::<GalleryData>();
-    let ctx_dispatch = Dispatch::<Context>::global();
-
-    if use_is_first_mount() {
-        let mut selected_path_cache = &cache.paths_cache;
-        let mut made_path = Vec::default();
-        for dir in gallery_data.files_tab_selected_dir.clone().to_vec() {
-            let result = selected_path_cache.children.iter().find(|child| child.dir_name == dir);
-            if result.is_some() {
-                selected_path_cache = result.unwrap();
-                made_path.push(dir);
-            } else {
-                data_dispatch.reduce_mut(|data| {
-                    data.files_tab_selected_dir = made_path.clone();
-                });
-                break;
-            }
-        }
-        let dirs: Vec<String> = selected_path_cache.children.iter().map(|child| child.dir_name.clone()).collect();
-        ctx_dispatch.reduce_mut(|ctx| {
-            ctx.main_pane_content = MainPaneDisplayType::FilesTabPicturesAndDirs(
-                gallery_data.files_tab_selected_dir.clone(),
-                selected_path_cache.pictures.clone(),
-                dirs.clone(),
-            );
-        });
-    }
-
-    html! {
-        <ul class="files-tree root">
-            {
-                cache.paths_cache.children.iter().enumerate().map(|(i, path_cache)| {
-                    html! {
-                        <DirTree key={i} parents={Vec::default()} path_cache={Rc::new(path_cache.clone())}
-                            selected_dir={selected_dir.clone()} is_current_tab={*current_left_tab == 0}/>
-                    }
-                }).collect::<Html>()
-            }
-        </ul>
-    }
-}
-
-#[derive(Properties, PartialEq)]
-struct DirTreeProps {
-    pub parents: Vec<String>,
-    pub path_cache: Rc<PathsCache>,
-    pub selected_dir: Rc<Vec<String>>,
-    pub is_current_tab: bool,
-}
-#[allow(non_snake_case)]
-#[function_component]
-fn DirTree(props: &DirTreeProps) -> Html {
-    let ctx_dispatch = Dispatch::<Context>::global();
     let data_dispatch = Dispatch::<GalleryData>::global();
+    let ctx_dispatch = Dispatch::<Context>::global();
 
-    let mut parents = props.parents.clone();
-    parents.push(props.path_cache.dir_name.clone());
-    let is_selected = *props.selected_dir == parents;
+    let last_selected_path = use_state(|| Vec::default());
 
-    let is_open = use_state_eq(|| false);
-    let was_selected = use_state(|| false); // Selected on last render
-
-    // Display the directory in the main pane
-    let show_content = {
-        let pictures = props.path_cache.pictures.clone();
-        let dirs = props.path_cache.children.clone();
-        let parents = parents.clone();
-        use_callback((), move |_, _| {
-            let dirs: Vec<String> = dirs.iter().map(|child| child.dir_name.clone()).collect();
-            ctx_dispatch.reduce_mut(|ctx| {
-                ctx.main_pane_content = MainPaneDisplayType::FilesTabPicturesAndDirs(parents.clone(), pictures.clone(), dirs.clone());
-            });
-        })
-    };
-
-    // Open if a children is selected
-    if !*is_open && !is_selected && props.selected_dir.starts_with(&parents) {
-        is_open.set(true);
-    }
-    // Show content if just selected
-    if is_selected && props.is_current_tab && !*was_selected {
-        show_content.emit(());
-        was_selected.set(true);
-    }
-
-    let toggle_open = {
-        let is_open = is_open.clone();
-        let parents = parents.clone();
-        let selected_dir = props.selected_dir.clone();
+    // Updating selected_dir when treeview selected_path changes.
+    let selected_changed = {
         let data_dispatch = data_dispatch.clone();
-        Callback::from(move |_| {
-            is_open.set(!*is_open);
-            if !is_selected && selected_dir.starts_with(&parents) {
-                // Select this dir instead of the children
-                data_dispatch.reduce_mut(|data| {
-                    data.files_tab_selected_dir = parents.clone();
-                });
-            }
-        })
-    };
-    let select = {
-        let parents = parents.clone();
-        Callback::from(move |_| {
-            data_dispatch.reduce_mut(|data| {
-                data.files_tab_selected_dir = parents.clone();
+        use_callback((), move |path: Vec<String>, _| {
+            data_dispatch.reduce_mut(move |data| {
+                data.files_tab_selected_dir = path;
             });
         })
     };
 
-    // Update was_selected
-    if !is_selected && *was_selected {
-        was_selected.set(false);
-    } else if is_selected && !*was_selected {
-        was_selected.set(true);
+    // Updating main_pane content when selected_dir changes.
+    if *last_selected_path != *selected_dir && cache.is_loaded {
+        let path = make_valid_path(&cache.paths_cache, &selected_dir);
+        last_selected_path.set(path.clone());
+        if path != *selected_dir {
+            data_dispatch.reduce_mut(|data| {
+                data.files_tab_selected_dir = path.clone();
+            });
+        }
+
+        let path_cache = vec_to_path_cache(&cache.paths_cache, &selected_dir);
+        if let Some(path_cache) = path_cache {
+            let pictures = path_cache.pictures.clone();
+            let dirs: Vec<String> = path_cache.children.iter().map(|child| child.dir_name.clone()).collect();
+
+            ctx_dispatch.reduce_mut(|ctx| {
+                ctx.main_pane_content = MainPaneDisplayType::FilesTabPicturesAndDirs((*selected_dir).clone(), pictures, dirs);
+            });
+        }
     }
+
+    let items = cache
+        .paths_cache
+        .children
+        .iter()
+        .map(|path_cache| Rc::new(to_tree_item_props(path_cache)))
+        .collect::<Vec<Rc<TreeItemData>>>();
 
     html! {
-        <li>
-            <div class={classes!(if is_selected { Some("selected") } else { None })}>
-                {
-                    if props.path_cache.children.len() > 0 {
-                        html! {
-                            <div class={classes!(if *is_open { Some("opened") } else { None })}
-                                onclick={toggle_open}>
-                                <Icon icon_id={IconId::FontAwesomeSolidAngleRight} />
-                            </div>
-                        }
-                    } else {
-                        html! { <div /> }
-                    }
-                }
-                <p onclick={select}>{&props.path_cache.dir_name}</p>
-            </div>
-            {
-                if *is_open && props.path_cache.children.len() > 0 {
-                    html! {
-                        <ul class="files-tree" style="margin-left: 20px">
-                            {
-                                props.path_cache.children.iter().enumerate().map(|(i, path_cache)| {
-                                    html! {
-                                        <DirTree key={i} parents={parents.clone()} path_cache={Rc::new(path_cache.clone())}
-                                            selected_dir={props.selected_dir.clone()} is_current_tab={props.is_current_tab}/>
-                                    }
-                                }).collect::<Html>()
-                            }
-                        </ul>
-                    }
-                } else { html! {} }
-            }
-        </li>
+        <TreeView
+            items={items}
+            selected_changed={selected_changed}
+            selected_path={Rc::clone(&selected_dir)}
+            />
     }
 }

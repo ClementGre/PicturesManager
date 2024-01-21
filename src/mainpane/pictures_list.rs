@@ -1,8 +1,6 @@
 use yew::suspense::Suspense;
 use yew::{function_component, html, Html, Properties};
 
-pub use pm_common::gallery_cache::PictureCache;
-
 use crate::mainpane::dir_thumb::DirThumb;
 use crate::mainpane::picture_thumb::PictureThumb;
 

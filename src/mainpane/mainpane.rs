@@ -19,6 +19,7 @@ use crate::utils::utils::cmd_async_get;
 
 #[derive(Clone, Debug, Default, PartialEq, Store)]
 pub struct CacheContext {
+    pub is_loaded: bool,
     pub datas_cache: HashMap<String, PictureCache>,
     pub paths_cache: PathsCache,
 }
@@ -37,6 +38,7 @@ pub fn MainPane() -> Html {
         let cache_dispatch = cache_dispatch.clone();
         use_future(|| async move {
             cache_dispatch.set(CacheContext {
+                is_loaded: true,
                 datas_cache: cmd_async_get::<HashMap<String, PictureCache>>("get_gallery_datas_cache").await,
                 paths_cache: cmd_async_get::<PathsCache>("get_gallery_paths_cache").await,
             });
@@ -50,6 +52,7 @@ pub fn MainPane() -> Html {
                 .unwrap();
             while let Some(e) = events.next().await {
                 cache_dispatch.set(CacheContext {
+                    is_loaded: true,
                     datas_cache: e.payload.0,
                     paths_cache: e.payload.1,
                 });

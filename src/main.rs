@@ -5,6 +5,7 @@ use crate::app::App;
 use crate::utils::logger::init_backend_logger;
 
 mod app;
+mod components;
 mod header;
 mod leftbar;
 mod mainpane;
