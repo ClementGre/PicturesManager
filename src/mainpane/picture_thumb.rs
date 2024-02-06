@@ -107,10 +107,12 @@ fn PictureThumbImage(props: &ImageProps) -> HtmlResult {
         return Ok(html! {});
     }
 
+    let protocol = if !static_ctx.windows { "reqimg://localhost" } else { "https://reqimg.localhost" };
+
     Ok(html! {
         <div class="thumb"
-            style={format!("background-image: url(reqimg://get-thumbnail/?id={}&window={}); aspect-ratio: {} / {};",
-            props.id, static_ctx.window_label, props.width, props.height)}>
+            style={format!("background-image: url({}/get-thumbnail?id={}&window={}); aspect-ratio: {} / {};",
+            protocol, props.id, static_ctx.window_label, props.width, props.height)}>
         </div>
     })
 }

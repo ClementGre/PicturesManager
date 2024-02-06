@@ -67,6 +67,7 @@ pub fn setup_menubar(app_name: String, t: &TranslatorState) -> Menu {
         .add_submenu(Submenu::new("Window", window_menu))
 }
 
+#[cfg(target_os = "macos")]
 fn tr(t: &TranslatorState, key: &str) -> String {
     t.tr(key).replace("_", "")
 }

@@ -1,14 +1,14 @@
 #![cfg_attr(all(not(debug_assertions), target_os = "windows"), windows_subsystem = "windows")]
 
-use log::info;
+use log::{info, trace};
 use tauri::{http::ResponseBuilder, Manager};
 use tauri_plugin_window_state::StateFlags;
 use url::Url;
 
 use app_data::{AppData, AppDataState};
 use gallery::windows_galleries::{get_gallery_path, WindowsGalleriesState};
-use header::macos::WindowMacosExt;
 #[cfg(target_os = "macos")]
+use header::macos::WindowMacosExt;
 use header::menubar::{menu_close_window, menu_quit, menu_update_gallery};
 use utils::commands::{greet, open_devtools};
 use utils::logger::{get_logger_plugin, log_from_front};
@@ -43,7 +43,10 @@ fn main() {
 
             let galleries = app.state::<WindowsGalleriesState>();
 
+            #[cfg(target_os = "macos")]
             galleries.open_from_path(&mut app.app_handle(), String::from("/Users/clement/Pictures/Gallery"));
+            #[cfg(not (target_os = "macos"))]
+            galleries.open_from_path(&mut app.app_handle(), String::from("C:\\Users\\Clement\\Pictures\\Gallery"));
 
             Ok(())
         })
@@ -84,6 +87,7 @@ fn main() {
             }
         })
         .register_uri_scheme_protocol("reqimg", move |app, request| {
+            trace!("Received request: {:?}", request);
             let res_not_found = ResponseBuilder::new().status(404).body(Vec::new());
 
             let url = Url::parse(request.uri()).unwrap();
@@ -95,26 +99,22 @@ fn main() {
             let galleries = galleries_state.get_galleries();
             let gallery = WindowGallery::get(&galleries, &window);
 
-            if let Some(url::Host::Domain(action)) = url.host() {
-                match action {
-                    "get-thumbnail" => {
-                        // The frontend must make sure the thumbnail exists before by calling the command gen_image_thumbnail.
-                        // This is only for data transfer.
+            return match url.path() {
+                "/get-thumbnail" => {
+                    // The frontend must make sure the thumbnail exists before by calling the command gen_image_thumbnail.
+                    // This is only for data transfer.
 
-                        let id = url.query_pairs().find(|(key, _)| key == "id").unwrap().1.to_string();
+                    let id = url.query_pairs().find(|(key, _)| key == "id").unwrap().1.to_string();
 
-                        if let Some(data) = get_existing_thumbnail(&gallery.path, &id) {
-                            ResponseBuilder::new().mimetype("image/png").body(data)
-                        } else {
-                            info!("🖼️ Sending no thumbnail {}", id);
-                            res_not_found
-                        }
+                    if let Some(data) = get_existing_thumbnail(&gallery.path, &id) {
+                        ResponseBuilder::new().mimetype("image/png").body(data)
+                    } else {
+                        info!("🖼️ Sending no thumbnail {}", id);
+                        res_not_found
                     }
-                    _ => res_not_found,
                 }
-            } else {
-                res_not_found
-            }
+                _ => res_not_found,
+            };
         })
         .manage(TranslatorState::default())
         .manage(AppDataState::default())

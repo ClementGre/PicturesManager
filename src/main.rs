@@ -1,5 +1,4 @@
 use gloo::events::{EventListener, EventListenerOptions};
-use wasm_bindgen::JsCast;
 use yew::{function_component, html, Html, use_effect};
 use yew::suspense::Suspense;
 

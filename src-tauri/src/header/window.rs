@@ -2,9 +2,10 @@ use tauri::{AppHandle, Manager, Window, Wry};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags, WindowExt};
 
 use crate::gallery::windows_galleries::WindowsGalleriesState;
-use crate::header::menubar::setup_menubar;
 use crate::utils::translator::TranslatorState;
 
+#[cfg(target_os = "macos")]
+use crate::header::menubar::setup_menubar;
 #[cfg(target_os = "macos")]
 use super::macos::WindowMacosExt;
 

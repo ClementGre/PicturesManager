@@ -15,7 +15,7 @@ tauri-build = { version = "1.2", features = [] }
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 serde-wasm-bindgen = "0.6.1"
-tauri = { version = "1.5.0", features = ["devtools", "dialog-all", "http-all", "os-all", "path-all", "shell-open", "window-all"] }
+tauri = { version = "1.5.0", features = [ "protocol-all", "devtools", "dialog-all", "http-all", "os-all", "path-all", "shell-open", "window-all"] }
 tauri-utils = "1.5.0"
 tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 tauri-plugin-log = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "dev", features = ["colored"] }
