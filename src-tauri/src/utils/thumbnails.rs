@@ -13,8 +13,9 @@ use tauri::{Window, Wry};
 use pm_common::gallery_cache::Orientation;
 
 use crate::gallery::windows_galleries::{WindowGallery, WindowsGalleriesState};
+use crate::utils::files_utils::path_from_unix_path_string;
 
-// First called function do determine images dimensions
+// First called function to determine image dimension
 // Dimensions are in the right orientation
 #[tauri::command]
 pub fn get_image_dimensions(window: Window<Wry>, galleries_state: tauri::State<'_, WindowsGalleriesState>, id: String) -> Option<(u32, u32)> {
@@ -39,10 +40,9 @@ pub async fn gen_image_thumbnail(window: Window<Wry>, galleries_state: tauri::St
         let galleries = galleries_state.get_galleries();
         let gallery = WindowGallery::get(&galleries, &window);
         orientation = gallery.gallery.datas_cache.get(&id).unwrap().orientation;
-        path = gallery.gallery.datas_cache.get(&id).unwrap().path.clone();
+        path = path_from_unix_path_string(gallery.gallery.datas_cache.get(&id).unwrap().path.clone());
         gallery_path = gallery.path.clone();
     }
-
     Ok(gen_thumbnail(gallery_path, path, id, orientation, 280).await.is_some())
 }
 async fn gen_thumbnail(gallery_path: String, image_path: String, id: String, orientation: Orientation, target_height: u32) -> Option<()> {
@@ -54,9 +54,14 @@ async fn gen_thumbnail(gallery_path: String, image_path: String, id: String, ori
     let start = std::time::Instant::now();
 
     let img_path: PathBuf = PathBuf::from(&gallery_path).join(&image_path);
-    let img = ImageReader::open(img_path.clone()).ok()?.decode();
-    if img.is_err() {
-        warn!("Unable to decode image: {:?}, error: {}", img_path, img.err().unwrap());
+    let img = ImageReader::open(img_path.clone());
+    if let Err(e) = img {
+        warn!("Unable to open image: {:?}, error: {}", img_path, e);
+        return None;
+    }
+    let img = img.ok()?.decode();
+    if let Err(e) = img {
+        warn!("Unable to decode image: {:?}, error: {}", img_path, e);
         return None;
     }
     let img = img.ok()?;

@@ -1,6 +1,6 @@
 #![cfg_attr(all(not(debug_assertions), target_os = "windows"), windows_subsystem = "windows")]
 
-use log::{info, trace};
+use log::info;
 use tauri::{http::ResponseBuilder, Manager};
 use tauri_plugin_window_state::StateFlags;
 use url::Url;
@@ -45,7 +45,7 @@ fn main() {
 
             #[cfg(target_os = "macos")]
             galleries.open_from_path(&mut app.app_handle(), String::from("/Users/clement/Pictures/Gallery"));
-            #[cfg(not (target_os = "macos"))]
+            #[cfg(not(target_os = "macos"))]
             galleries.open_from_path(&mut app.app_handle(), String::from("C:\\Users\\Clement\\Pictures\\Gallery"));
 
             Ok(())
@@ -87,7 +87,6 @@ fn main() {
             }
         })
         .register_uri_scheme_protocol("reqimg", move |app, request| {
-            trace!("Received request: {:?}", request);
             let res_not_found = ResponseBuilder::new().status(404).body(Vec::new());
 
             let url = Url::parse(request.uri()).unwrap();

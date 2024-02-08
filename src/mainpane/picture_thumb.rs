@@ -83,7 +83,7 @@ pub fn PictureThumb(props: &Props) -> HtmlResult {
         });
     }
 
-    warn!("No thumb for {}", props.id);
+    warn!("No cached dimensions for image {}", props.id);
     return Ok(html! { <li ref={ref_pic.clone()}></li> });
 }
 
@@ -107,7 +107,11 @@ fn PictureThumbImage(props: &ImageProps) -> HtmlResult {
         return Ok(html! {});
     }
 
-    let protocol = if !static_ctx.windows { "reqimg://localhost" } else { "https://reqimg.localhost" };
+    let protocol = if !static_ctx.windows {
+        "reqimg://localhost"
+    } else {
+        "https://reqimg.localhost"
+    };
 
     Ok(html! {
         <div class="thumb"

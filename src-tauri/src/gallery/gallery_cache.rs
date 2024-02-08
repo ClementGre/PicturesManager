@@ -10,7 +10,9 @@ use tauri::{Window, Wry};
 
 use pm_common::gallery_cache::Orientation;
 
-use crate::utils::{exif_utils::ExifFile, thumbnails::is_supported_img};
+use crate::utils::exif_utils::ExifFile;
+use crate::utils::files_utils::path_to_unix_path_string;
+use crate::utils::thumbnails::is_supported_img;
 
 use super::windows_galleries::{WindowGallery, WindowsGalleriesState};
 
@@ -89,19 +91,14 @@ pub fn read_dir_recursive(path: PathBuf, datas_cache: &mut HashMap<String, Pictu
                 paths_cache.children.push(read_dir_recursive(path, datas_cache, gallery_path));
             }
         } else if is_supported_img(path.clone()) {
-            let stripped_path = path
-                .strip_prefix(gallery_path)
-                .expect("Can't strip image path prefix")
-                .to_str()
-                .expect("Non UTF-8 path")
-                .to_string();
+            let stripped_path = path.strip_prefix(gallery_path).expect("Can't strip image path prefix");
 
             if let Some(mut exif_file) = ExifFile::new(path.clone()) {
                 if datas_cache.contains_key(&exif_file.uid) {
                     // TODO: compare locations with old cache and regenerate uid for the file that changed location (or was renamed)
                     exif_file.regen_uid();
                 }
-                datas_cache.insert(exif_file.uid.clone(), exif_file.to_picture_cache(stripped_path));
+                datas_cache.insert(exif_file.uid.clone(), exif_file.to_picture_cache(path_to_unix_path_string(stripped_path)));
                 paths_cache.pictures.push(exif_file.uid.clone());
             } else {
                 warn!("File {:?} does not support EXIF of XMP data.", path);
