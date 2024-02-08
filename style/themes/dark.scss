@@ -3,6 +3,8 @@
 .th-dark {
     --text-color: white;
     --bg-color: black;
+    --accent-color-foreground: hsl(215, 12%, 30%);
+    --accent-color-hover-bg: hsl(215, 49%, 50%);
 }
 
 /***** HEADER *****/
@@ -22,6 +24,7 @@ header.th-dark {
     // Windows buttons
     --windows-buttons-color: white;
 }
+
 /***** SIDE BAR *****/
 
 main.th-dark .sidebar {
@@ -42,6 +45,5 @@ main.th-dark .mainpane {
     --text-color: white;
     --bg-color: hsl(215, 12%, 6%);
     // Pictures list
-    --pictures-list-thumbnail-loading-bg-color: hsl(215, 12%, 30%);
-    --pictures-list-dir-svg-color: hsl(215, 49%, 50%);
+    --picture-loading-bg-color: hsl(215, 8%, 15%);
 }

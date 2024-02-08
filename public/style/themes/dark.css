@@ -30,7 +30,7 @@ main.th-dark .mainpane {
   --text-color: white;
   --bg-color: hsl(215, 12%, 6%);
   /* Pictures list */
-  --pictures-list-thumbnail-loading-bg-color: hsl(215, 12%, 10%);
+  --picture-loading-bg-color: hsl(215, 12%, 10%);
 }
 
 /*# sourceMappingURL=dark.css.map */

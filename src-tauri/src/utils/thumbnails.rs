@@ -13,7 +13,6 @@ use tauri::{Window, Wry};
 use pm_common::gallery_cache::Orientation;
 
 use crate::gallery::windows_galleries::{WindowGallery, WindowsGalleriesState};
-use crate::utils::files_utils::path_from_unix_path_string;
 
 // First called function to determine image dimension
 // Dimensions are in the right orientation
@@ -40,7 +39,7 @@ pub async fn gen_image_thumbnail(window: Window<Wry>, galleries_state: tauri::St
         let galleries = galleries_state.get_galleries();
         let gallery = WindowGallery::get(&galleries, &window);
         orientation = gallery.gallery.datas_cache.get(&id).unwrap().orientation;
-        path = path_from_unix_path_string(gallery.gallery.datas_cache.get(&id).unwrap().path.clone());
+        path = gallery.gallery.datas_cache.get(&id).unwrap().get_path();
         gallery_path = gallery.path.clone();
     }
     Ok(gen_thumbnail(gallery_path, path, id, orientation, 280).await.is_some())

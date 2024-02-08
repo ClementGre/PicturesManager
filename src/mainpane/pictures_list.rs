@@ -13,14 +13,10 @@ pub struct PicturesListProps {
 #[allow(non_snake_case)]
 #[function_component]
 pub fn PicturesList(props: &PicturesListProps) -> Html {
-    let fallback = html! {
-        <></>
-    };
-
     html! {
         <>
             <ul class="pictures-list">
-                <Suspense fallback={fallback.clone()}>
+                <Suspense fallback={html!{<></>}}>
                     {
                         props.dirs.iter().map(|dir| {
                             html! {

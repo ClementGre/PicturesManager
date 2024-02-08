@@ -1,19 +1,15 @@
 use log::warn;
-use serde::{Deserialize, Serialize};
 use web_sys::HtmlElement;
 use yew::suspense::Suspense;
 use yew::{function_component, html, suspense::use_future_with, use_context, HtmlResult, Properties};
 use yew::{use_node_ref, NodeRef};
 use yew_hooks::{use_is_first_mount, use_size, use_update};
 use yewdux::prelude::use_selector;
+use yewdux::Dispatch;
 
-use crate::app::Context;
+use crate::app::{Context, MainPaneDisplayType};
+use crate::mainpane::full_picture::GetImageArgs;
 use crate::{app::StaticContext, utils::utils::cmd_async};
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct GetImageThumbnailArgs {
-    id: String,
-}
 
 fn get_non_null_ref(ref_1: NodeRef, ref_2: NodeRef) -> Option<HtmlElement> {
     if let Some(element) = ref_1.cast::<HtmlElement>() {
@@ -32,7 +28,7 @@ pub struct Props {
 #[function_component]
 pub fn PictureThumb(props: &Props) -> HtmlResult {
     let dimensions = use_future_with(props.id.clone(), |id| async move {
-        cmd_async::<GetImageThumbnailArgs, Option<(u32, u32)>>("get_image_dimensions", &GetImageThumbnailArgs { id: id.to_string() }).await
+        cmd_async::<GetImageArgs, Option<(u32, u32)>>("get_image_dimensions", &GetImageArgs { id: id.to_string() }).await
     })?;
 
     let main_pane_dimensions = use_selector(|ctx: &Context| ctx.main_pane_dimensions.clone());
@@ -48,8 +44,17 @@ pub fn PictureThumb(props: &Props) -> HtmlResult {
         let h = 140;
         let w = h * width / height;
 
+        // Switch to carousel mode on click
+        let context_dispatch = Dispatch::<Context>::global();
+        let onclick = {
+            let id = props.id.clone();
+            context_dispatch.reduce_mut_callback(move |data| {
+                data.main_pane_content = MainPaneDisplayType::PictureAndCarousel(id.clone(), vec![], vec![]);
+            })
+        };
+
         let fallback = html! {
-            <li class="loading" style={format!("flex-basis: {}px; flex-grow: {};", w, w)} ref={ref_load.clone()}>
+            <li class="loading" style={format!("flex-basis: {}px; flex-grow: {};", w, w)} ref={ref_load.clone()} onclick={onclick.clone()}>
                 <div class="thumb" style={format!("aspect-ratio: {} / {};", w, h)} />
             </li>
         };
@@ -60,6 +65,7 @@ pub fn PictureThumb(props: &Props) -> HtmlResult {
             return Ok(fallback);
         }
 
+        // Not displaying image if not in the visible area
         let element = get_non_null_ref(ref_load.clone(), ref_pic.clone());
         let mut visible = false;
         if let Some(el) = element {
@@ -70,13 +76,13 @@ pub fn PictureThumb(props: &Props) -> HtmlResult {
                 visible = top + height >= main_pane_dimensions.scroll_top - 300 && top <= main_pane_dimensions.scroll_bottom + 300;
             }
         }
-
         if !visible {
             return Ok(fallback);
         }
+
         return Ok(html! {
             <Suspense fallback={fallback}>
-                <li style={format!("flex-basis: {}px; flex-grow: {};", w, w)} ref={ref_pic.clone()}>
+                <li style={format!("flex-basis: {}px; flex-grow: {};", w, w)} ref={ref_pic.clone()} onclick={onclick}>
                     <PictureThumbImage id={props.id.clone()} width={w} height={h}/>
                 </li>
             </Suspense>
@@ -99,7 +105,7 @@ fn PictureThumbImage(props: &ImageProps) -> HtmlResult {
     let static_ctx = use_context::<StaticContext>().unwrap();
 
     let has_thumb = use_future_with(props.id.clone(), |id| async move {
-        cmd_async::<GetImageThumbnailArgs, bool>("gen_image_thumbnail", &GetImageThumbnailArgs { id: id.to_string() }).await
+        cmd_async::<GetImageArgs, bool>("gen_image_thumbnail", &GetImageArgs { id: id.to_string() }).await
     })?;
 
     if !*has_thumb {

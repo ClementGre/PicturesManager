@@ -1,61 +1,139 @@
-.mainpane{
-    flex-shrink: 1;
-    color: var(--text-color);
-    background-color: var(--bg-color);
+.mainpane {
+  flex-shrink: 1;
+  color: var(--text-color);
+  background-color: var(--bg-color);
 }
+
 .mainpane ul.pictures-list {
-    list-style: none;
-    padding: 0;
-    margin: 11px;
-    display: flex;
-    flex-wrap: wrap;
-    align-content: stretch;
-    gap: 3px;
-    &::after {
-        content: '';
-        flex-grow: 1000000000;
-    }
+  list-style: none;
+  padding: 0;
+  margin: 11px;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: stretch;
+  gap: 3px;
+
+  &::after {
+    content: '';
+    flex-grow: 1000000000;
+  }
 }
 
 .mainpane ul.pictures-list li {
-    flex-grow: 1;
-    border-radius: 2px;
-    overflow: hidden;
-    animation: fadeIn .2s;
-    background-color: var(--pictures-list-thumbnail-loading-bg-color);
+  flex-grow: 1;
+  border-radius: 2px;
+  overflow: hidden;
+  animation: fadeIn .2s;
+  background-color: var(--picture-loading-bg-color);
 
-    .thumb {
-        width: 100%;
-        height: 100%;
+  .thumb {
+    width: 100%;
+    height: 100%;
 
-        background-repeat: no-repeat;
-        background-size: cover;
-        background-position: center;
-    }
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+  }
 
 }
+
 .mainpane ul.pictures-list li .dir-thumb {
+  position: relative;
+  background-color: white;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: var(--accent-color-hover-bg);
+  }
+
+  svg {
+    width: 60%;
+    height: 60%;
+    color: var(--accent-color-foreground);
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  p {
+    width: 100%;
+    margin: 0;
+    position: absolute;
+    bottom: 6%;
+    text-align: center;
+    @include no-select;
+  }
+}
+
+.mainpane div.picture-and-carousel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  height: 100%;
+
+  div.full-image {
+    flex-grow: 1;
     position: relative;
-    background-color: white;
-    transition: background-color 0.2s ease-in-out;
-    &:hover {
-        background-color: var(--pictures-list-dir-hover-color);
+    max-height: calc(100% - 35px); // 35px is the minimum height left for the carousel container
+    padding: 3px;
+
+    .image {
+      border-radius: 2px;
+      background-color: var(--picture-loading-bg-color);
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center;
+      animation: fadeIn .4s;
+
+      max-height: 100%;
+      position: relative;
+      top: 50%;
+      left: 50%;
+      transform: translateY(-50%) translateX(-50%);
     }
-    svg {
-        width: 60%;
-        height: 60%;
-        color: var(--pictures-list-dir-svg-color);
-        position: absolute;
-        top: 45%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+  }
+
+  div.carousel {
+    flex-basis: 70px; // 70px is the maximum height for the carousel container
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    position: relative;
+
+    ul {
+      position: absolute;
+      width: 100%;
+      height: 60px;
+      // 60px is the height of the carousel so that it stays pined at the top of the container when big enough
+      bottom: max(3px, calc(100% - 60px));
+      padding: 0;
+      margin: 0;
+
+      list-style: none;
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 3px;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      li {
+        flex-shrink: 0;
+        width: 107px;
+        height: 60px;
+        border-radius: 2px;
+        overflow: hidden;
+        background-color: var(--picture-loading-bg-color);
+        animation: fadeIn .2s;
+
+        &.selected {
+          border: 2px solid var(--accent-color-foreground);
+        }
+      }
+
     }
-    p {
-        width: 100%;
-        margin: 0;
-        position: absolute;
-        bottom: 6%;
-        text-align: center;
-        @include no-select;
-    }
+  }
 }

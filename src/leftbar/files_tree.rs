@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
-use yew::{function_component, html, use_callback, use_state, Html};
-use yewdux::prelude::{use_selector, use_store, Dispatch};
+use yew::{function_component, html, Html, use_callback, use_state_eq};
+use yewdux::prelude::{Dispatch, use_selector, use_store};
 
 use pm_common::gallery::GalleryData;
 use pm_common::gallery_cache::PathsCache;
@@ -52,14 +52,21 @@ pub fn FilesTree() -> Html {
     //let current_left_tab = use_selector(|data: &GalleryData| data.current_left_tab.clone());
     let selected_dir = use_selector(|data: &GalleryData| data.files_tab_selected_dir.clone());
     let data_dispatch = Dispatch::<GalleryData>::global();
-    let ctx_dispatch = Dispatch::<Context>::global();
+    let (ctx, ctx_dispatch) = use_store::<Context>();
 
-    let last_selected_path = use_state(|| Vec::default());
+    let last_selected_path = use_state_eq(|| Vec::default());
 
     // Updating selected_dir when treeview selected_path changes.
     let selected_changed = {
         let data_dispatch = data_dispatch.clone();
+        let last_selected_path = last_selected_path.clone();
+        let ctx = ctx.clone();
         use_callback((), move |path: Vec<String>, _| {
+            if let MainPaneDisplayType::PicturesAndDirs(_, _, _) = ctx.main_pane_content {
+            } else {
+                // Force MainPaneDisplayType to be updated.
+                last_selected_path.set(Vec::default());
+            }
             data_dispatch.reduce_mut(move |data| {
                 data.files_tab_selected_dir = path;
             });
@@ -82,7 +89,7 @@ pub fn FilesTree() -> Html {
             let dirs: Vec<String> = path_cache.children.iter().map(|child| child.dir_name.clone()).collect();
 
             ctx_dispatch.reduce_mut(|ctx| {
-                ctx.main_pane_content = MainPaneDisplayType::FilesTabPicturesAndDirs((*selected_dir).clone(), pictures, dirs);
+                ctx.main_pane_content = MainPaneDisplayType::PicturesAndDirs((*selected_dir).clone(), pictures, dirs);
             });
         }
     }

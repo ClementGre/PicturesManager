@@ -11,7 +11,7 @@ use tauri::{Window, Wry};
 use pm_common::gallery_cache::Orientation;
 
 use crate::utils::exif_utils::ExifFile;
-use crate::utils::files_utils::path_to_unix_path_string;
+use crate::utils::files_utils::{path_from_unix_path_string, path_to_unix_path_string};
 use crate::utils::thumbnails::is_supported_img;
 
 use super::windows_galleries::{WindowGallery, WindowsGalleriesState};
@@ -19,7 +19,7 @@ use super::windows_galleries::{WindowGallery, WindowsGalleriesState};
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[serde(default)]
 pub struct PictureCache {
-    pub path: String,
+    pub path: String, // In unix style, call get_path to get a valid path.
     pub uuid_generated: bool,
     pub date: Option<String>,
     pub location: Option<(f64, f64, f64)>,
@@ -30,6 +30,12 @@ pub struct PictureCache {
     pub exposure_time: Option<(u32, u32)>,
     pub iso_speed: Option<i32>,
     pub f_number: Option<f64>,
+}
+
+impl PictureCache {
+    pub fn get_path(&self) -> String {
+        path_from_unix_path_string(self.path.clone())
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]

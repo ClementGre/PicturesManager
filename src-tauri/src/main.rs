@@ -1,5 +1,8 @@
 #![cfg_attr(all(not(debug_assertions), target_os = "windows"), windows_subsystem = "windows")]
 
+use std::fs::read;
+use std::path::PathBuf;
+
 use log::info;
 use tauri::{http::ResponseBuilder, Manager};
 use tauri_plugin_window_state::StateFlags;
@@ -106,14 +109,24 @@ fn main() {
             return match url.path() {
                 "/get-thumbnail" => {
                     // The frontend must make sure the thumbnail exists before by calling the command gen_image_thumbnail.
-                    // This is only for data transfer.
 
                     let id = url.query_pairs().find(|(key, _)| key == "id").unwrap().1.to_string();
 
                     if let Some(data) = get_existing_thumbnail(&gallery.path, &id) {
                         ResponseBuilder::new().mimetype("image/png").body(data)
                     } else {
-                        info!("🖼️ Sending no thumbnail {}", id);
+                        info!("🖼️ Can't read thumbnail {}", id);
+                        res_not_found
+                    }
+                }
+                "/get-image" => {
+                    let id = url.query_pairs().find(|(key, _)| key == "id").unwrap().1.to_string();
+                    let path = PathBuf::from(&gallery.path).join(gallery.gallery.datas_cache.get(&id).unwrap().get_path());
+
+                    if let Ok(data) = read(path) {
+                        ResponseBuilder::new().mimetype("image").body(data)
+                    } else {
+                        info!("🖼️ Can't read image {}", id);
                         res_not_found
                     }
                 }

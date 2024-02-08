@@ -3,6 +3,8 @@
 .th-light {
     --text-color: black;
     --bg-color: white;
+    --accent-color-foreground: hsl(215, 49%, 50%);
+    --accent-color-hover-bg: hsl(215, 49%, 90%);
 }
 
 /***** HEADER *****/
@@ -43,7 +45,5 @@ main.th-light .mainpane {
     --text-color: hsl(0, 0%, 24%);
     --bg-color: hsl(0, 0%, 93%);
     // Pictures list
-    --pictures-list-thumbnail-loading-bg-color: hsl(0, 0%, 70%);
-    --pictures-list-dir-svg-color: hsl(215, 49%, 50%);
-    --pictures-list-dir-hover-color: hsl(215, 49%, 90%);
+    --picture-loading-bg-color: hsl(0, 0%, 70%);
 }

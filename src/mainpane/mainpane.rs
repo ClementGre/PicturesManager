@@ -5,15 +5,16 @@ use tauri_sys::event::listen;
 use web_sys::HtmlElement;
 use yew::platform::spawn_local;
 use yew::suspense::use_future;
-use yew::{function_component, html, use_node_ref, use_state, Children, Html, Properties};
+use yew::{function_component, html, use_node_ref, use_state, Children, Html, Properties, Suspense};
 use yew_hooks::use_size;
 use yewdux::prelude::{use_selector, use_store, Dispatch};
 use yewdux::store::Store;
 
 use pm_common::gallery_cache::{PathsCache, PictureCache};
 
-use crate::app::MainPaneDisplayType::FilesTabPicturesAndDirs;
+use crate::app::MainPaneDisplayType;
 use crate::app::{Context, MainPaneDimensions};
+use crate::mainpane::cargo_and_carousel::PictureAndCarousel;
 use crate::mainpane::pictures_list::PicturesList;
 use crate::utils::utils::cmd_async_get;
 
@@ -32,8 +33,10 @@ pub struct Props {
 #[allow(non_snake_case)]
 #[function_component]
 pub fn MainPane() -> Html {
-    let (_, cache_dispatch) = use_store::<CacheContext>();
     let context_dispatch = Dispatch::<Context>::global();
+
+    // CacheContext loading and updating system
+    let (_, cache_dispatch) = use_store::<CacheContext>();
     let _ = {
         let cache_dispatch = cache_dispatch.clone();
         use_future(|| async move {
@@ -60,8 +63,8 @@ pub fn MainPane() -> Html {
         }
     });
 
+    // Syncing main pane dimensions to Context
     let node = use_node_ref();
-
     let on_scroll_zone_changed = {
         let node = node.clone();
         context_dispatch.reduce_mut_callback_with(move |context, _: yew::Event| {
@@ -74,7 +77,6 @@ pub fn MainPane() -> Html {
             };
         })
     };
-
     let size_state = use_state(|| (0u32, 0u32));
     let size = use_size(node.clone());
     if *size_state != size {
@@ -82,16 +84,22 @@ pub fn MainPane() -> Html {
         on_scroll_zone_changed.emit(yew::Event::new("onscroll").unwrap());
     }
 
-    let content = use_selector(|context: &Context| context.main_pane_content.clone());
+    let content = (*use_selector(|context: &Context| context.main_pane_content.clone())).clone();
 
     html! {
         <section ref={node} class="mainpane" onscroll={on_scroll_zone_changed.clone()}>
+            <Suspense fallback={html! { <div class="empty"></div> }}>
             {
-                if let FilesTabPicturesAndDirs(root_dir, pics, dirs) = (*content).clone() {
+                if let MainPaneDisplayType::PicturesAndDirs(root_dir, pics, dirs) = content{
                     html! {
                         <PicturesList {root_dir} {pics} {dirs}/>
                     }
-                }else{
+                }else if let MainPaneDisplayType::PictureAndCarousel(id, left_ids, right_ids) = content {
+                    html! {
+                        <PictureAndCarousel {id} {left_ids} {right_ids}/>
+                    }
+                }
+                else{
                     html!{
                         <div class="empty">
                             <p>{"Nothing to display"}</p>
@@ -99,6 +107,8 @@ pub fn MainPane() -> Html {
                     }
                 }
             }
+            </Suspense>
         </section>
+
     }
 }
