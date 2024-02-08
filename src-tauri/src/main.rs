@@ -83,6 +83,11 @@ fn main() {
             println!("MenuEvent: {}", event.menu_item_id());
             match event.menu_item_id() {
                 "close" => {}
+                "update_gallery" => {
+                    tauri::async_runtime::spawn(async move {
+                        let _ = menu_update_gallery(event.window().clone(), event.window().state::<WindowsGalleriesState>()).await;
+                    });
+                }
                 _ => {}
             }
         })

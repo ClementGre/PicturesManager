@@ -42,7 +42,7 @@ pub struct PathsCache {
 
 pub fn update_gallery_cache(
     window: &Window<Wry>,
-    galleries_state: tauri::State<WindowsGalleriesState>,
+    galleries_state: &tauri::State<WindowsGalleriesState>,
 ) -> (HashMap<String, PictureCache>, PathsCache) {
     let mut galleries = galleries_state.get_galleries();
     let gallery = WindowGallery::get_mut(&mut galleries, &window);
@@ -95,7 +95,8 @@ pub fn read_dir_recursive(path: PathBuf, datas_cache: &mut HashMap<String, Pictu
 
             if let Some(mut exif_file) = ExifFile::new(path.clone()) {
                 if datas_cache.contains_key(&exif_file.uid) {
-                    // TODO: compare locations with old cache and regenerate uid for the file that changed location (or was renamed)
+                    // TODO: check that the file is the same (edit date, name, etc.) because it might have been edited. In this case, the uid should be regenerated.
+                    info!("Regenerating uid for file {:?} because this uid already exists.", path);
                     exif_file.regen_uid();
                 }
                 datas_cache.insert(exif_file.uid.clone(), exif_file.to_picture_cache(path_to_unix_path_string(stripped_path)));

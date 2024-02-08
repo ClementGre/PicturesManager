@@ -23,3 +23,6 @@ menu-bar-edit-select-all = Tout _sélectionner
 menu-bar-tools = _Outils
 menu-bar-tools-update-gallery = _Actualiser la galerie
 menu-bar-tools-edit-exif = _Corriger les données EXIF
+
+menu-bar-view = Présentation
+menu-bar-window = Fenêtre

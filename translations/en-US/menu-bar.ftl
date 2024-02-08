@@ -24,3 +24,6 @@ menu-bar-tools = _Tools
 menu-bar-tools-update-gallery = _Update gallery
 menu-bar-tools-edit-exif = _Edit EXIF data
 
+menu-bar-view = View
+menu-bar-window = Window
+
