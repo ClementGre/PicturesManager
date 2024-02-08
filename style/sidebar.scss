@@ -56,18 +56,19 @@ main > .sidebar > .content {
 	width: 0;
 	border-left: 0 solid var(--separator-color);
 }
+.sidebar > .content {
+	padding: 10px;
+}
 
 /* LEFT TAB */
+
+/* Files Tree */
 
 .sidebar.leftbar > .content ul.files-tree {
 	list-style: none;
 	margin: 0;
 	padding: 0;
-	font-size: 10pt;
-	font-weight: 300;
-	&.root {
-		padding: 10px;
-	}
+	font-size: 13px;
 	li {
 		> div {
 			padding: 0;

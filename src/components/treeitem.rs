@@ -117,7 +117,7 @@ impl Component for TreeItem {
                 // Children
                 if self.is_open && ctx.props().children.len() > 0 {
                     html! {
-                        <ul class="files-tree" style="margin-left: 20px">
+                        <ul class="files-tree" style="margin-left: 16px">
                             {
                                 ctx.props().children.iter().map(|tree_item| {
                                     html! {
