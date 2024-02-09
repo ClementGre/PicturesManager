@@ -89,6 +89,7 @@ pub fn FilesTree() -> Html {
             let dirs: Vec<String> = path_cache.children.iter().map(|child| child.dir_name.clone()).collect();
 
             ctx_dispatch.reduce_mut(|ctx| {
+                ctx.main_pane_old_content = ctx.main_pane_content.clone();
                 ctx.main_pane_content = MainPaneDisplayType::PicturesAndDirs((*selected_dir).clone(), pictures, dirs);
             });
         }

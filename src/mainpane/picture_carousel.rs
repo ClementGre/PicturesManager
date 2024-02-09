@@ -2,7 +2,9 @@ use log::warn;
 use serde::{Deserialize, Serialize};
 use yew::suspense::Suspense;
 use yew::{function_component, html, suspense::use_future_with, use_context, HtmlResult, Properties};
+use yewdux::Dispatch;
 
+use crate::app::{Context, MainPaneDisplayType};
 use crate::{app::StaticContext, utils::utils::cmd_async};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -23,25 +25,41 @@ pub fn PictureCarousel(props: &Props) -> HtmlResult {
 
     let carousel_height = 60;
 
+    // Switch to another picture of the carousel on click
+    let context_dispatch = Dispatch::<Context>::global();
+    let onclick = {
+        let id = props.id.clone();
+        context_dispatch.reduce_mut_callback(move |data| {
+            if let MainPaneDisplayType::PictureAndCarousel(old_id, old_left, mut old_right) = data.main_pane_content.clone() {
+                if id == old_id {
+                    return;
+                }
+                let (mut right, mut left) = (vec![], vec![]);
+                if let Some(i) = old_left.iter().position(|x| *x == id) {
+                    left = old_left[..i].to_vec();
+                    right = old_left[i + 1..].to_vec();
+                    right.push(old_id);
+                    right.append(&mut old_right);
+                } else if let Some(i) = old_right.iter().position(|x| *x == id) {
+                    left = old_left;
+                    left.push(old_id);
+                    left.append(&mut old_right[..i].to_vec());
+                    right = old_right[i + 1..].to_vec();
+                }
+                data.main_pane_content = MainPaneDisplayType::PictureAndCarousel(id.clone(), left, right);
+            }
+        })
+    };
+
     if let Some((width, height)) = *dimensions {
         let fallback = html! {
-            <li class="loading">
+            <li class="loading" onclick={onclick.clone()}>
                 <div class="image" style={format!("width: {}px; height: {}px;", carousel_height*width/height, carousel_height)}/>
             </li>
         };
-
-        // Switch to carousel mode on click
-        // let context_dispatch = Dispatch::<Context>::global();
-        // let onclick = {
-        //     let id = props.id.clone();
-        //     context_dispatch.reduce_mut_callback(move |data| {
-        //         data.main_pane_content = MainPaneDisplayType::PictureAndCarousel(id.clone(), vec![], vec![]);
-        //     })
-        // };
-
         return Ok(html! {
             <Suspense fallback={fallback}>
-                <li>
+                <li onclick={onclick}>
                     <PictureCarouselImage id={props.id.clone()} width={carousel_height*width/height} height={carousel_height}/>
                 </li>
             </Suspense>
@@ -49,7 +67,7 @@ pub fn PictureCarousel(props: &Props) -> HtmlResult {
     }
 
     warn!("No cached dimensions for image {}", props.id);
-    return Ok(html! { <div></div> });
+    return Ok(html! { <li></li> });
 }
 
 #[derive(Properties, PartialEq)]

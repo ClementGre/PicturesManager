@@ -13,6 +13,10 @@ pub struct PictureAndCarouselProps {
 #[allow(non_snake_case)]
 #[function_component]
 pub fn PictureAndCarousel(props: &PictureAndCarouselProps) -> Html {
+    // TODO :
+    // - Set not visible PictureCarousel not to load images.
+    // - Redesign the carousel to allow horizontal scrolling and update selected image in function
+    //   This would require not to use a left and right Vec, but a single vec with the index of current picture.
     html! {
         <div class="picture-and-carousel">
             <FullPicture id={props.id.clone()} />

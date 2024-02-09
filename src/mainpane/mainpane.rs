@@ -1,11 +1,12 @@
 use std::collections::HashMap;
 
 use futures::stream::StreamExt;
+use log::debug;
 use tauri_sys::event::listen;
 use web_sys::HtmlElement;
 use yew::platform::spawn_local;
 use yew::suspense::use_future;
-use yew::{function_component, html, use_node_ref, use_state, Children, Html, Properties, Suspense};
+use yew::{function_component, html, use_node_ref, use_state, Callback, Children, Html, Properties, Suspense};
 use yew_hooks::use_size;
 use yewdux::prelude::{use_selector, use_store, Dispatch};
 use yewdux::store::Store;
@@ -84,10 +85,16 @@ pub fn MainPane() -> Html {
         on_scroll_zone_changed.emit(yew::Event::new("onscroll").unwrap());
     }
 
+    let onkeypress = {
+        Callback::from(move |e| {
+            debug!("Keypres {:?}", e);
+        })
+    };
+
     let content = (*use_selector(|context: &Context| context.main_pane_content.clone())).clone();
 
     html! {
-        <section ref={node} class="mainpane" onscroll={on_scroll_zone_changed.clone()}>
+        <section ref={node} class="mainpane" onscroll={on_scroll_zone_changed.clone()} onkeypress={onkeypress}>
             <Suspense fallback={html! { <div class="empty"></div> }}>
             {
                 if let MainPaneDisplayType::PicturesAndDirs(root_dir, pics, dirs) = content{

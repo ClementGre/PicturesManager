@@ -1,5 +1,3 @@
-use std::cmp::{max, min};
-
 use yew::suspense::Suspense;
 use yew::{function_component, html, Html, Properties};
 use yewdux::Dispatch;
@@ -20,10 +18,11 @@ pub fn PicturesList(props: &PicturesListProps) -> Html {
     let context_dispatch = Dispatch::<Context>::global();
     let select_picture = {
         let pics = props.pics.clone();
-        context_dispatch.reduce_mut_callback_with(move |data, (i, id): (usize, String)| {
-            let left = pics[(max(i as isize - 5, 0) as usize)..i].to_vec();
-            let right = pics[i + 1..min(i + 6, pics.len())].to_vec();
-            data.main_pane_content = MainPaneDisplayType::PictureAndCarousel(id.clone(), left, right);
+        context_dispatch.reduce_mut_callback_with(move |ctx, (i, id): (usize, String)| {
+            ctx.main_pane_old_content = ctx.main_pane_content.clone();
+            let left = pics[..i].to_vec();
+            let right = pics[i + 1..].to_vec();
+            ctx.main_pane_content = MainPaneDisplayType::PictureAndCarousel(id.clone(), left, right);
         })
     };
 

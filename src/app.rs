@@ -52,6 +52,7 @@ pub struct Context {
     pub theme: Theme,
     pub gallery_path: String,
     pub main_pane_content: MainPaneDisplayType,
+    pub main_pane_old_content: MainPaneDisplayType,
     pub main_pane_dimensions: MainPaneDimensions,
 }
 
