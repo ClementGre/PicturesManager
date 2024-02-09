@@ -14,7 +14,7 @@ use pm_common::gallery_cache::{PathsCache, PictureCache};
 
 use crate::app::MainPaneDisplayType;
 use crate::app::{Context, MainPaneDimensions};
-use crate::mainpane::cargo_and_carousel::PictureAndCarousel;
+use crate::mainpane::picture_and_carousel::PictureAndCarousel;
 use crate::mainpane::pictures_list::PicturesList;
 use crate::utils::utils::cmd_async_get;
 

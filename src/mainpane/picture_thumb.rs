@@ -1,13 +1,12 @@
 use log::warn;
 use web_sys::HtmlElement;
 use yew::suspense::Suspense;
-use yew::{function_component, html, suspense::use_future_with, use_context, HtmlResult, Properties};
+use yew::{function_component, html, suspense::use_future_with, use_context, Callback, HtmlResult, Properties};
 use yew::{use_node_ref, NodeRef};
 use yew_hooks::{use_is_first_mount, use_size, use_update};
 use yewdux::prelude::use_selector;
-use yewdux::Dispatch;
 
-use crate::app::{Context, MainPaneDisplayType};
+use crate::app::Context;
 use crate::mainpane::full_picture::GetImageArgs;
 use crate::{app::StaticContext, utils::utils::cmd_async};
 
@@ -23,6 +22,7 @@ fn get_non_null_ref(ref_1: NodeRef, ref_2: NodeRef) -> Option<HtmlElement> {
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub id: String,
+    pub select_callback: Callback<String>,
 }
 #[allow(non_snake_case)]
 #[function_component]
@@ -45,11 +45,11 @@ pub fn PictureThumb(props: &Props) -> HtmlResult {
         let w = h * width / height;
 
         // Switch to carousel mode on click
-        let context_dispatch = Dispatch::<Context>::global();
         let onclick = {
             let id = props.id.clone();
-            context_dispatch.reduce_mut_callback(move |data| {
-                data.main_pane_content = MainPaneDisplayType::PictureAndCarousel(id.clone(), vec![], vec![]);
+            let select_callback = props.select_callback.clone();
+            Callback::from(move |_| {
+                select_callback.emit(id.clone());
             })
         };
 
@@ -82,7 +82,7 @@ pub fn PictureThumb(props: &Props) -> HtmlResult {
 
         return Ok(html! {
             <Suspense fallback={fallback}>
-                <li style={format!("flex-basis: {}px; flex-grow: {};", w, w)} ref={ref_pic.clone()} onclick={onclick}>
+                <li style={format!("flex-basis: {}px; flex-grow: {};", w, w)} ref={ref_pic.clone()} onclick={onclick.clone()}>
                     <PictureThumbImage id={props.id.clone()} width={w} height={h}/>
                 </li>
             </Suspense>
