@@ -24,7 +24,7 @@ pub fn DirThumb(props: &Props) -> Html {
 
     html! {
         <li style={format!("flex-basis: {}px; flex-grow: {};", 140, 140)} onclick={onclick}>
-            <div class="thumb dir-thumb" style={format!("aspect-ratio: 1;")}>
+            <div class="thumb dir-thumb">
                 <Icon icon_id={IconId::FontAwesomeSolidFolderOpen} />
                 <p>{props.dir.clone()}</p>
             </div>

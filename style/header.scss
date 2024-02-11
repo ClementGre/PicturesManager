@@ -11,8 +11,8 @@ header {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
-	color: var(--text-color);
-	background-color: var(--bg-color);
+	color: var(--fg-default);
+	background-color: var(--bg-default);
 	p {
 		margin: 0;
 	}
@@ -82,7 +82,7 @@ header .windows-menu .menu .menu-item p span {
 header .windows-menu.opened > .menu.opened,
 header .windows-menu .menu.selected,
 header .windows-menu .item.selected {
-	background-color: var(--hover-bg-color);
+	background-color: var(--bgh-default);
 }
 
 header .windows-menu.alt-mode .menu p span {
@@ -164,7 +164,7 @@ header .windows-menu .menu-arrow {
 		left: 50%;
 		border-radius: 1px;
 		transform-origin: center right;
-		background-color: var(--text-color);
+		background-color: var(--fg-default);
 		&:first-child {
 			transform: translateX(-50%) translateY(calc(-50% + 0.354px)) rotate(45deg);
 		}
@@ -186,15 +186,15 @@ header .buttons {
 	overscroll-behavior-x: none;
 	/* Scroll shadow */
 	background: /* Prevents the visibility of the shadow when too close to an end */
-			linear-gradient(90deg, var(--bg-color), var(--bg-color)) left,
-			linear-gradient(90deg, var(--bg-color), var(--bg-color)) right,
-			linear-gradient(90deg, var(--bg-color), transparent) left 7px top 50%,
-			linear-gradient(90deg, transparent, var(--bg-color)) right 7px top 50%,
+			linear-gradient(90deg, var(--bg-default), var(--bg-default)) left,
+			linear-gradient(90deg, var(--bg-default), var(--bg-default)) right,
+			linear-gradient(90deg, var(--bg-default), transparent) left 7px top 50%,
+			linear-gradient(90deg, transparent, var(--bg-default)) right 7px top 50%,
 				/* The shadow */
 			radial-gradient(farthest-side at 0 50%, var(--button-row-scroll-shadow), transparent),
 			radial-gradient(farthest-side at 100% 50%, var(--button-row-scroll-shadow), transparent) right 1px bottom 50%;
 	background-repeat: no-repeat;
-	background-color: var(--bg-color);
+	background-color: var(--bg-default);
 	background-size: 7px 100%, 7px 100%,
 	7px 100%, 7px 100%,
 	7px 100%, 7px 100%;
@@ -217,11 +217,11 @@ header .buttons button {
 	outline: inherit;
 	cursor: default;
 
-	color: var(--text-color);
+	color: var(--fg-default);
 	background-color: transparent;
 
 	&:hover, &:focus {
-		background-color: var(--hover-bg-color);
+		background-color: var(--bgh-default);
 	}
 	svg {
 		width: 20px;
@@ -268,7 +268,7 @@ header .windows-buttons {
 		height: 100%;
 		transition: all 0.2s ease-in-out;
 		&:hover {
-			background-color: var(--hover-bg-color);
+			background-color: var(--bgh-default);
 		}
 	}
 }

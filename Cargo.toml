@@ -64,7 +64,7 @@ members = ["src-tauri"]
 
 [profile.release]
 lto = "fat"
-#compiler-units = 1
-# opt-level = "z"
-# panic = "abort"
-# strip = "debuginfo"
+compiler-units = 1
+opt-level = "z"
+panic = "abort"
+strip = "debuginfo"

@@ -1,7 +1,7 @@
 .mainpane {
   flex-shrink: 1;
-  color: var(--text-color);
-  background-color: var(--bg-color);
+  color: var(--fg-default);
+  background-color: var(--bgd-default);
 }
 
 .mainpane ul.pictures-list {
@@ -39,17 +39,17 @@
 
 .mainpane ul.pictures-list li .dir-thumb {
   position: relative;
-  background-color: white;
-  transition: background-color 0.2s ease-in-out;
+  aspect-ratio: 1;
+  background-color: var(--picture-loaded-bg-color);
 
   &:hover {
-    background-color: var(--accent-color-hover-bg);
+    background-color: var(--bg-info);
   }
 
   svg {
-    width: 60%;
-    height: 60%;
-    color: var(--accent-color-foreground);
+    width: 50%;
+    height: 50%;
+    color: var(--fgl-info);
     position: absolute;
     top: 45%;
     left: 50%;
@@ -113,6 +113,7 @@ div.carousel-container {
 div.carousel-container > div.carousel-overflow > .carousel {
     position: relative;
     min-width: fit-content;
+    height: 60px;
     width: 100%;
     left: 50%;
     transform: translateX(-50%);
@@ -141,7 +142,7 @@ div.carousel-container > div.carousel-overflow > .carousel {
         min-width: auto;
       }
       &.selected li {
-        border: 2px solid var(--accent-color-foreground);
+        border: 2px solid var(--fg-info);
       }
       li {
         flex-shrink: 0;
@@ -151,7 +152,7 @@ div.carousel-container > div.carousel-overflow > .carousel {
         animation: fadeIn .2s;
 
         div {
-          background-size: contain;
+          background-size: cover;
         }
       }
 

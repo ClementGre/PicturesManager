@@ -1,49 +1,66 @@
 /***** GENERAL *****/
-
+/* bgd = background dark */
+/* bgh = background hover */
+/* fgl = foreground light */
 .th-light {
-    --text-color: black;
-    --bg-color: white;
-    --accent-color-foreground: hsl(215, 49%, 50%);
-    --accent-color-hover-bg: hsl(215, 49%, 90%);
+    --bg-default: hsl(0, 0%, 100%);
+    --bgd-default: hsl(0, 0%, 93%);
+    --bgh-default: hsl(0, 0%, 90%);
+    --fgl-default: hsl(0, 0%, 24%);
+    --fg-default: hsl(0, 0%, 15%);
+
+    --bg-success: hsl(120, 49%, 90%);
+    --bgh-success: hsl(120, 49%, 80%);
+    --fgl-success: hsl(120, 49%, 40%);
+    --fg-success: hsl(120, 49%, 20%);
+
+    --bg-warning: hsl(50, 49%, 90%);
+    --bgh-warning: hsl(50, 49%, 80%);
+    --fgl-warning: hsl(50, 49%, 40%);
+    --fg-warning: hsl(50, 49%, 20%);
+
+    --bg-error: hsl(0, 49%, 90%);
+    --bgh-error: hsl(0, 49%, 80%);
+    --fgl-error: hsl(0, 49%, 40%);
+    --fg-error: hsl(0, 49%, 20%);
+
+    --bg-info: hsl(215, 49%, 90%);
+    --bgh-info: hsl(215, 49%, 80%);
+    --fgl-info: hsl(215, 49%, 40%);
+    --fg-info: hsl(215, 49%, 20%);
 }
 
 /***** HEADER *****/
 
 header.th-light{
-    --bg-color: white;
-    --hover-bg-color: hsl(0, 0%, 90%);
+    --bg-default: var(--bg-default);
     // Menu
     --menu-bg-color: hsl(0, 0%, 96%);
     --menu-underline-color: hsl(0, 0%, 30%);
     --menu-separator-color: hsl(0, 0%, 50%);
     // Buttons
-    --button-svg-color: hsl(0, 0%, 24%);
+    --button-svg-color: var(--fgl-default);
     --button-row-scroll-shadow: rgba(0, 0, 0, .2);
     // Title
-    --title-color: hsl(0, 0%, 24%);
+    --title-color: var(--fgl-default);
     // Windows buttons
-    --windows-buttons-color: hsl(0, 0%, 24%);
+    --windows-buttons-color: var(--fgl-default);
 }
 
 /***** SIDE BAR *****/
 
 main.th-light .sidebar {
-    --text-color: hsl(0, 0%, 15%);
-    --bg-color: white;
-    --separator-color: hsl(0, 0%, 88%);
+    --separator-color: var(--bgh-default);
+
     // Tabs Header
-    --header-bg-color: hsl(0, 0%, 93%);
-    --header-svg-color: hsl(0, 0%, 24%);
-    --header-button-hover-color: hsl(0, 0%, 88%);
-    // Components
-    --hover-bg-color: hsl(0, 0%, 93%);
+    --header-bg-color: var(--bgd-default);
+    --header-svg-color: var(--fgl-default);
 }
 
 /***** MAIN PANE *****/
 
 main.th-light .mainpane {
-    --text-color: hsl(0, 0%, 24%);
-    --bg-color: hsl(0, 0%, 93%);
     // Pictures list
     --picture-loading-bg-color: hsl(0, 0%, 70%);
+    --picture-loaded-bg-color: var(--bg-default);
 }

@@ -24,7 +24,7 @@
 		left: 50%;
 		border-radius: calc($thickness / 2);
 		transform-origin: right center;
-		background-color: var(--text-color);
+		background-color: var(--fg-default);
 		$trx: - calc($length) - 3px * calc(sqrt-with-unit($thickness) / 4);
 		$try-shift: calc(sqrt-with-unit($thickness) / 2) * 1px;
 		&:first-child {

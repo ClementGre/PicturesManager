@@ -1,6 +1,6 @@
 /***** HEADER *****/
 header.th-dark {
-  --hover-bg-color: hsl(215, 8%, 26%);
+  --bgh-default: hsl(215, 8%, 26%);
   /* Menu */
   --menu-bg-color: hsl(215, 12%, 15%);
   --menu-underline-color: hsl(0, 0%, 70%);
@@ -16,19 +16,19 @@ header.th-dark {
 
 /***** SIDE BAR *****/
 main.th-dark .sidebar {
-  --text-color: white;
-  --bg-color: hsl(215, 12%, 12%);
+  --fg-default: white;
+  --bg-default: hsl(215, 12%, 12%);
   --separator-color: hsl(0, 0%, 16%);
   /* Tabs Header */
   --header-bg-color: hsl(215, 12%, 6%);
   --header-svg-color: white;
-  --header-button-hover-color: hsl(215, 8%, 14%);
+  --bgh-default: hsl(215, 8%, 14%);
 }
 
 /***** MAIN PANE *****/
 main.th-dark .mainpane {
-  --text-color: white;
-  --bg-color: hsl(215, 12%, 6%);
+  --fg-default: white;
+  --bg-default: hsl(215, 12%, 6%);
   /* Pictures list */
   --picture-loading-bg-color: hsl(215, 12%, 10%);
 }

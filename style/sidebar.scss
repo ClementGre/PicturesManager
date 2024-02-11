@@ -1,8 +1,8 @@
 main > .sidebar {
 	flex-grow: 0;
 	width: 250px;
-	color: var(--text-color);
-	background-color: var(--bg-color);
+	color: var(--fg-default);
+	background-color: var(--bg-default);
 	display: flex;
 	flex-direction: column;
 }
@@ -25,17 +25,17 @@ main > .sidebar .tabs-header {
 		padding: 6px;
 		border-radius: 5px 5px 0 0;
 
-		color: var(--header-svg-color);
+		color: var(--loaded-bg-color);
 		background-color: transparent;
 		border: none;
 		outline: inherit;
 		cursor: default;
 
 		&:hover, &:focus {
-			background-color: var(--header-button-hover-color);
+			background-color: var(--bgh-default);
 		}
 		&.selected, &.selected:hover {
-			background-color: var(--bg-color);
+			background-color: var(--bg-default);
 		}
 	}
 }
@@ -79,7 +79,7 @@ main > .sidebar > .content {
 			min-width: 100%;
 			width: min-content;
 			&.selected {
-				background-color: var(--hover-bg-color);
+				background-color: var(--bgh-default);
 			}
 			> div {
 				flex-shrink: 0;

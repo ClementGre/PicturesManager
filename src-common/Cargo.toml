@@ -18,3 +18,10 @@ yew = { version = "0.21.0", features = ["csr"] }
 [lib]
 name = "pm_common"
 path = "src/lib.rs"
+
+[profile.release]
+lto = "fat"
+compiler-units = 1
+opt-level = "z"
+panic = "abort"
+strip = "debuginfo"
