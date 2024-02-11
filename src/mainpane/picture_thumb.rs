@@ -1,23 +1,14 @@
 use log::warn;
-use web_sys::HtmlElement;
+use yew::{Callback, function_component, html, HtmlResult, Properties, suspense::use_future_with, use_context};
 use yew::suspense::Suspense;
-use yew::{function_component, html, suspense::use_future_with, use_context, Callback, HtmlResult, Properties};
-use yew::{use_node_ref, NodeRef};
+use yew::use_node_ref;
 use yew_hooks::{use_is_first_mount, use_size, use_update};
 use yewdux::prelude::use_selector;
 
+use crate::{app::StaticContext, utils::utils::cmd_async};
 use crate::app::Context;
 use crate::mainpane::full_picture::GetImageArgs;
-use crate::{app::StaticContext, utils::utils::cmd_async};
-
-fn get_non_null_ref(ref_1: NodeRef, ref_2: NodeRef) -> Option<HtmlElement> {
-    if let Some(element) = ref_1.cast::<HtmlElement>() {
-        return Some(element);
-    } else if let Some(element) = ref_2.cast::<HtmlElement>() {
-        return Some(element);
-    }
-    return None;
-}
+use crate::utils::utils::get_non_null_ref;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
