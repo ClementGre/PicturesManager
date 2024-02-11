@@ -59,9 +59,11 @@ fn FullPictureImage(props: &ImageProps) -> HtmlResult {
     };
 
     Ok(html! {
-        <div class="image"
-            style={format!("background-image: url({}/get-image?id={}&window={}); aspect-ratio: {} / {};",
-            protocol, props.id, static_ctx.window_label, props.width, props.height)}>
+        <div class="image-container" /*style={format!("aspect-ratio: {} / {};", props.width, props.height)}*/>
+            <div class="image"
+                style={format!("background-image: url({}/get-image?id={}&window={}); aspect-ratio: {} / {};",
+                protocol, props.id, static_ctx.window_label, props.width, props.height)}>
+            </div>
         </div>
     })
 }
