@@ -77,7 +77,7 @@
     position: relative;
     max-height: calc(100% - 35px); // 35px is the minimum height left for the carousel container
     padding: 3px;
-    overflow: auto;
+    overflow: scroll;
 
     .image {
       border-radius: 2px;
@@ -90,6 +90,24 @@
       max-height: 100%;
       position: relative;
       transform-origin: 0 0;
+      p {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        margin: 0;
+        color: var(--fg-info);
+        background-color: var(--bg-info);
+        font-size: 2em;
+      }
+      .point{
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        transform: translateX(-50%) translateY(-50%);
+        background-color: var(--fg-info);
+        box-shadow: 0 0 5px 1px var(--bg-info);
+      }
     }
   }
 
