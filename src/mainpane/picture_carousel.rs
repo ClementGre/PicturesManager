@@ -1,66 +1,77 @@
-use log::warn;
-use serde::{Deserialize, Serialize};
+use log::{info, warn};
+use web_sys::console::info;
+use web_sys::HtmlElement;
+use yew::{
+    Callback, classes, function_component, html, HtmlResult, Properties, suspense::use_future_with, use_context, use_effect, use_node_ref,
+    use_state, use_state_eq,
+};
 use yew::suspense::Suspense;
-use yew::{function_component, html, suspense::use_future_with, use_context, HtmlResult, Properties};
+use yew_hooks::{use_measure, use_size, use_update};
 use yewdux::Dispatch;
 
-use crate::app::{Context, MainPaneDisplayType};
 use crate::{app::StaticContext, utils::utils::cmd_async};
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct GetImageArgs {
-    pub(crate) id: String,
-}
+use crate::app::{Context, MainPaneDisplayType};
+use crate::mainpane::full_picture::GetImageArgs;
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub id: String,
+    pub index: usize,
+    pub selected: bool,
+    pub set_offset: Callback<i32>,
 }
+
 #[allow(non_snake_case)]
 #[function_component]
 pub fn PictureCarousel(props: &Props) -> HtmlResult {
     let dimensions = use_future_with(props.id.clone(), |id| async move {
         cmd_async::<GetImageArgs, Option<(u32, u32)>>("get_image_dimensions", &GetImageArgs { id: id.to_string() }).await
     })?;
+    // let main_pane_dimensions = use_selector(|ctx: &Context| ctx.main_pane_dimensions.clone());
 
+    let offset = use_state_eq(|| 0i32);
     let carousel_height = 60;
 
     // Switch to another picture of the carousel on click
     let context_dispatch = Dispatch::<Context>::global();
     let onclick = {
-        let id = props.id.clone();
+        let index = props.index.clone();
+        let offset = offset.clone();
+        let set_offset = props.set_offset.clone();
         context_dispatch.reduce_mut_callback(move |data| {
-            if let MainPaneDisplayType::PictureAndCarousel(old_id, old_left, mut old_right) = data.main_pane_content.clone() {
-                if id == old_id {
-                    return;
-                }
-                let (mut right, mut left) = (vec![], vec![]);
-                if let Some(i) = old_left.iter().position(|x| *x == id) {
-                    left = old_left[..i].to_vec();
-                    right = old_left[i + 1..].to_vec();
-                    right.push(old_id);
-                    right.append(&mut old_right);
-                } else if let Some(i) = old_right.iter().position(|x| *x == id) {
-                    left = old_left;
-                    left.push(old_id);
-                    left.append(&mut old_right[..i].to_vec());
-                    right = old_right[i + 1..].to_vec();
-                }
-                data.main_pane_content = MainPaneDisplayType::PictureAndCarousel(id.clone(), left, right);
+            if let MainPaneDisplayType::PictureAndCarousel(pictures_ids, _) = data.main_pane_content.clone() {
+                data.main_pane_content = MainPaneDisplayType::PictureAndCarousel(pictures_ids, index);
+                set_offset.emit(*offset);
+            }
+        })
+    };
+
+    let set_offset = {
+        let index = props.index.clone();
+        let offset = offset.clone();
+        let set_offset = props.set_offset.clone();
+        let selected = props.selected.clone();
+        Callback::from(move |new_offset: i32| {
+            if new_offset != 0 {
+                offset.set(new_offset);
+            }
+            if selected {
+                // *offset only updates at the next render
+                set_offset.emit(if new_offset != 0 { new_offset } else { *offset });
             }
         })
     };
 
     if let Some((width, height)) = *dimensions {
         let fallback = html! {
-            <li class="loading" onclick={onclick.clone()}>
+            <li class={classes!(Some("loading"), if props.selected { Some("selected") } else { None })} onclick={onclick.clone()}>
                 <div class="image" style={format!("width: {}px; height: {}px;", carousel_height*width/height, carousel_height)}/>
             </li>
         };
         return Ok(html! {
             <Suspense fallback={fallback}>
-                <li onclick={onclick}>
-                    <PictureCarouselImage id={props.id.clone()} width={carousel_height*width/height} height={carousel_height}/>
+                <li class={classes!(if props.selected { Some("selected") } else { None })} onclick={onclick}>
+                    <PictureCarouselImage id={props.id.clone()} width={carousel_height*width/height} height={carousel_height} {set_offset}/>
                 </li>
             </Suspense>
         });
@@ -75,18 +86,16 @@ pub struct ImageProps {
     pub id: String,
     pub width: u32,
     pub height: u32,
+    pub set_offset: Callback<i32>,
 }
+
 #[allow(non_snake_case)]
 #[function_component]
 fn PictureCarouselImage(props: &ImageProps) -> HtmlResult {
     let static_ctx = use_context::<StaticContext>().unwrap();
 
     let has_thumb = use_future_with(props.id.clone(), |id| async move {
-        cmd_async::<crate::mainpane::full_picture::GetImageArgs, bool>(
-            "gen_image_thumbnail",
-            &crate::mainpane::full_picture::GetImageArgs { id: id.to_string() },
-        )
-        .await
+        cmd_async::<GetImageArgs, bool>("gen_image_thumbnail", &GetImageArgs { id: id.to_string() }).await
     })?;
 
     if !*has_thumb {
@@ -94,16 +103,23 @@ fn PictureCarouselImage(props: &ImageProps) -> HtmlResult {
         return Ok(html! {});
     }
 
-    let protocol = if !static_ctx.windows {
-        "reqimg://localhost"
-    } else {
-        "https://reqimg.localhost"
-    };
+    let ref_img = use_node_ref();
+    let _ = use_size(ref_img.clone());
+
+    use_effect({
+        let set_offset = props.set_offset.clone();
+        let ref_img = ref_img.clone();
+        move || {
+            if let Some(img_div) = ref_img.cast::<HtmlElement>() {
+                set_offset.emit(img_div.offset_left());
+            }
+        }
+    });
 
     Ok(html! {
-        <div class="image"
+        <div class="image" ref={ref_img.clone()}
             style={format!("background-image: url({}/get-thumbnail?id={}&window={}); width: {}px; height: {}px;",
-            protocol, props.id, static_ctx.window_label, props.width, props.height)}>
+            static_ctx.protocol, props.id, static_ctx.window_label, props.width, props.height)}>
         </div>
     })
 }

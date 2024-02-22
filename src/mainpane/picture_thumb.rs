@@ -15,6 +15,7 @@ pub struct Props {
     pub id: String,
     pub select_callback: Callback<String>,
 }
+
 #[allow(non_snake_case)]
 #[function_component]
 pub fn PictureThumb(props: &Props) -> HtmlResult {
@@ -90,6 +91,7 @@ pub struct ImageProps {
     pub width: u32,
     pub height: u32,
 }
+
 #[allow(non_snake_case)]
 #[function_component]
 fn PictureThumbImage(props: &ImageProps) -> HtmlResult {
@@ -104,16 +106,10 @@ fn PictureThumbImage(props: &ImageProps) -> HtmlResult {
         return Ok(html! {});
     }
 
-    let protocol = if !static_ctx.windows {
-        "reqimg://localhost"
-    } else {
-        "https://reqimg.localhost"
-    };
-
     Ok(html! {
         <div class="thumb"
             style={format!("background-image: url({}/get-thumbnail?id={}&window={}); aspect-ratio: {} / {};",
-            protocol, props.id, static_ctx.window_label, props.width, props.height)}>
+            static_ctx.protocol, props.id, static_ctx.window_label, props.width, props.height)}>
         </div>
     })
 }

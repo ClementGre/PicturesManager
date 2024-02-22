@@ -1,13 +1,13 @@
 use js_sys::Math::abs;
 use log::{info, warn};
 use serde::{Deserialize, Serialize};
-use web_sys::{HtmlElement, MouseEvent, WheelEvent};
+use web_sys::{HtmlElement, WheelEvent};
+use yew::{
+    Callback, function_component, html, HtmlResult, NodeRef, Properties, suspense::use_future_with, use_context, use_effect_with, use_node_ref,
+    use_state,
+};
 use yew::suspense::Suspense;
-use yew::{function_component, html, suspense::use_future_with, use_context, use_node_ref, use_state, Callback, HtmlResult, NodeRef, Properties};
 use yew_hooks::{use_is_first_mount, use_size, use_update};
-use yewdux::{use_selector, Dispatch};
-
-use pm_common::gallery::GalleryData;
 
 use crate::{app::StaticContext, utils::utils::cmd_async};
 
@@ -27,8 +27,14 @@ pub fn FullPicture(props: &Props) -> HtmlResult {
     let dimensions = use_future_with(props.id.clone(), |id| async move {
         cmd_async::<GetImageArgs, Option<(u32, u32)>>("get_image_dimensions", &GetImageArgs { id: id.to_string() }).await
     })?;
-    let zoom = use_selector(|data: &GalleryData| data.zoom_carousel.clone());
-    let data_dispatch = Dispatch::<GalleryData>::global();
+    let zoom = use_state(|| 1.0);
+    use_effect_with(props.id.clone(), {
+        let zoom = zoom.clone();
+        move |_| {
+            zoom.set(1.0);
+            || {}
+        }
+    });
 
     let ref_container = use_node_ref();
     let left_s = use_state(|| 0f64);
@@ -47,7 +53,7 @@ pub fn FullPicture(props: &Props) -> HtmlResult {
             let zoom = zoom.clone();
             let left_s = left_s.clone();
             let top_s = top_s.clone();
-            data_dispatch.reduce_mut_callback_with(move |data, e: WheelEvent| {
+            Callback::from(move |e: WheelEvent| {
                 if e.ctrl_key() {
                     if let Some(container) = container.clone() {
                         e.prevent_default();
@@ -57,12 +63,12 @@ pub fn FullPicture(props: &Props) -> HtmlResult {
                         if abs(*left_s - container.scroll_left() as f64) > 3.0 || abs(*top_s - container.scroll_top() as f64) > 3.0 {
                             left = container.scroll_left() as f64;
                             top = container.scroll_top() as f64;
-                            info!("Scrolled manually!");
+                            info!("Scrolled manually in full picture pane!");
                         }
 
                         let old_zoom = *zoom;
-                        let zoom = (old_zoom * (1.0 - e.delta_y() / 40.0)).max(1.0).min(5.0);
-                        let factor = zoom / old_zoom;
+                        let new_zoom = (old_zoom * (1.0 - e.delta_y() / 40.0)).max(1.0).min(5.0);
+                        let factor = new_zoom / old_zoom;
 
                         let x = e.client_x() as f64 - container.get_bounding_client_rect().left();
                         let y = e.client_y() as f64 - container.get_bounding_client_rect().top();
@@ -77,7 +83,7 @@ pub fn FullPicture(props: &Props) -> HtmlResult {
                         top_s.set(scroll_top);
                         container.set_scroll_left(scroll_left as i32);
                         container.set_scroll_top(scroll_top as i32);
-                        data.zoom_carousel = zoom;
+                        zoom.set(new_zoom);
                     }
                 }
             })
@@ -86,7 +92,7 @@ pub fn FullPicture(props: &Props) -> HtmlResult {
         return Ok(html! {
             <Suspense fallback={fallback}>
                 <div class="full-image" ref={ref_container.clone()} {onwheel}>
-                    <FullPictureImage id={props.id.clone()} {width} {height} {ref_container} {container_width} {container_height}/>
+                    <FullPictureImage id={props.id.clone()} {width} {height} zoom={*zoom} {ref_container} {container_width} {container_height}/>
                 </div>
             </Suspense>
         });
@@ -101,7 +107,9 @@ pub struct ImageProps {
     pub id: String,
     pub width: u32,
     pub height: u32,
+    pub zoom: f64,
     pub ref_container: NodeRef,
+    // Needs to be passed as a prop to force re-render when the container size change.
     pub container_width: u32,
     pub container_height: u32,
 }
@@ -110,7 +118,6 @@ pub struct ImageProps {
 #[function_component]
 fn FullPictureImage(props: &ImageProps) -> HtmlResult {
     let static_ctx = use_context::<StaticContext>().unwrap();
-    let zoom = use_selector(|data: &GalleryData| data.zoom_carousel.clone());
 
     let update = use_update();
     let is_first_mount = use_is_first_mount();
@@ -136,23 +143,18 @@ fn FullPictureImage(props: &ImageProps) -> HtmlResult {
         let img_w = image.client_width() as f64;
         let img_h = image.client_height() as f64;
 
-        if cont_w > img_w * *zoom {
-            left = ((cont_w - img_w * *zoom) / 2.0) as i32;
+        if cont_w > img_w * props.zoom {
+            left = ((cont_w - img_w * props.zoom) / 2.0) as i32;
         }
-        if cont_h > img_h * *zoom {
-            top = ((cont_h - img_h * *zoom) / 2.0) as i32;
+        if cont_h > img_h * props.zoom {
+            top = ((cont_h - img_h * props.zoom) / 2.0) as i32;
         }
     }
 
-    let protocol = if !static_ctx.windows {
-        "reqimg://localhost"
-    } else {
-        "https://reqimg.localhost"
-    };
     Ok(html! {
         <div class="image" ref={ref_image}
             style={format!("background-image: url({}/get-image?id={}&window={}); aspect-ratio: {}/{}; scale: {}; left: {}px; top: {}px;",
-            protocol, props.id, static_ctx.window_label, props.width, props.height, *zoom, left, top)}>
+            static_ctx.protocol, props.id, static_ctx.window_label, props.width, props.height, props.zoom, left, top)}>
         </div>
     })
 }

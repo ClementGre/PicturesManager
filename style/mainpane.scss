@@ -90,6 +90,7 @@
       max-height: 100%;
       position: relative;
       transform-origin: 0 0;
+
       p {
         position: absolute;
         top: 50%;
@@ -100,7 +101,8 @@
         background-color: var(--bg-info);
         font-size: 2em;
       }
-      .point{
+
+      .point {
         position: absolute;
         width: 10px;
         height: 10px;
@@ -111,37 +113,40 @@
     }
   }
 
-div.carousel-container {
-  flex-basis: 70px; // 70px is the maximum height for the carousel container
-  min-height: 0;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  position: relative;
-
-  div.carousel-overflow {
-    position: absolute;
-    height: 60px;
-    // 60px is the height of the carousel so that it stays pined at the top of the container when big enough
-    bottom: max(3px, calc(100% - 60px));
+  div.carousel-container {
+    flex-basis: 70px; // 70px is the maximum height for the carousel container
+    min-height: 0;
     width: 100%;
-    overflow: hidden;
-  }
-}
-div.carousel-container > div.carousel-overflow > .carousel {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
     position: relative;
-    min-width: fit-content;
+
+    div.carousel-overflow {
+      position: absolute;
+      height: 60px;
+      // 60px is the height of the carousel so that it stays pined at the top of the container when big enough
+      bottom: max(3px, calc(100% - 60px));
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+    }
+  }
+
+  div.carousel-container > div.carousel-overflow > .carousel {
+    position: relative;
     height: 60px;
     width: 100%;
-    left: 50%;
-    transform: translateX(-50%);
+    max-width: 100%;
 
     display: flex;
     flex-wrap: nowrap;
     gap: 3px;
 
     ul {
-      padding: 0;
+      position: relative;
+      overflow: scroll;
+      padding: 0 3px;
       margin: 0;
       list-style: none;
       display: flex;
@@ -151,17 +156,12 @@ div.carousel-container > div.carousel-overflow > .carousel {
       flex-grow: 1;
       flex-basis: 100%;
       min-width: 0;
-      &:first-child {
-        justify-content: flex-end;
-      }
-      &.selected {
-        flex-grow: 0;
-        flex-basis: 0;
-        min-width: auto;
-      }
-      &.selected li {
+
+      li.selected {
         border: 2px solid var(--fg-info);
+        //outline: 2px solid var(--fg-info);
       }
+
       li {
         flex-shrink: 0;
         border-radius: 2px;
@@ -171,6 +171,7 @@ div.carousel-container > div.carousel-overflow > .carousel {
 
         div {
           background-size: cover;
+          background-position: center center;
         }
       }
 

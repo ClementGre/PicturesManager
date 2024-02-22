@@ -26,6 +26,7 @@ use crate::utils::utils::{cmd_async, cmd_async_get};
 pub struct StaticContext {
     pub macos: bool,
     pub windows: bool,
+    pub protocol: &'static str,
     pub window_label: String,
     pub home_dir: String,
 }
@@ -34,11 +35,12 @@ pub struct StaticContext {
 pub enum MainPaneDisplayType {
     // Root dir path as vec, Pictures Ids, Dirs names
     PicturesAndDirs(Vec<String>, Vec<String>, Vec<String>),
-    // Picture id, Left pictures ids, Right pictures ids
-    PictureAndCarousel(String, Vec<String>, Vec<String>),
+    // Picture id, Selected picture index
+    PictureAndCarousel(Vec<String>, usize),
     #[default]
     None,
 }
+
 #[derive(Clone, Debug, Default, PartialEq, Store)]
 pub struct MainPaneDimensions {
     pub width: i32,
@@ -60,6 +62,7 @@ pub struct Context {
 pub struct GalleryDataContainer {
     pub data: GalleryData,
 }
+
 #[derive(Serialize, Deserialize)]
 pub struct GallerySettingsContainer {
     pub settings: GallerySettings,
@@ -76,6 +79,11 @@ pub fn App() -> HtmlResult {
     let static_context = use_memo((), |_| StaticContext {
         macos: *os == OsKind::Darwin,
         windows: *os == OsKind::WindowsNT,
+        protocol: if *os != OsKind::WindowsNT {
+            "reqimg://localhost"
+        } else {
+            "https://reqimg.localhost"
+        },
         window_label: current_window().label(),
         home_dir: home_dir.to_string_lossy().to_string(),
     });
@@ -185,14 +193,14 @@ pub fn App() -> HtmlResult {
                     data: (*gallery_data).clone(),
                 },
             )
-            .await;
+                .await;
             cmd_async::<GallerySettingsContainer, ()>(
                 "set_gallery_settings",
                 &GallerySettingsContainer {
                     settings: (*gallery_settings).clone(),
                 },
             )
-            .await;
+                .await;
 
             current_window().close().await.unwrap();
         });
