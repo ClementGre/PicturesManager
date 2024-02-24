@@ -19,7 +19,6 @@ pub struct PictureAndCarouselProps {
 pub fn PictureAndCarousel(props: &PictureAndCarouselProps) -> Html {
     let carousel_scroll = use_mut_ref(|| 0i32);
     let ref_ul = use_node_ref();
-    let update = use_update();
 
     let onscroll = {
         let carousel_scroll = carousel_scroll.clone();
@@ -40,7 +39,6 @@ pub fn PictureAndCarousel(props: &PictureAndCarouselProps) -> Html {
         let ref_ul = ref_ul.clone();
         let pad_left = pad_left.clone();
         let pad_right = pad_right.clone();
-        let update = update.clone();
         Callback::from(move |(offset, width)| {
             if let Some(ul) = ref_ul.cast::<web_sys::HtmlElement>() {
                 let bounds = ul.get_bounding_client_rect();
