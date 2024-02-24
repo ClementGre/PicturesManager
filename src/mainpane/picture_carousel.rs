@@ -1,12 +1,11 @@
-use log::{info, warn};
-use web_sys::console::info;
+use log::warn;
 use web_sys::HtmlElement;
 use yew::{
     Callback, classes, function_component, html, HtmlResult, Properties, suspense::use_future_with, use_context, use_effect, use_node_ref,
-    use_state, use_state_eq,
+    use_state_eq,
 };
 use yew::suspense::Suspense;
-use yew_hooks::{use_measure, use_size, use_update};
+use yew_hooks::use_size;
 use yewdux::Dispatch;
 
 use crate::{app::StaticContext, utils::utils::cmd_async};
@@ -18,7 +17,7 @@ pub struct Props {
     pub id: String,
     pub index: usize,
     pub selected: bool,
-    pub set_offset: Callback<i32>,
+    pub set_offset: Callback<(i32, i32)>, // li left offset, li width
 }
 
 #[allow(non_snake_case)]
@@ -29,35 +28,42 @@ pub fn PictureCarousel(props: &Props) -> HtmlResult {
     })?;
     // let main_pane_dimensions = use_selector(|ctx: &Context| ctx.main_pane_dimensions.clone());
 
+    let li_ref = use_node_ref();
     let offset = use_state_eq(|| 0i32);
     let carousel_height = 60;
 
     // Switch to another picture of the carousel on click
     let context_dispatch = Dispatch::<Context>::global();
-    let onclick = {
-        let index = props.index.clone();
+
+    let set_offset = {
         let offset = offset.clone();
         let set_offset = props.set_offset.clone();
-        context_dispatch.reduce_mut_callback(move |data| {
-            if let MainPaneDisplayType::PictureAndCarousel(pictures_ids, _) = data.main_pane_content.clone() {
-                data.main_pane_content = MainPaneDisplayType::PictureAndCarousel(pictures_ids, index);
-                set_offset.emit(*offset);
+        let selected = props.selected.clone();
+        let li_ref = li_ref.clone();
+        Callback::from(move |mut new_offset: i32| {
+            if new_offset != 0 {
+                offset.set(new_offset);
+            } else {
+                new_offset = *offset;
+            }
+            if selected {
+                let mut width = 0;
+                if let Some(li) = li_ref.cast::<HtmlElement>() {
+                    width = li.offset_width();
+                }
+                set_offset.emit((new_offset, width));
             }
         })
     };
 
-    let set_offset = {
+    let onclick = {
         let index = props.index.clone();
         let offset = offset.clone();
-        let set_offset = props.set_offset.clone();
-        let selected = props.selected.clone();
-        Callback::from(move |new_offset: i32| {
-            if new_offset != 0 {
-                offset.set(new_offset);
-            }
-            if selected {
-                // *offset only updates at the next render
-                set_offset.emit(if new_offset != 0 { new_offset } else { *offset });
+        let set_offset = set_offset.clone();
+        context_dispatch.reduce_mut_callback(move |data| {
+            if let MainPaneDisplayType::PictureAndCarousel(pictures_ids, _) = data.main_pane_content.clone() {
+                data.main_pane_content = MainPaneDisplayType::PictureAndCarousel(pictures_ids, index);
+                set_offset.emit(*offset); // Will force offset to be updated to the value of this li.
             }
         })
     };
@@ -70,7 +76,7 @@ pub fn PictureCarousel(props: &Props) -> HtmlResult {
         };
         return Ok(html! {
             <Suspense fallback={fallback}>
-                <li class={classes!(if props.selected { Some("selected") } else { None })} onclick={onclick}>
+                <li class={classes!(if props.selected { Some("selected") } else { None })} onclick={onclick} ref={li_ref}>
                     <PictureCarouselImage id={props.id.clone()} width={carousel_height*width/height} height={carousel_height} {set_offset}/>
                 </li>
             </Suspense>

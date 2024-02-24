@@ -146,7 +146,7 @@
     ul {
       position: relative;
       overflow: scroll;
-      padding: 0 3px;
+      padding: 0 3px; // horizontal padding is set automatically in Rust.
       margin: 0;
       list-style: none;
       display: flex;
