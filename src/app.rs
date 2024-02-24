@@ -193,14 +193,14 @@ pub fn App() -> HtmlResult {
                     data: (*gallery_data).clone(),
                 },
             )
-                .await;
+            .await;
             cmd_async::<GallerySettingsContainer, ()>(
                 "set_gallery_settings",
                 &GallerySettingsContainer {
                     settings: (*gallery_settings).clone(),
                 },
             )
-                .await;
+            .await;
 
             current_window().close().await.unwrap();
         });

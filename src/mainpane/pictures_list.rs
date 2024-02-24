@@ -1,5 +1,5 @@
-use yew::{function_component, html, Html, Properties};
 use yew::suspense::Suspense;
+use yew::{function_component, html, Html, Properties};
 use yewdux::Dispatch;
 
 use crate::app::{Context, MainPaneDisplayType};

@@ -2,11 +2,11 @@ use js_sys::Math::abs;
 use log::{info, warn};
 use serde::{Deserialize, Serialize};
 use web_sys::{HtmlElement, WheelEvent};
-use yew::{
-    Callback, function_component, html, HtmlResult, NodeRef, Properties, suspense::use_future_with, use_context, use_effect_with, use_node_ref,
-    use_state,
-};
 use yew::suspense::Suspense;
+use yew::{
+    function_component, html, suspense::use_future_with, use_context, use_effect_with, use_node_ref, use_state, Callback, HtmlResult, NodeRef,
+    Properties,
+};
 use yew_hooks::{use_is_first_mount, use_size, use_update};
 
 use crate::{app::StaticContext, utils::utils::cmd_async};
