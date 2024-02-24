@@ -144,6 +144,7 @@ fn FullPictureImage(props: &ImageProps) -> HtmlResult {
         let img_h = image.client_height() as f64;
 
         if cont_w > img_w * props.zoom {
+            info!("left = {}", ((cont_w - img_w * props.zoom) / 2.0));
             left = ((cont_w - img_w * props.zoom) / 2.0) as i32;
         }
         if cont_h > img_h * props.zoom {
@@ -152,9 +153,12 @@ fn FullPictureImage(props: &ImageProps) -> HtmlResult {
     }
 
     Ok(html! {
-        <div class="image" ref={ref_image}
-            style={format!("background-image: url({}/get-image?id={}&window={}); aspect-ratio: {}/{}; scale: {}; left: {}px; top: {}px;",
-            static_ctx.protocol, props.id, static_ctx.window_label, props.width, props.height, props.zoom, left, top)}>
+        <div class="image-container" ref={ref_image}
+            style={format!("aspect-ratio: {}/{}; scale: {}; left: {}px; top: {}px; padding: {}px", props.width, props.height, props.zoom, left, top, 3f64 / props.zoom)}>
+            <div class="image"
+                style={format!("background-image: url({}/get-image?id={}&window={}); border-radius: {}px",
+                    static_ctx.protocol, props.id, static_ctx.window_label, 3f64 / props.zoom)}>
+            </div>
         </div>
     })
 }

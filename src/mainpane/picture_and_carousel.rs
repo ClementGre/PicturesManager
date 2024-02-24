@@ -2,8 +2,8 @@ use std::cmp::max;
 
 use log::info;
 use web_sys::Event;
-use yew::{Callback, function_component, html, Html, Properties, use_mut_ref, use_node_ref, use_state_eq};
-use yew_hooks::{use_size, use_update};
+use yew::{function_component, html, use_mut_ref, use_node_ref, use_state_eq, Callback, Html, Properties};
+use yew_hooks::use_size;
 
 use crate::mainpane::full_picture::FullPicture;
 use crate::mainpane::picture_carousel::PictureCarousel;

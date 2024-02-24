@@ -7,7 +7,7 @@
 .mainpane ul.pictures-list {
   list-style: none;
   padding: 0;
-  margin: 11px;
+  margin: 3px;
   display: flex;
   flex-wrap: wrap;
   align-content: stretch;
@@ -76,39 +76,23 @@
     flex-grow: 1;
     position: relative;
     max-height: calc(100% - 35px); // 35px is the minimum height left for the carousel container
-    padding: 3px;
     overflow: scroll;
 
-    .image {
-      border-radius: 2px;
-      background-color: var(--picture-loading-bg-color);
-      background-repeat: no-repeat;
-      background-size: cover;
-      background-position: center;
-      animation: fadeIn .2s;
-
+    .image-container {
+      // padding is automatically set from rust
       max-height: 100%;
       position: relative;
       transform-origin: 0 0;
 
-      p {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        margin: 0;
-        color: var(--fg-info);
-        background-color: var(--bg-info);
-        font-size: 2em;
-      }
-
-      .point {
-        position: absolute;
-        width: 10px;
-        height: 10px;
-        transform: translateX(-50%) translateY(-50%);
-        background-color: var(--fg-info);
-        box-shadow: 0 0 5px 1px var(--bg-info);
+      .image {
+        // border-radius is automatically set from rust
+        background-color: var(--picture-loading-bg-color);
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+        animation: fadeIn .2s;
+        width: 100%;
+        height: 100%;
       }
     }
   }
@@ -146,7 +130,7 @@
     ul {
       position: relative;
       overflow: scroll;
-      padding: 0 3px; // horizontal padding is set automatically in Rust.
+      padding: 0 3px; // horizontal padding is managed automatically in Rust, changing this value will have no effect.
       margin: 0;
       list-style: none;
       display: flex;
