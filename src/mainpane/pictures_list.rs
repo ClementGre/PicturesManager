@@ -1,6 +1,6 @@
 use yew::suspense::Suspense;
 use yew::{function_component, html, Html, Properties};
-use yewdux::Dispatch;
+use yewdux::{use_selector, Dispatch};
 
 use crate::app::{Context, MainPaneDisplayType};
 use crate::mainpane::dir_thumb::DirThumb;
@@ -9,27 +9,26 @@ use crate::mainpane::picture_thumb::PictureThumb;
 #[derive(Properties, PartialEq)]
 pub struct PicturesListProps {
     pub root_dir: Vec<String>,
-    pub pics: Vec<String>,
-    pub dirs: Vec<String>,
 }
 
 #[allow(non_snake_case)]
 #[function_component]
 pub fn PicturesList(props: &PicturesListProps) -> Html {
     let context_dispatch = Dispatch::<Context>::global();
-    let select_picture = {
-        let pics = props.pics.clone();
-        context_dispatch.reduce_mut_callback_with(move |ctx, i: usize| {
-            ctx.main_pane_content = MainPaneDisplayType::PictureAndCarousel(pics.clone(), i);
-        })
-    };
+    let pictures_ids = (*use_selector(|context: &Context| context.main_pane_pictures.clone())).clone();
+    let subdirectories = (*use_selector(|context: &Context| context.main_pane_dirs.clone())).clone();
+
+    let to_carousel_cb = context_dispatch.reduce_mut_callback_with(move |ctx, i: usize| {
+        ctx.main_pane_content = MainPaneDisplayType::PictureAndCarousel;
+        ctx.main_pane_selected_index = Some(i);
+    });
 
     html! {
         <>
             <ul class="pictures-list">
                 <Suspense fallback={html!{<></>}}>
                     {
-                        props.dirs.iter().map(|dir| {
+                        subdirectories.iter().map(|dir| {
                             html! {
                                 <>
                                     {""} // Without this, the order might not be persistent while loading.
@@ -39,16 +38,15 @@ pub fn PicturesList(props: &PicturesListProps) -> Html {
                         }).collect::<Html>()
                     }
                     {
-                        props.pics.iter().enumerate().map(|(i, id)| {
-                            let select_picture = select_picture.clone();
-                            html! {
-                                <>
-                                    {""} // Without this, the order might not be persistent while loading.
-                                    <PictureThumb key={id.clone()} id={id.clone()} select_callback={move |_| {select_picture.emit(i);}}/>
-                                </>
-                            }
-                        }).collect::<Html>()
-                    }
+                    pictures_ids.iter().enumerate().map(|(i, id)| {
+                        html! {
+                            <>
+                                {""} // Without this, the order might not be persistent while loading.
+                                <PictureThumb key={id.clone()} id={id.clone()} index={i} to_carousel_cb={to_carousel_cb.clone()}/>
+                            </>
+                        }
+                    }).collect::<Html>()
+                }
                 </Suspense>
             </ul>
         </>

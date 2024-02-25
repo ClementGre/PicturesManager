@@ -4,17 +4,17 @@ use futures::stream::StreamExt;
 use log::debug;
 use tauri_sys::event::listen;
 use web_sys::HtmlElement;
-use yew::{Callback, Children, function_component, html, Html, Properties, Suspense, use_node_ref, use_state};
 use yew::platform::spawn_local;
 use yew::suspense::use_future;
+use yew::{function_component, html, use_node_ref, use_state, Callback, Children, Html, Properties, Suspense};
 use yew_hooks::use_size;
-use yewdux::prelude::{Dispatch, use_selector, use_store};
+use yewdux::prelude::{use_selector, use_store, Dispatch};
 use yewdux::store::Store;
 
 use pm_common::gallery_cache::{PathsCache, PictureCache};
 
-use crate::app::{Context, MainPaneDimensions};
 use crate::app::MainPaneDisplayType;
+use crate::app::{Context, MainPaneDimensions};
 use crate::mainpane::picture_and_carousel::PictureAndCarousel;
 use crate::mainpane::pictures_list::PicturesList;
 use crate::utils::utils::cmd_async_get;
@@ -97,13 +97,13 @@ pub fn MainPane() -> Html {
         <section ref={node} class="mainpane" onscroll={on_scroll_zone_changed.clone()} onkeypress={onkeypress}>
             <Suspense fallback={html! { <div class="empty"></div> }}>
             {
-                if let MainPaneDisplayType::PicturesAndDirs(root_dir, pics, dirs) = content{
+                if let MainPaneDisplayType::PicturesAndDirs(root_dir) = content{
                     html! {
-                        <PicturesList {root_dir} {pics} {dirs}/>
+                        <PicturesList {root_dir}/>
                     }
-                }else if let MainPaneDisplayType::PictureAndCarousel(pictures_ids, selected_index) = content {
+                }else if let MainPaneDisplayType::PictureAndCarousel = content {
                     html! {
-                        <PictureAndCarousel {pictures_ids} {selected_index}/>
+                        <PictureAndCarousel/>
                     }
                 }
                 else{

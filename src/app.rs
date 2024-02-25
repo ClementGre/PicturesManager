@@ -33,10 +33,8 @@ pub struct StaticContext {
 
 #[derive(Clone, Debug, Default, PartialEq, Store)]
 pub enum MainPaneDisplayType {
-    // Root dir path as vec, Pictures Ids, Dirs names
-    PicturesAndDirs(Vec<String>, Vec<String>, Vec<String>),
-    // Picture id, Selected picture index
-    PictureAndCarousel(Vec<String>, usize),
+    PicturesAndDirs(Vec<String>), // Root dir path as vec
+    PictureAndCarousel,
     #[default]
     None,
 }
@@ -54,7 +52,10 @@ pub struct Context {
     pub theme: Theme,
     pub gallery_path: String,
     pub main_pane_content: MainPaneDisplayType,
-    pub main_pane_old_content: MainPaneDisplayType,
+    pub main_pane_pictures: Vec<String>,
+    pub main_pane_dirs: Vec<String>,
+    pub main_pane_selected_index: Option<usize>,
+    pub main_pane_selected_indices: Vec<usize>,
     pub main_pane_dimensions: MainPaneDimensions,
 }
 

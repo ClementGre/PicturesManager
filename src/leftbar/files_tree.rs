@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
-use yew::{function_component, html, Html, use_callback, use_state_eq};
-use yewdux::prelude::{Dispatch, use_selector, use_store};
+use yew::{function_component, html, use_callback, use_state_eq, Html};
+use yewdux::prelude::{use_selector, use_store, Dispatch};
 
 use pm_common::gallery::GalleryData;
 use pm_common::gallery_cache::PathsCache;
@@ -62,7 +62,7 @@ pub fn FilesTree() -> Html {
         let last_selected_path = last_selected_path.clone();
         let ctx = ctx.clone();
         use_callback((), move |path: Vec<String>, _| {
-            if let MainPaneDisplayType::PicturesAndDirs(_, _, _) = ctx.main_pane_content {
+            if let MainPaneDisplayType::PicturesAndDirs(_) = ctx.main_pane_content {
             } else {
                 // Force MainPaneDisplayType to be updated.
                 last_selected_path.set(Vec::default());
@@ -89,8 +89,9 @@ pub fn FilesTree() -> Html {
             let dirs: Vec<String> = path_cache.children.iter().map(|child| child.dir_name.clone()).collect();
 
             ctx_dispatch.reduce_mut(|ctx| {
-                ctx.main_pane_old_content = ctx.main_pane_content.clone();
-                ctx.main_pane_content = MainPaneDisplayType::PicturesAndDirs((*selected_dir).clone(), pictures, dirs);
+                ctx.main_pane_content = MainPaneDisplayType::PicturesAndDirs((*selected_dir).clone());
+                ctx.main_pane_pictures = pictures;
+                ctx.main_pane_dirs = dirs;
             });
         }
     }

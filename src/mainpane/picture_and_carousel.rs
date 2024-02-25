@@ -4,21 +4,23 @@ use log::info;
 use web_sys::Event;
 use yew::{function_component, html, use_mut_ref, use_node_ref, use_state_eq, Callback, Html, Properties};
 use yew_hooks::use_size;
+use yewdux::use_selector;
 
+use crate::app::Context;
 use crate::mainpane::full_picture::FullPicture;
 use crate::mainpane::picture_carousel::PictureCarousel;
 
 #[derive(Properties, PartialEq)]
-pub struct PictureAndCarouselProps {
-    pub pictures_ids: Vec<String>,
-    pub selected_index: usize,
-}
+pub struct PictureAndCarouselProps {}
 
 #[allow(non_snake_case)]
 #[function_component]
-pub fn PictureAndCarousel(props: &PictureAndCarouselProps) -> Html {
+pub fn PictureAndCarousel(_: &PictureAndCarouselProps) -> Html {
     let carousel_scroll = use_mut_ref(|| 0i32);
     let ref_ul = use_node_ref();
+
+    let pictures_ids = (*use_selector(|context: &Context| context.main_pane_pictures.clone())).clone();
+    let selected_index = (*use_selector(|context: &Context| context.main_pane_selected_index)).unwrap_or(0);
 
     let onscroll = {
         let carousel_scroll = carousel_scroll.clone();
@@ -65,15 +67,15 @@ pub fn PictureAndCarousel(props: &PictureAndCarouselProps) -> Html {
 
     html! {
         <div class="picture-and-carousel">
-            <FullPicture id={props.pictures_ids[props.selected_index].clone()} />
+            <FullPicture id={pictures_ids[selected_index].clone()} />
             <div class="carousel-container">
                 <div class="carousel-overflow">
                     <div class="carousel">
                         <ul ref={ref_ul} {onscroll} style={format!("padding-left: {}px; padding-right: {}px;", *pad_left, *pad_right)}>
                             {
-                                props.pictures_ids.iter().enumerate().map(|(i, id)| {
+                                pictures_ids.iter().enumerate().map(|(i, id)| {
                                     html! {
-                                        <PictureCarousel key={id.clone()} id={id.clone()} index={i} selected={i == props.selected_index} set_offset={set_offset.clone()}/>
+                                        <PictureCarousel key={id.clone()} id={id.clone()} index={i} selected={i == selected_index} set_offset={set_offset.clone()}/>
                                     }
                                 }).collect::<Html>()
                             }
