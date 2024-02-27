@@ -59,6 +59,73 @@ pub struct Context {
     pub main_pane_dimensions: MainPaneDimensions,
 }
 
+impl Context {
+    pub fn select_index(&mut self, i: usize, shift: bool, ctrl: bool) {
+        if let Some(i_from) = self.main_pane_selected_index {
+            if shift {
+                self.select_range(i_from, i, ctrl);
+            } else if ctrl {
+                self.select_single(i, true);
+            } else {
+                self.select_single(i, false);
+            }
+        } else {
+            self.main_pane_selected_index = Some(i);
+            self.main_pane_selected_indices = vec![i];
+        }
+    }
+    fn select_range(&mut self, i_from: usize, i_to: usize, add: bool) {
+        let mut new_selected_indices = Vec::new();
+        if i_from > i_to {
+            for i in i_to..=i_from {
+                new_selected_indices.push(i);
+            }
+        } else {
+            for i in i_from..=i_to {
+                new_selected_indices.push(i);
+            }
+        }
+        if add {
+            self.main_pane_selected_indices.extend(new_selected_indices);
+            self.main_pane_selected_indices.sort();
+            self.main_pane_selected_indices.dedup();
+            self.main_pane_selected_index = Some(i_to);
+        } else {
+            self.main_pane_selected_indices = new_selected_indices;
+        }
+    }
+    fn select_single(&mut self, i: usize, add: bool) {
+        if add {
+            if self.main_pane_selected_indices.contains(&i) {
+                self.main_pane_selected_indices.retain(|&j| j != i);
+                if self.main_pane_selected_index == Some(i) {
+                    self.main_pane_selected_index = self.main_pane_selected_indices.last().copied();
+                }
+            } else {
+                self.main_pane_selected_indices.push(i);
+                self.main_pane_selected_index = Some(i);
+            }
+        } else {
+            self.main_pane_selected_index = Some(i);
+            self.main_pane_selected_indices = vec![i];
+        }
+    }
+
+    pub fn get_selected_picture_ids(&self) -> Vec<String> {
+        if let Some(i) = self.main_pane_selected_index {
+            if self.main_pane_selected_indices.len() > 1 {
+                return self
+                    .main_pane_selected_indices
+                    .iter()
+                    .map(|i| self.main_pane_pictures[*i].clone())
+                    .collect();
+            }
+            return vec![self.main_pane_pictures[i].clone()];
+        }
+        return Vec::new();
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct GalleryDataContainer {
     pub data: GalleryData,

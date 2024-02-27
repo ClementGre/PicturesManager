@@ -50,53 +50,7 @@ pub fn PictureThumb(props: &Props) -> HtmlResult {
             let index = props.index.clone();
             context_dispatch.reduce_mut_callback_with(move |ctx, e: MouseEvent| {
                 if e.button() == 0 {
-                    if selected_index.is_none() {
-                        ctx.main_pane_selected_index = Some(index);
-                        ctx.main_pane_selected_indices = vec![index];
-                        return;
-                    }
-                    let selected_index = selected_index.unwrap();
-
-                    if (macos && e.meta_key()) || (!macos && e.ctrl_key()) {
-                        if e.shift_key() {
-                            let mut new_selected_indices = (*selected_indices).clone();
-                            if index > selected_index {
-                                for i in selected_index..=index {
-                                    new_selected_indices.push(i);
-                                }
-                            } else {
-                                for i in index..=selected_index {
-                                    new_selected_indices.push(i);
-                                }
-                            }
-                            ctx.main_pane_selected_indices = new_selected_indices;
-                        } else {
-                            if is_selected {
-                                ctx.main_pane_selected_indices.retain(|&i| i != index);
-                                if is_primary_selected {
-                                    ctx.main_pane_selected_index = ctx.main_pane_selected_indices.last().copied();
-                                }
-                            } else {
-                                ctx.main_pane_selected_indices.push(index);
-                                ctx.main_pane_selected_index = Some(index);
-                            }
-                        }
-                    } else if e.shift_key() {
-                        let mut new_selected_indices = vec![];
-                        if index > selected_index {
-                            for i in selected_index..=index {
-                                new_selected_indices.push(i);
-                            }
-                        } else {
-                            for i in index..=selected_index {
-                                new_selected_indices.push(i);
-                            }
-                        }
-                        ctx.main_pane_selected_indices = new_selected_indices;
-                    } else {
-                        ctx.main_pane_selected_index = Some(index);
-                        ctx.main_pane_selected_indices = vec![index];
-                    }
+                    ctx.select_index(index, e.shift_key(), (macos && e.meta_key()) || (!macos && e.ctrl_key()));
                 } else if e.button() == 2 {
                     // TODO: Context menu
                 }

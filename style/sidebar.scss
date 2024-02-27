@@ -1,114 +1,164 @@
 main > .sidebar {
-	flex-grow: 0;
-	width: 250px;
-	color: var(--fg-default);
-	background-color: var(--bg-default);
-	display: flex;
-	flex-direction: column;
+  flex-grow: 0;
+  width: 250px;
+  color: var(--fg-default);
+  background-color: var(--bg-default);
+  display: flex;
+  flex-direction: column;
+}
+
+main > .sidebar > .content {
+  width: 100%;
+  flex-grow: 1;
 }
 
 /* TABS HEADER */
 
 main > .sidebar .tabs-header {
-	display: flex;
-	flex-direction: row;
-	justify-content: stretch;
-	align-items: stretch;
-	height: 40px;
-	padding: 2px 4px 0;
-	gap: 4px;
-	background-color: var(--header-bg-color);
+  display: flex;
+  flex-direction: row;
+  justify-content: stretch;
+  align-items: stretch;
+  height: 40px;
+  padding: 2px 4px 0;
+  gap: 4px;
+  background-color: var(--header-bg-color);
 
-	button {
-		flex-grow: 1;
-		margin: 0;
-		padding: 6px;
-		border-radius: 5px 5px 0 0;
+  button {
+    flex-grow: 1;
+    margin: 0;
+    padding: 6px;
+    border-radius: 5px 5px 0 0;
 
-		color: var(--loaded-bg-color);
-		background-color: transparent;
-		border: none;
-		outline: inherit;
-		cursor: default;
+    color: var(--loaded-bg-color);
+    background-color: transparent;
+    border: none;
+    outline: inherit;
+    cursor: default;
 
-		&:hover, &:focus {
-			background-color: var(--bgh-default);
-		}
-		&.selected, &.selected:hover {
-			background-color: var(--bg-default);
-		}
-	}
-}
+    &:hover, &:focus {
+      background-color: var(--bgh-default);
+    }
 
-main > .sidebar > .content {
-	overflow: auto;
-	width: 100%;
-	height: calc(100% - 40px);
+    &.selected, &.selected:hover {
+      background-color: var(--bg-default);
+    }
+  }
 }
 
 /* SEPARATOR */
 
 .sidebar.leftbar {
-	border-right: 1px solid var(--separator-color);
+  border-right: 1px solid var(--separator-color);
 }
 
 .sidebar.rightbar {
-	width: 0;
-	border-left: 0 solid var(--separator-color);
+  border-left: 1px solid var(--separator-color);
 }
+
 .sidebar > .content {
-	padding: 10px;
+  padding: 10px;
 }
 
 /* LEFT TAB */
 
+main > .leftbar > .content {
+  overflow: auto;
+  height: calc(100% - 40px);
+}
+
 /* Files Tree */
 
 .sidebar.leftbar > .content ul.files-tree {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-	font-size: 13px;
-	li {
-		> div {
-			padding: 0;
-			display: flex;
-			align-items: stretch;
-			border-radius: 3px;
-			gap: 2px;
-			min-width: 100%;
-			width: min-content;
-			&.selected {
-				background-color: var(--bgh-default);
-			}
-			> div {
-				flex-shrink: 0;
-				width: 16px;
-				height: 24px;
-				padding: 5px 0 5px 2px;
-				svg {
-					width: 100%;
-					height: 100%;
-					transition: transform 0.1s ease-in-out;
-				}
-				&.opened svg {
-					transform: rotate(90deg);
-				}
-			}
-			> p {
-				white-space: nowrap;
-				margin: 0;
-				flex-grow: 1;
-				line-height: 24px;
-				padding: 0 4px 0 0;
-				@include no-select;
-			}
-		}
-	}
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+
+  li {
+    > div {
+      padding: 0;
+      display: flex;
+      align-items: stretch;
+      border-radius: 3px;
+      gap: 2px;
+      min-width: 100%;
+      width: min-content;
+
+      &.selected {
+        background-color: var(--bgh-default);
+      }
+
+      > div {
+        flex-shrink: 0;
+        width: 16px;
+        height: 24px;
+        padding: 5px 0 5px 2px;
+
+        svg {
+          width: 100%;
+          height: 100%;
+          transition: transform 0.1s ease-in-out;
+        }
+
+        &.opened svg {
+          transform: rotate(90deg);
+        }
+      }
+
+      > p {
+        white-space: nowrap;
+        margin: 0;
+        flex-grow: 1;
+        line-height: 24px;
+        padding: 0 4px 0 0;
+        @include no-select;
+      }
+    }
+  }
 }
 
 /* RIGHT TAB */
 
+main > .rightbar {
+  overflow: auto;
+}
+
 .sidebar.rightbar {
-	width: 0;
+
+  .multiple-previews {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: stretch;
+    align-items: stretch;
+    overflow: hidden;
+    height: 150px;
+
+    .preview {
+      flex-grow: 1;
+      border-radius: 0 0 3px 3px;
+      box-shadow: -5px 0 5px 0 var(--fg-default);
+
+      .thumb {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+
+  .preview {
+    > .thumb {
+      margin: auto;
+      max-height: 200px;
+      border-radius: 0 0 2px 2px;
+
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center;
+    }
+
+    &.loading > .thumb {
+      background-color: var(--picture-loading-bg-color);
+    }
+  }
 }

@@ -46,15 +46,13 @@ yew_icons = { version = "0.8.0", features = [
     "FontAwesomeSolidMessage",
     "BootstrapWindows",
     "BootstrapHouseGearFill",
-
     "LucideFolderClosed",
     "LucideFilter",
     "OcticonsListOrdered16",
     "HeroiconsOutlineRectangleGroup",
-
     "FontAwesomeSolidAngleRight",
-
     "FontAwesomeSolidFolderOpen",
+    "BootstrapPlusCircle"
 ] }
 base64 = "0.21.0"
 instant = { version = "0.1", features = ["wasm-bindgen", "inaccurate"] }
