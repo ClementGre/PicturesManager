@@ -1,3 +1,4 @@
+Project abandonned and replaced by [Archypix](https://github.com/Archypix/archypix-app-back).
 # PicturesManager
 
 An efficient pictures manager based on custom tags and file system organization.
