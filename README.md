@@ -1,4 +1,5 @@
-Project abandonned and replaced by [Archypix](https://github.com/Archypix/archypix-app-back).
+> 🚧 Discontinued — This project has been scrapped and rewritten from the ground up as [PMCloud](https://github.com/ClementGre/PMCloud). Please refer to that repository instead.
+
 # PicturesManager
 
 An efficient pictures manager based on custom tags and file system organization.
